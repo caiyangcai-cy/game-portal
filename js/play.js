@@ -8,10 +8,6 @@
 
   var frame = document.getElementById("game-frame");
   var frameWrap = document.getElementById("play-frame-wrap");
-  var startGate = document.getElementById("play-start-gate");
-  var startGateKicker = document.getElementById("play-start-gate-kicker");
-  var startGateTitle = document.getElementById("play-start-gate-title");
-  var startGameBtn = document.getElementById("play-start-game");
   var previewHint = document.getElementById("play-preview-hint");
   var badgeEl = document.getElementById("play-intro-badge");
   var titleIntroEl = document.getElementById("play-intro-title");
@@ -22,15 +18,7 @@
   var fsBtn = document.getElementById("play-fullscreen");
   var startFullBtn = document.getElementById("play-start-full");
 
-  var gameStarted = false;
-
-  function setPlayControlsEnabled(on) {
-    if (fsBtn) fsBtn.disabled = !on;
-    if (startFullBtn) startFullBtn.disabled = !on;
-  }
-
   function requestFs() {
-    if (!gameStarted) return;
     var root = frameWrap || document.querySelector(".play-frame-wrap");
     if (!root) return;
     var fn =
@@ -42,22 +30,11 @@
     }
   }
 
-  function beginGame() {
-    if (!game || !game.entry || !frame || gameStarted) return;
-    gameStarted = true;
-    frame.src = game.entry;
-    if (startGate) startGate.hidden = true;
-    setPlayControlsEnabled(true);
-  }
-
   if (fsBtn) {
     fsBtn.addEventListener("click", requestFs);
   }
   if (startFullBtn) {
     startFullBtn.addEventListener("click", requestFs);
-  }
-  if (startGameBtn) {
-    startGameBtn.addEventListener("click", beginGame);
   }
 
   if (!game) {
@@ -68,7 +45,7 @@
     if (badgeEl) badgeEl.textContent = "";
     if (tipsEl) tipsEl.innerHTML = "";
     if (previewHint) previewHint.hidden = false;
-    setPlayControlsEnabled(false);
+    if (fsBtn) fsBtn.disabled = true;
     return;
   }
 
@@ -84,8 +61,7 @@
       previewHint.textContent = "该游戏尚未开放，敬请期待。";
       previewHint.hidden = false;
     }
-    if (startGate) startGate.hidden = true;
-    setPlayControlsEnabled(false);
+    if (fsBtn) fsBtn.disabled = true;
     return;
   }
 
@@ -96,26 +72,10 @@
   var badge = game.introBadge;
   if (badgeEl) badgeEl.textContent = badge || "H5 互动";
 
-  if (startGateKicker) startGateKicker.textContent = badge || "H5 互动";
-  if (startGateTitle) startGateTitle.textContent = game.title;
-
-  if (startGate && game.coverImage) {
-    var u = String(game.coverImage).replace(/'/g, "%27");
-    var base = game.coverStyle || "#111";
-    var pos = game.coverPosition || "center";
-    startGate.style.backgroundColor = base;
-    startGate.style.backgroundImage = "url('" + u + "')";
-    startGate.style.backgroundSize = "cover";
-    startGate.style.backgroundPosition = pos;
-    startGate.style.backgroundRepeat = "no-repeat";
-  }
-
-  if (startGate && game.entry) {
-    startGate.hidden = false;
+  if (frame && game.entry) {
+    frame.src = game.entry;
   }
   if (previewHint) previewHint.hidden = true;
-
-  setPlayControlsEnabled(false);
 
   var tags = game.tags || [];
   if (tagsEl && tags.length) {

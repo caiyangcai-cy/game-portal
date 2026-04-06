@@ -414,22 +414,84 @@ a {
 
 .site-footer {
   border-top: none;
-  padding: 2.6rem 1.3rem 3rem;
+  padding: 3rem 1.3rem 3.25rem;
   background: var(--bg-elevated);
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.2);
 }
 
 .footer-about {
-  max-width: 1080px;
+  max-width: 28rem;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
   text-align: center;
 }
 
-.footer-slogan {
-  margin: 0.8rem 0 0;
-  font-size: 0.84rem;
+.footer-about .logo--footer {
+  margin: 0;
+}
+
+.footer-blurb {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.footer-lead {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(251, 251, 253, 0.88);
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+}
+
+.footer-sub {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--text-muted);
-  line-height: 1.65;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+}
+
+.footer-mail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+  padding: 0.32rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(168, 168, 173, 0.65);
+  text-decoration: none;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.footer-mail:hover {
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.footer-mail:active {
+  opacity: 0.92;
+}
+
+.footer-mail:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.2);
+  outline-offset: 3px;
+}
+
+.footer-mail-icon {
+  flex-shrink: 0;
+  opacity: 0.55;
 }
 
 /* ── Play page ── */

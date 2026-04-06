@@ -11,7 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/main.css" />
-    <link rel="stylesheet" href="css/play.css" />
+    <link rel="stylesheet" href="css/play.css?v=4" />
   </head>
   <body class="play-body">
     <div id="play-page" class="play-page" aria-live="polite">
@@ -21,16 +21,11 @@
           ><span class="logo-cyou">CYou</span>
           <span class="logo-games">Games</span></a
         >
-        <button type="button" class="btn btn--ghost" id="play-fullscreen" disabled>
-          全屏
-        </button>
+        <button type="button" class="btn btn--ghost" id="play-fullscreen">全屏</button>
       </header>
 
       <div class="play-split">
-        <section
-          class="play-preview"
-          aria-label="游戏体验区"
-        >
+        <section class="play-preview" aria-label="游戏体验区">
           <div class="play-frame-wrap" id="play-frame-wrap">
             <iframe
               class="play-frame"
@@ -39,25 +34,6 @@
               src="about:blank"
               allow="camera *; microphone *; fullscreen; autoplay; display-capture; gamepad"
             ></iframe>
-            <div
-              class="play-start-gate"
-              id="play-start-gate"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="play-start-gate-title"
-              hidden
-            >
-              <div class="play-start-gate-inner">
-                <p class="play-start-gate-kicker" id="play-start-gate-kicker"></p>
-                <p class="play-start-gate-title" id="play-start-gate-title"></p>
-                <p class="play-start-gate-hint">
-                  点击「开始游戏」后才会加载游戏；届时浏览器会询问是否允许使用摄像头。
-                </p>
-                <button type="button" class="btn--play" id="play-start-game">
-                  开始游戏
-                </button>
-              </div>
-            </div>
           </div>
           <p class="play-preview-hint" id="play-preview-hint" hidden>
             从游戏库选择作品后，将在此处加载真实游戏画面。
@@ -72,16 +48,14 @@
             <ul class="play-intro-tags" id="play-intro-tags" hidden></ul>
             <ul class="play-intro-tips" id="play-intro-tips"></ul>
             <div class="play-intro-actions" id="play-intro-actions" hidden>
-              <button type="button" class="btn--play" id="play-start-full" disabled>
-                全屏体验
-              </button>
+              <button type="button" class="btn--play" id="play-start-full">全屏体验</button>
             </div>
           </div>
         </aside>
       </div>
     </div>
 
-    <script src="js/games-data.js"></script>
-    <script src="js/play.js"></script>
+    <script src="js/games-data.js?v=4"></script>
+    <script src="js/play.js?v=4"></script>
   </body>
 </html>

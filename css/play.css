@@ -1,12 +1,26 @@
 .play-body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--bg, #09090b);
 }
 
+.play-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 15% 20%, rgba(183, 110, 121, 0.12), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(92, 33, 41, 0.15), transparent 55%),
+    var(--bg, #09090b);
+}
+
 .play-page {
+  --play-header-h: 52px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -16,15 +30,16 @@
 
 .play-header {
   flex-shrink: 0;
+  height: var(--play-header-h);
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.52rem 1rem;
+  padding: 0 1rem;
   border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.06));
-  background: rgba(9, 9, 11, 0.92);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  background: rgba(9, 9, 11, 0.78);
+  backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.35);
 }
 
 .play-header-logo {
@@ -42,16 +57,18 @@
   text-decoration: none;
 }
 
-/* ── 左：真实游戏 iframe · 右：简介 ── */
+/* ── 左：游戏 iframe · 右：简介 ── */
 
 .play-split {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  grid-template-rows: 1fr;
   gap: 0;
   min-height: 0;
+  min-height: calc(100dvh - var(--play-header-h));
   width: 100%;
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 
@@ -59,84 +76,21 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: #030303;
-  border-right: 1px solid var(--border, rgba(255, 255, 255, 0.06));
+  background: #050506;
+  border-right: 1px solid var(--border, rgba(255, 255, 255, 0.07));
 }
 
 .play-frame-wrap {
   flex: 1;
-  min-height: 280px;
+  min-height: clamp(360px, 58vh, 720px);
   position: relative;
-  background: #030303;
-}
-
-.play-start-gate {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.25rem;
-  background: #0a0a0c;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.play-start-gate::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0.72) 100%
-  );
-  z-index: 0;
-}
-
-.play-start-gate-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 22rem;
-  text-align: center;
-}
-
-.play-start-gate-kicker {
-  margin: 0 0 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent-rosegold, #b76e79);
-}
-
-.play-start-gate-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1.25;
-  color: var(--text, #fbfbfd);
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
-}
-
-.play-start-gate-hint {
-  margin: 0 0 1.15rem;
-  font-size: 0.8125rem;
-  color: rgba(251, 251, 253, 0.82);
-  line-height: 1.65;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
-}
-
-.play-start-gate .btn--play {
-  min-width: 12rem;
+  background: radial-gradient(ellipse 100% 80% at 50% 0%, #121218 0%, #050506 55%);
 }
 
 .play-frame {
   width: 100%;
   height: 100%;
-  min-height: 320px;
+  min-height: clamp(360px, 58vh, 720px);
   border: none;
   display: block;
 }
@@ -152,18 +106,30 @@
 
 .play-sidebar {
   flex-shrink: 0;
-  background: var(--surface, #1a1a1e);
+  background: linear-gradient(180deg, #141418 0%, #101013 100%);
   overflow-y: auto;
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .play-sidebar-inner {
-  padding: 1.25rem 1.2rem 1.75rem;
+  padding: 1.5rem 1.35rem 2rem;
   position: sticky;
   top: 0;
 }
 
+.play-sidebar-inner::before {
+  content: "关于本作";
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(183, 110, 121, 0.85);
+  margin-bottom: 0.75rem;
+}
+
 .play-intro-badge {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.45rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -172,49 +138,54 @@
 }
 
 .play-intro-title {
-  margin: 0 0 0.65rem;
-  font-size: 1.28rem;
+  margin: 0 0 0.6rem;
+  font-size: 1.35rem;
   font-weight: 800;
   line-height: 1.25;
   color: var(--text, #fbfbfd);
+  letter-spacing: -0.02em;
 }
 
 .play-intro-desc {
-  margin: 0 0 1rem;
+  margin: 0 0 1.1rem;
   font-size: 0.9375rem;
   color: var(--text-muted, #a8a8ad);
-  line-height: 1.6;
+  line-height: 1.62;
 }
 
 .play-intro-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  margin: 0 0 1rem;
+  margin: 0 0 1.15rem;
   padding: 0;
   list-style: none;
 }
 
 .play-intro-tag {
   display: inline-block;
-  padding: 0.28rem 0.62rem;
+  padding: 0.3rem 0.65rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text-muted, #a8a8ad);
+  color: #c4c4cc;
   background: rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-tag, 8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .play-intro-tips {
-  margin: 0 0 1.35rem;
-  padding: 0 0 0 1.15rem;
+  margin: 0 0 1.4rem;
+  padding: 0.85rem 0.85rem 0.85rem 1.85rem;
   font-size: 0.8125rem;
   color: var(--text-muted, #a8a8ad);
   line-height: 1.65;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: var(--radius-inner, 12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .play-intro-tips li {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.5rem;
 }
 
 .play-intro-tips li:last-child {
@@ -223,27 +194,42 @@
 
 .play-intro-actions .btn--play {
   width: 100%;
+  background: linear-gradient(180deg, #6e2a35 0%, var(--btn-primary, #5c2129) 100%);
+}
+
+.play-intro-actions .btn--play:hover {
+  background: linear-gradient(180deg, #7d303d 0%, var(--btn-primary-hover, #722a35) 100%);
 }
 
 @media (max-width: 840px) {
   .play-split {
     grid-template-columns: 1fr;
-    max-width: none;
+    grid-template-rows: auto auto;
+    min-height: 0;
   }
 
   .play-preview {
     border-right: none;
     border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.06));
-    min-height: 45vh;
-    min-height: 45dvh;
+  }
+
+  .play-frame-wrap {
+    min-height: min(52vh, 520px);
   }
 
   .play-frame {
-    min-height: 40vh;
-    min-height: 40dvh;
+    min-height: min(52vh, 520px);
+  }
+
+  .play-sidebar {
+    border-left: none;
   }
 
   .play-sidebar-inner {
     position: static;
+  }
+
+  .play-sidebar-inner::before {
+    margin-top: 0.25rem;
   }
 }
