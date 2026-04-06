@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CYou Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;800&family=Outfit:wght@700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <header class="site-header" id="top">
+      <div class="header-inner">
+        <a class="logo" href="index.html">
+          <span class="logo-cyou">CYou</span> <span class="logo-games">Games</span>
+        </a>
+        <nav class="nav-main" aria-label="页面导航">
+          <a href="#games" class="nav-link nav-games nav-link--active">游戏库</a>
+          <a href="#about" class="nav-link nav-about">关于我</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-label="站点介绍">
+        <h1 class="hero-title">点击畅玩，样样好玩</h1>
+      </section>
+
+      <section class="showcase" id="games" aria-label="游戏列表">
+        <div class="showcase-grid" id="games-grid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="about">
+      <div class="footer-about">
+        <a class="logo logo--footer" href="index.html">
+          <span class="logo-cyou">CYou</span> <span class="logo-games">Games</span>
+        </a>
+        <p class="footer-slogan">一个不会代码的文科生写出来的小游戏</p>
+      </div>
+    </footer>
+
+    <script src="js/games-data.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

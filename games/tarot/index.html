@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>塔罗牌 · 占位演示</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, sans-serif;
+        background: radial-gradient(ellipse at 30% 20%, #3d1f6b 0%, transparent 55%),
+          radial-gradient(ellipse at 70% 80%, #1a1035 0%, #07030f 100%);
+        color: #f3e8ff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        text-align: center;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      p {
+        margin: 0 0 1rem;
+        max-width: 28rem;
+        line-height: 1.6;
+        opacity: 0.88;
+        font-size: 0.95rem;
+      }
+      .deck {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 1.25rem 0;
+      }
+      .card {
+        width: 4.5rem;
+        height: 7rem;
+        border-radius: 10px;
+        background: linear-gradient(145deg, #2a1848, #120a22);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .card:hover {
+        transform: translateY(-6px) rotate(-2deg);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      }
+      .card.reveal {
+        background: linear-gradient(145deg, #f5c518, #e09b10);
+        color: #1a0a2e;
+        font-weight: 800;
+        font-size: 0.85rem;
+        padding: 0.35rem;
+      }
+      .hint {
+        font-size: 0.8rem;
+        opacity: 0.65;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>塔罗牌</h1>
+    <p>
+      这是门户里的<strong>占位页面</strong>。请把你的正式构建（例如 Unity WebGL、Cocos H5 或纯前端打包产物）放到
+      <code>games/tarot/</code> 目录并确保入口仍为 <code>index.html</code>。
+    </p>
+    <div class="deck" id="deck" aria-live="polite"></div>
+    <p class="hint">点击任意卡牌试试 · 正式版可删除本演示脚本</p>
+    <script>
+      (function () {
+        var labels = ["星", "月", "光", "梦", "旅"];
+        var deck = document.getElementById("deck");
+        labels.forEach(function (t, i) {
+          var el = document.createElement("button");
+          el.type = "button";
+          el.className = "card";
+          el.textContent = "✦";
+          el.setAttribute("aria-label", "卡牌 " + (i + 1));
+          el.addEventListener("click", function () {
+            el.classList.add("reveal");
+            el.textContent = t;
+          });
+          deck.appendChild(el);
+        });
+      })();
+    </script>
+  </body>
+</html>

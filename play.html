@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>游玩 · CYou Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;800&family=Outfit:wght@700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/play.css" />
+  </head>
+  <body class="play-body">
+    <div id="play-page" class="play-page" aria-live="polite">
+      <header class="play-header">
+        <a class="btn btn--ghost play-back" href="index.html">← 返回游戏库</a>
+        <a class="logo play-header-logo" href="index.html"
+          ><span class="logo-cyou">CYou</span>
+          <span class="logo-games">Games</span></a
+        >
+        <button type="button" class="btn btn--ghost" id="play-fullscreen" disabled>
+          全屏
+        </button>
+      </header>
+
+      <div class="play-split">
+        <section
+          class="play-preview"
+          aria-label="游戏体验区"
+        >
+          <div class="play-frame-wrap" id="play-frame-wrap">
+            <iframe
+              class="play-frame"
+              id="game-frame"
+              title="游戏内容"
+              src="about:blank"
+              allow="camera *; microphone *; fullscreen; autoplay; display-capture; gamepad"
+            ></iframe>
+            <div
+              class="play-start-gate"
+              id="play-start-gate"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="play-start-gate-title"
+              hidden
+            >
+              <div class="play-start-gate-inner">
+                <p class="play-start-gate-kicker" id="play-start-gate-kicker"></p>
+                <p class="play-start-gate-title" id="play-start-gate-title"></p>
+                <p class="play-start-gate-hint">
+                  点击「开始游戏」后才会加载游戏；届时浏览器会询问是否允许使用摄像头。
+                </p>
+                <button type="button" class="btn--play" id="play-start-game">
+                  开始游戏
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="play-preview-hint" id="play-preview-hint" hidden>
+            从游戏库选择作品后，将在此处加载真实游戏画面。
+          </p>
+        </section>
+
+        <aside class="play-sidebar">
+          <div class="play-sidebar-inner">
+            <p class="play-intro-badge" id="play-intro-badge"></p>
+            <h1 class="play-intro-title" id="play-intro-title">加载中…</h1>
+            <p class="play-intro-desc" id="play-intro-desc"></p>
+            <ul class="play-intro-tags" id="play-intro-tags" hidden></ul>
+            <ul class="play-intro-tips" id="play-intro-tips"></ul>
+            <div class="play-intro-actions" id="play-intro-actions" hidden>
+              <button type="button" class="btn--play" id="play-start-full" disabled>
+                全屏体验
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script src="js/games-data.js"></script>
+    <script src="js/play.js"></script>
+  </body>
+</html>

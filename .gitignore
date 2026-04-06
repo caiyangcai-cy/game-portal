@@ -1,0 +1,13 @@
+# WorkBuddy 工作区数据
+.workbuddy/
+
+# AI 生成的设计概念图（不需要上线）
+generated-images/
+
+# 备选设计方案（不需要上线）
+poki-style.html
+steam-style.html
+
+# macOS
+.DS_Store
+*.swp
