@@ -40,7 +40,7 @@
       card.className = "game-card game-card--coming";
       card.innerHTML =
         '<div class="game-card__cover game-card__cover--coming">' +
-        '<span class="coming-icon">🚧</span>' +
+        '<span class="coming-icon" aria-hidden="true">🎮</span>' +
         "</div>" +
         '<div class="game-card__info">' +
         '<h3 class="game-card__title game-card__title--muted">' +
