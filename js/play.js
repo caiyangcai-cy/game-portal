@@ -20,6 +20,27 @@
 
   /** 用户点过「全屏」后，若因摄像头授权弹窗退出全屏，授权结束后自动恢复 */
   var wantsFullscreenAfterCameraGrant = false;
+  var restoreBtn = null;
+
+  function ensureRestoreButton() {
+    if (restoreBtn) return restoreBtn;
+    restoreBtn = document.createElement("button");
+    restoreBtn.type = "button";
+    restoreBtn.id = "btn-restore-fullscreen";
+    restoreBtn.textContent = "点击恢复全屏";
+    restoreBtn.style.cssText =
+      "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);" +
+      "padding:12px 18px;border-radius:999px;border:1px solid rgba(255,255,255,0.35);" +
+      "background:rgba(0,0,0,0.55);color:#fff;font-weight:600;letter-spacing:0.5px;" +
+      "z-index:99999;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);" +
+      "box-shadow:0 10px 30px rgba(0,0,0,0.35);display:none;cursor:pointer;";
+    restoreBtn.addEventListener("click", function () {
+      restoreBtn.style.display = "none";
+      requestFs();
+    });
+    document.body.appendChild(restoreBtn);
+    return restoreBtn;
+  }
 
   function requestFs() {
     var root = frameWrap || document.querySelector(".play-frame-wrap");
@@ -29,7 +50,12 @@
       root.webkitRequestFullscreen ||
       root.msRequestFullscreen;
     if (fn) {
-      fn.call(root).catch(function () {});
+      try {
+        var p = fn.call(root);
+        if (p && typeof p.catch === "function") {
+          p.catch(function () {});
+        }
+      } catch (e) {}
     }
   }
 
@@ -60,8 +86,21 @@
     if (d.type !== "cygame-camera-granted") return;
     if (!wantsFullscreenAfterCameraGrant) return;
     wantsFullscreenAfterCameraGrant = false;
+    // 先尝试自动恢复全屏（部分浏览器会要求用户手势，可能失败）
     setTimeout(function () {
       requestFs();
+      // 若 500ms 后仍非全屏，则显示“点一下恢复全屏”按钮（用户手势即可成功）
+      setTimeout(function () {
+        var isFs =
+          !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement
+          );
+        if (!isFs) {
+          ensureRestoreButton().style.display = "block";
+        }
+      }, 500);
     }, 200);
   });
 
