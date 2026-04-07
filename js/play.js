@@ -18,6 +18,9 @@
   var fsBtn = document.getElementById("play-fullscreen");
   var startFullBtn = document.getElementById("play-start-full");
 
+  /** 用户点过「全屏」后，若因摄像头授权弹窗退出全屏，授权结束后自动恢复 */
+  var wantsFullscreenAfterCameraGrant = false;
+
   function requestFs() {
     var root = frameWrap || document.querySelector(".play-frame-wrap");
     if (!root) return;
@@ -30,12 +33,37 @@
     }
   }
 
+  function markFullscreenIntent() {
+    wantsFullscreenAfterCameraGrant = true;
+  }
+
   if (fsBtn) {
-    fsBtn.addEventListener("click", requestFs);
+    fsBtn.addEventListener("click", function () {
+      markFullscreenIntent();
+      requestFs();
+    });
   }
   if (startFullBtn) {
-    startFullBtn.addEventListener("click", requestFs);
+    startFullBtn.addEventListener("click", function () {
+      markFullscreenIntent();
+      requestFs();
+    });
   }
+
+  window.addEventListener("message", function (ev) {
+    var d = ev && ev.data;
+    if (!d || typeof d !== "object") return;
+    if (d.type === "cygame-camera-denied") {
+      wantsFullscreenAfterCameraGrant = false;
+      return;
+    }
+    if (d.type !== "cygame-camera-granted") return;
+    if (!wantsFullscreenAfterCameraGrant) return;
+    wantsFullscreenAfterCameraGrant = false;
+    setTimeout(function () {
+      requestFs();
+    }, 200);
+  });
 
   if (!game) {
     if (titleIntroEl) titleIntroEl.textContent = "未找到游戏";
