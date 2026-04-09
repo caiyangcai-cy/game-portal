@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Play 预览 · Desktop2</title>
+    <style>
+      :root {
+        --bg: #09090b;
+        --surface: rgba(26, 26, 30, 0.92);
+        --surface-2: rgba(20, 20, 24, 0.96);
+        --border: rgba(255, 255, 255, 0.08);
+        --text: #fbfbfd;
+        --muted: rgba(168, 168, 173, 0.9);
+        --rosegold: #b76e79;
+        --btn: #5c2129;
+        --btn-hover: #722a35;
+        --radius: 18px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Noto Sans SC", sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(ellipse 70% 45% at 80% 0%, rgba(224, 191, 184, 0.08), transparent 55%),
+          radial-gradient(ellipse 70% 45% at 10% 90%, rgba(183, 110, 121, 0.12), transparent 60%);
+      }
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        height: 52px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        background: rgba(9, 9, 11, 0.78);
+        backdrop-filter: blur(18px) saturate(1.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .btn-ghost {
+        height: 34px;
+        padding: 0 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .logo {
+        justify-self: center;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+      .logo span:first-child {
+        background: linear-gradient(135deg, #e0bfb8 0%, #b76e79 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .logo span:last-child {
+        margin-left: 6px;
+        font-size: 0.75em;
+        letter-spacing: 0.08em;
+        color: rgba(168, 168, 173, 0.9);
+      }
+      .wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 392px);
+        gap: 16px;
+        min-height: calc(100vh - 52px - 32px);
+      }
+      .card {
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--surface) 0%, rgba(16, 16, 19, 0.98) 100%);
+        box-shadow: 0 18px 70px rgba(0, 0, 0, 0.55);
+        overflow: hidden;
+      }
+      .game {
+        display: grid;
+        place-items: center;
+        background: radial-gradient(ellipse 140% 90% at 50% 0%, #171720 0%, #070709 55%);
+        height: 100%;
+        min-height: 560px;
+      }
+      .game img {
+        width: min(820px, 92%);
+        opacity: 0.95;
+        filter: drop-shadow(0 24px 60px rgba(0, 0, 0, 0.55));
+      }
+      .side {
+        padding: 18px 16px 16px;
+      }
+      .eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(251, 251, 253, 0.55);
+        margin: 0 0 10px;
+      }
+      .badge {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--rosegold);
+        margin: 0 0 6px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        line-height: 1.18;
+      }
+      .desc {
+        margin: 0 0 14px;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 14px;
+      }
+      .tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 0 0 14px;
+        padding: 0;
+        list-style: none;
+      }
+      .tag {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 12px;
+        color: rgba(251, 251, 253, 0.86);
+      }
+      .tips {
+        margin: 0 0 16px;
+        padding: 12px 12px 12px 30px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: rgba(168, 168, 173, 0.92);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+      .tips li {
+        margin-bottom: 8px;
+      }
+      .tips li:last-child {
+        margin-bottom: 0;
+      }
+      .cta {
+        width: 100%;
+        height: 44px;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(180deg, #6e2a35 0%, var(--btn) 100%);
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+      .cta:hover {
+        background: linear-gradient(180deg, #7d303d 0%, var(--btn-hover) 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <button class="btn-ghost">← 返回游戏库</button>
+      <div class="logo"><span>CYou</span><span>Games</span></div>
+      <button class="btn-ghost">全屏</button>
+    </header>
+
+    <main class="wrap">
+      <div class="split">
+        <section class="card">
+          <div class="game" aria-label="游戏体验区（预览截图占位）">
+            <img
+              alt="游戏画面预览"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'%3E%3Crect width='1200' height='800' fill='%230b0b10'/%3E%3Ccircle cx='600' cy='400' r='260' fill='none' stroke='%23d2b15a' stroke-width='6' opacity='0.65'/%3E%3Ccircle cx='600' cy='400' r='200' fill='none' stroke='%23d2b15a' stroke-width='3' opacity='0.55'/%3E%3Cpath d='M600 180 L650 400 L600 620 L550 400 Z' fill='none' stroke='%23d2b15a' stroke-width='4' opacity='0.65'/%3E%3Ccircle cx='600' cy='400' r='14' fill='%23d2b15a' opacity='0.85'/%3E%3C/svg%3E"
+            />
+          </div>
+        </section>
+
+        <aside class="card">
+          <div class="side">
+            <div class="eyebrow">关于本作</div>
+            <p class="badge">H5 · 手势互动</p>
+            <h1>小樱魔法卡</h1>
+            <p class="desc">手势即魔杖，隔空召唤魔法阵</p>
+            <ul class="tags">
+              <li class="tag">卡牌</li>
+              <li class="tag">休闲</li>
+              <li class="tag">治愈</li>
+            </ul>
+            <ul class="tips">
+              <li>需要授权摄像头用于手势识别，画面在本地处理</li>
+              <li>建议使用 Chrome / Edge 等现代浏览器</li>
+            </ul>
+            <button class="cta">全屏体验</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
+
