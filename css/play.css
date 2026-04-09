@@ -42,6 +42,13 @@
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.35);
 }
 
+.play-header-actions {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .play-header-logo {
   justify-self: center;
   font-size: 1.05rem;
@@ -109,6 +116,10 @@
   background: linear-gradient(180deg, #141418 0%, #101013 100%);
   overflow-y: auto;
   border-left: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.play-sheet-handle {
+  display: none;
 }
 
 .play-sidebar-inner {
@@ -202,34 +213,90 @@
 }
 
 @media (max-width: 840px) {
+  .play-page {
+    --sheet-peek: 56px;
+    --sheet-radius: 20px;
+  }
+
   .play-split {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    grid-template-rows: 1fr;
     min-height: 0;
   }
 
   .play-preview {
     border-right: none;
-    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.06));
+    border-bottom: none;
   }
 
   .play-frame-wrap {
-    min-height: min(52vh, 520px);
+    /* 让游戏优先占满屏幕：给底部抽屉留出 peek 高度 */
+    min-height: calc(100dvh - var(--play-header-h) - var(--sheet-peek));
   }
 
   .play-frame {
-    min-height: min(52vh, 520px);
+    min-height: calc(100dvh - var(--play-header-h) - var(--sheet-peek));
   }
 
   .play-sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 30;
     border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+    background: linear-gradient(180deg, rgba(20, 20, 24, 0.96) 0%, rgba(16, 16, 19, 0.98) 100%);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+    max-height: min(70dvh, 560px);
+    transform: translateY(calc(100% - var(--sheet-peek)));
+    transition: transform 0.22s ease;
+  }
+
+  .play-body.play-sheet-open .play-sidebar {
+    transform: translateY(0);
+  }
+
+  .play-sheet-handle {
+    display: flex;
+    width: 100%;
+    height: var(--sheet-peek);
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .play-sheet-grip {
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
   }
 
   .play-sidebar-inner {
     position: static;
+    padding-top: 0.25rem;
   }
 
   .play-sidebar-inner::before {
     margin-top: 0.25rem;
+  }
+
+  /* 顶栏的「简介」按钮仅在移动端展示 */
+  .play-info-toggle {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 841px) {
+  .play-info-toggle {
+    display: none;
   }
 }

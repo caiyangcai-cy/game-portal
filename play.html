@@ -24,7 +24,18 @@
           ><span class="logo-cyou">CYou</span>
           <span class="logo-games">Games</span></a
         >
-        <button type="button" class="btn btn--ghost" id="play-fullscreen">全屏</button>
+        <div class="play-header-actions">
+          <button
+            type="button"
+            class="btn btn--ghost play-info-toggle"
+            id="play-info-toggle"
+            aria-controls="play-sidebar"
+            aria-expanded="false"
+          >
+            简介
+          </button>
+          <button type="button" class="btn btn--ghost" id="play-fullscreen">全屏</button>
+        </div>
       </header>
 
       <div class="play-split">
@@ -43,7 +54,15 @@
           </p>
         </section>
 
-        <aside class="play-sidebar">
+        <aside class="play-sidebar" id="play-sidebar">
+          <button
+            type="button"
+            class="play-sheet-handle"
+            id="play-sheet-handle"
+            aria-label="展开/收起简介"
+          >
+            <span class="play-sheet-grip" aria-hidden="true"></span>
+          </button>
           <div class="play-sidebar-inner">
             <p class="play-intro-badge" id="play-intro-badge"></p>
             <h1 class="play-intro-title" id="play-intro-title">加载中…</h1>

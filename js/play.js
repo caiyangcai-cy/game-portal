@@ -17,6 +17,9 @@
   var actionsEl = document.getElementById("play-intro-actions");
   var fsBtn = document.getElementById("play-fullscreen");
   var startFullBtn = document.getElementById("play-start-full");
+  var infoToggleBtn = document.getElementById("play-info-toggle");
+  var sheetHandleBtn = document.getElementById("play-sheet-handle");
+  var sidebar = document.getElementById("play-sidebar");
 
   /** 用户点过「全屏」后，若因摄像头授权弹窗退出全屏，授权结束后自动恢复 */
   var wantsFullscreenAfterCameraGrant = false;
@@ -73,6 +76,27 @@
     startFullBtn.addEventListener("click", function () {
       markFullscreenIntent();
       requestFs();
+    });
+  }
+
+  function setSheetOpen(open) {
+    document.body.classList.toggle("play-sheet-open", !!open);
+    if (infoToggleBtn) infoToggleBtn.setAttribute("aria-expanded", String(!!open));
+    if (sidebar) sidebar.setAttribute("data-open", open ? "1" : "0");
+  }
+
+  function toggleSheet() {
+    setSheetOpen(!document.body.classList.contains("play-sheet-open"));
+  }
+
+  if (infoToggleBtn) {
+    infoToggleBtn.addEventListener("click", function () {
+      toggleSheet();
+    });
+  }
+  if (sheetHandleBtn) {
+    sheetHandleBtn.addEventListener("click", function () {
+      toggleSheet();
     });
   }
 
@@ -143,6 +167,9 @@
     frame.src = game.entry;
   }
   if (previewHint) previewHint.hidden = true;
+
+  // 移动端默认收起简介抽屉，让游戏画面优先占满
+  setSheetOpen(false);
 
   var tags = game.tags || [];
   if (tagsEl && tags.length) {
