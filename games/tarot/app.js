@@ -239,11 +239,15 @@ class App {
       await new Promise(resolve => { this.els.camera.onloadedmetadata = resolve; });
       await this.els.camera.play();
       this._setLoading('塔罗牌灵已就绪');
+      // 通知父页面（play.html）摄像头已授权，以便恢复全屏
+      try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
     } catch (err) {
       console.error('摄像头初始化失败:', err);
       let detail = err.message || String(err);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         detail = '已拒绝摄像头权限，请在地址栏旁点击 🔒 图标允许摄像头，然后刷新页面';
+        // 通知父页面摄像头被拒绝
+        try { window.parent.postMessage({ type: 'cygame-camera-denied' }, '*'); } catch (_) {}
       } else if (!window.isSecureContext) {
         detail = '当前不是安全来源，请用本地服务器打开（如 http://127.0.0.1:8765），勿用 file://';
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {

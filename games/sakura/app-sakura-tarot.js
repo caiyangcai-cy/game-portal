@@ -859,11 +859,15 @@ class SakuraTarotApp {
       await this.els.camera.play();
       this._setLoading('摄像头已就绪');
       this._tryPlayBGM(); // 摄像头授权后再次尝试播放BGM
+      // 通知父页面（play.html）摄像头已授权，以便恢复全屏
+      try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
     } catch (err) {
       console.error(err);
       let detail = err.message || String(err);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         detail = '已拒绝摄像头权限，请允许后刷新';
+        // 通知父页面摄像头被拒绝
+        try { window.parent.postMessage({ type: 'cygame-camera-denied' }, '*'); } catch (_) {}
       } else if (!window.isSecureContext) {
         detail = '请用 http://127.0.0.1 本地服务器打开，勿用 file://';
       }
