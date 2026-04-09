@@ -70,16 +70,88 @@
     wantsFullscreenAfterCameraGrant = true;
   }
 
+  /**
+   * 先请求摄像头权限（非全屏状态下弹窗不会打断），
+   * 授权后再进入全屏。这样 iframe 内游戏再调 getUserMedia 时
+   * 浏览器已记住授权，不会再弹窗。
+   *
+   * 如果权限已授权（granted），在同步用户手势栈内直接全屏。
+   * 如果需要弹窗（prompt），先弹窗获取权限，获取后显示「进入全屏」按钮
+   * （因为异步 .then 中 requestFullscreen 可能被浏览器拒绝）。
+   */
+  var cameraPreGranted = false;
+
+  function preCameraAndFullscreen() {
+    markFullscreenIntent();
+
+    // 已授权过，直接全屏
+    if (cameraPreGranted) {
+      requestFs();
+      return;
+    }
+
+    // 检查游戏是否需要摄像头
+    var needsCamera = !!(game && !game.comingSoon && game.entry);
+    if (!needsCamera) {
+      requestFs();
+      return;
+    }
+
+    // 先用 permissions API 检查状态
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions
+        .query({ name: "camera" })
+        .then(function (status) {
+          if (status.state === "granted") {
+            cameraPreGranted = true;
+            requestFs();
+          } else {
+            requestCameraThenFullscreen();
+          }
+        })
+        .catch(function () {
+          requestCameraThenFullscreen();
+        });
+    } else {
+      requestCameraThenFullscreen();
+    }
+  }
+
+  function requestCameraThenFullscreen() {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: false })
+      .then(function (stream) {
+        stream.getTracks().forEach(function (t) { t.stop(); });
+        cameraPreGranted = true;
+        // 异步回调中全屏可能被浏览器阻止，先尝试
+        requestFs();
+        // 300ms 后检查，若没进全屏则显示按钮让用户手动点
+        setTimeout(function () {
+          var isFs = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement
+          );
+          if (!isFs && wantsFullscreenAfterCameraGrant) {
+            ensureRestoreButton().textContent = "摄像头已就绪 · 点击进入全屏";
+            ensureRestoreButton().style.display = "block";
+          }
+        }, 300);
+      })
+      .catch(function () {
+        // 摄像头被拒绝也允许进全屏
+        requestFs();
+      });
+  }
+
   if (fsBtn) {
     fsBtn.addEventListener("click", function () {
-      markFullscreenIntent();
-      requestFs();
+      preCameraAndFullscreen();
     });
   }
   if (startFullBtn) {
     startFullBtn.addEventListener("click", function () {
-      markFullscreenIntent();
-      requestFs();
+      preCameraAndFullscreen();
     });
   }
 
