@@ -25,29 +25,23 @@
   var wechatCloseBtn = document.getElementById("wechat-close-tip");
   var wechatCopyStatus = document.getElementById("wechat-copy-status");
 
-  /** 用户点过「全屏」后，若因摄像头授权弹窗退出全屏，授权结束后自动恢复 */
-  var wantsFullscreenAfterCameraGrant = false;
-  var restoreBtn = null;
+  /**
+   * 全屏 + 摄像头策略（按浏览器分流）
+   *
+   * ★ Chrome / Firefox（支持 permissions.query('camera')，同源 iframe 共享权限）：
+   *   点全屏 → 检查权限 → 若未授权先弹窗 → 授权后进全屏 → iframe 不弹窗 ✓
+   *
+   * ★ Safari（不支持 permissions.query('camera')，iframe 有独立权限域）：
+   *   点全屏 → 直接进全屏 → iframe 请求摄像头 → Safari 弹窗 → 退出全屏
+   *   → 用户确认 → iframe 发 cygame-camera-granted → 显示「恢复全屏」覆盖层
+   *   → 用户点击 → 恢复全屏 ✓
+   */
+  var wantsFullscreen = false;
+  var cameraPreGranted = false;
+  var restoreOverlay = null;
 
-  function ensureRestoreButton() {
-    if (restoreBtn) return restoreBtn;
-    restoreBtn = document.createElement("button");
-    restoreBtn.type = "button";
-    restoreBtn.id = "btn-restore-fullscreen";
-    restoreBtn.textContent = "点击恢复全屏";
-    restoreBtn.style.cssText =
-      "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);" +
-      "padding:12px 18px;border-radius:999px;border:1px solid rgba(255,255,255,0.35);" +
-      "background:rgba(0,0,0,0.55);color:#fff;font-weight:600;letter-spacing:0.5px;" +
-      "z-index:99999;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);" +
-      "box-shadow:0 10px 30px rgba(0,0,0,0.35);display:none;cursor:pointer;";
-    restoreBtn.addEventListener("click", function () {
-      restoreBtn.style.display = "none";
-      requestFs();
-    });
-    document.body.appendChild(restoreBtn);
-    return restoreBtn;
-  }
+  /** 检测 Safari：不支持 permissions.query('camera') 的就走 Safari 路径 */
+  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   function requestFs() {
     var root = frameWrap || document.querySelector(".play-frame-wrap");
@@ -66,38 +60,59 @@
     }
   }
 
-  function markFullscreenIntent() {
-    wantsFullscreenAfterCameraGrant = true;
+  /** 创建醒目的全屏恢复覆盖层 */
+  function showRestoreOverlay() {
+    if (restoreOverlay) {
+      restoreOverlay.style.display = "flex";
+      return;
+    }
+    restoreOverlay = document.createElement("div");
+    restoreOverlay.id = "fullscreen-restore-overlay";
+    restoreOverlay.innerHTML =
+      '<div style="text-align:center;max-width:320px;padding:0 20px;">' +
+        '<div style="font-size:48px;margin-bottom:16px;">📷</div>' +
+        '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">摄像头已就绪</div>' +
+        '<div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:1.5;">权限已获取，点击下方按钮恢复全屏继续游戏</div>' +
+        '<button type="button" id="btn-restore-fs" style="' +
+          "padding:14px 36px;border-radius:999px;border:none;" +
+          "background:linear-gradient(135deg,#ff6fa7,#ff8a50);color:#fff;" +
+          "font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;" +
+          "box-shadow:0 4px 20px rgba(255,111,167,0.4);" +
+        '">进入全屏</button>' +
+      '</div>';
+    restoreOverlay.style.cssText =
+      "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;" +
+      "justify-content:center;background:rgba(0,0,0,0.75);" +
+      "backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);";
+    document.body.appendChild(restoreOverlay);
+
+    restoreOverlay.querySelector("#btn-restore-fs").addEventListener("click", function () {
+      restoreOverlay.style.display = "none";
+      requestFs();
+    });
+  }
+
+  function hideRestoreOverlay() {
+    if (restoreOverlay) restoreOverlay.style.display = "none";
   }
 
   /**
-   * 流程：先在非全屏状态下拿到摄像头权限（弹窗不会打断全屏），
-   * 授权后再进全屏。这样 iframe 内游戏再调 getUserMedia 时
-   * 浏览器已记住 granted 状态，不会弹窗 → 不会退出全屏。
-   *
-   * - 已经 granted → 同步手势栈内直接全屏
-   * - 需要 prompt → 先弹窗拿权限 → 拿到后尝试全屏（若浏览器拒绝则显示恢复按钮）
-   * - 不需要摄像头的游戏 → 直接全屏
+   * Chrome 路径：先拿权限再全屏
    */
-  var cameraPreGranted = false;
-
-  function enterFullscreen() {
-    markFullscreenIntent();
-
-    // 已授权过，直接全屏
+  function chromePath() {
     if (cameraPreGranted) {
       requestFs();
       return;
     }
 
-    // 检查游戏是否需要摄像头（comingSoon 或无 entry 的不需要）
+    // 检查游戏是否需要摄像头
     var needsCamera = !!(game && !game.comingSoon && game.entry);
     if (!needsCamera) {
       requestFs();
       return;
     }
 
-    // 用 permissions API 检查当前权限状态
+    // Chrome 支持 permissions.query
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions
         .query({ name: "camera" })
@@ -106,16 +121,15 @@
             cameraPreGranted = true;
             requestFs();
           } else {
-            // prompt 或 denied → 先请求权限再全屏
             requestCameraThenFullscreen();
           }
         })
         .catch(function () {
-          requestCameraThenFullscreen();
+          // permissions.query 失败 → 走 Safari 路径
+          safariPath();
         });
     } else {
-      // 不支持 permissions API → 直接尝试
-      requestCameraThenFullscreen();
+      safariPath();
     }
   }
 
@@ -123,28 +137,42 @@
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
       .then(function (stream) {
-        // 拿到权限后立即释放 stream（不需要用它，只是为了让浏览器记住 granted）
         stream.getTracks().forEach(function (t) { t.stop(); });
         cameraPreGranted = true;
-        // 尝试全屏（异步回调中可能被浏览器阻止）
         requestFs();
-        // 300ms 后检查是否成功进入全屏，若没有则显示按钮让用户手动点
+        // 300ms 后检查是否成功进入全屏
         setTimeout(function () {
           var isFs = !!(
             document.fullscreenElement ||
             document.webkitFullscreenElement ||
             document.msFullscreenElement
           );
-          if (!isFs && wantsFullscreenAfterCameraGrant) {
-            ensureRestoreButton().textContent = "摄像头已就绪 · 点击进入全屏";
-            ensureRestoreButton().style.display = "block";
+          if (!isFs && wantsFullscreen) {
+            showRestoreOverlay();
           }
         }, 300);
       })
       .catch(function () {
-        // 摄像头被拒绝也允许进全屏（游戏内部会自行提示错误）
         requestFs();
       });
+  }
+
+  /**
+   * Safari 路径：直接进全屏，让 iframe 自己请求摄像头
+   * 弹窗退出全屏后由 cygame-camera-granted 触发恢复覆盖层
+   */
+  function safariPath() {
+    requestFs();
+  }
+
+  function enterFullscreen() {
+    wantsFullscreen = true;
+
+    if (isSafari) {
+      safariPath();
+    } else {
+      chromePath();
+    }
   }
 
   if (fsBtn) {
@@ -244,29 +272,33 @@
   window.addEventListener("message", function (ev) {
     var d = ev && ev.data;
     if (!d || typeof d !== "object") return;
+
     if (d.type === "cygame-camera-denied") {
-      wantsFullscreenAfterCameraGrant = false;
+      // 摄像头被拒绝，不处理全屏恢复
       return;
     }
-    if (d.type !== "cygame-camera-granted") return;
-    if (!wantsFullscreenAfterCameraGrant) return;
-    wantsFullscreenAfterCameraGrant = false;
-    // 先尝试自动恢复全屏（部分浏览器会要求用户手势，可能失败）
-    setTimeout(function () {
-      requestFs();
-      // 若 500ms 后仍非全屏，则显示“点一下恢复全屏”按钮（用户手势即可成功）
-      setTimeout(function () {
-        var isFs =
-          !!(
-            document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.msFullscreenElement
-          );
-        if (!isFs) {
-          ensureRestoreButton().style.display = "block";
-        }
-      }, 500);
-    }, 200);
+
+    if (d.type === "cygame-camera-granted") {
+      cameraPreGranted = true;
+
+      if (!wantsFullscreen) return;
+
+      // 检查当前是否还在全屏中
+      var isFs = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement
+      );
+
+      if (isFs) {
+        // 还在全屏（Chrome 路径，或 Safari 没退出），不需要恢复
+        return;
+      }
+
+      // 不在全屏（Safari 被弹窗打断了）→ 显示恢复覆盖层
+      showRestoreOverlay();
+      return;
+    }
   });
 
   if (!game) {
