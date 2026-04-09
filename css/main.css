@@ -198,7 +198,7 @@ a {
 .hero {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 2.5rem 1.3rem 0.85rem;
+  padding: 1.9rem 1.3rem 0.6rem;
 }
 
 .hero-title {
@@ -222,19 +222,19 @@ a {
 .showcase {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0.65rem 1.3rem 3.2rem;
+  padding: 0.5rem 1.3rem 2.35rem;
 }
 
 .showcase-grid {
   display: grid;
-  gap: 1.4rem;
+  gap: 1.05rem;
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 700px) {
   .showcase-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
+    gap: 1.05rem;
   }
 }
 
@@ -244,7 +244,7 @@ a {
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-card);
-  padding: 14px;
+  padding: 12px;
   border: none;
   background: var(--surface);
   box-shadow: var(--shadow-card);
@@ -270,6 +270,13 @@ a {
   overflow: hidden;
   border-radius: var(--radius-inner);
   flex-shrink: 0;
+}
+
+@media (min-width: 700px) {
+  .game-card__cover {
+    /* 桌面端略收短高度，确保三卡更容易一屏展示 */
+    aspect-ratio: 4 / 5;
+  }
 }
 
 .game-card__media {
