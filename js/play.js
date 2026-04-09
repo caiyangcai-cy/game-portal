@@ -25,8 +25,18 @@
   var wechatCloseBtn = document.getElementById("wechat-close-tip");
   var wechatCopyStatus = document.getElementById("wechat-copy-status");
 
-  /** 用户点过「全屏」后，若因摄像头授权弹窗退出全屏，授权结束后自动恢复 */
-  var wantsFullscreenAfterCameraGrant = false;
+  /**
+   * 全屏 + 摄像头流程：
+   * 1. 用户点「全屏体验」→ 先请求摄像头权限（弹窗在非全屏下出现）
+   * 2. 用户确认权限 → 父页面保持持有 stream（不释放！）→ 进入全屏
+   * 3. iframe 内游戏再调 getUserMedia → 浏览器已有活跃 stream，不弹窗
+   * 4. iframe 通知 cygame-camera-granted → 父页面释放自己持有的 stream
+   *
+   * 关键：父页面的 stream 必须保持活跃直到 iframe 拿到自己的 stream，
+   * 否则某些浏览器会认为权限已过期而重新弹窗。
+   */
+  var parentStream = null; // 父页面持有的摄像头 stream
+  var cameraPreGranted = false;
   var restoreBtn = null;
 
   function ensureRestoreButton() {
@@ -66,24 +76,15 @@
     }
   }
 
-  function markFullscreenIntent() {
-    wantsFullscreenAfterCameraGrant = true;
+  /** 释放父页面持有的摄像头 stream */
+  function releaseParentStream() {
+    if (parentStream) {
+      parentStream.getTracks().forEach(function (t) { t.stop(); });
+      parentStream = null;
+    }
   }
 
-  /**
-   * 流程：先在非全屏状态下拿到摄像头权限（弹窗不会打断全屏），
-   * 授权后再进全屏。这样 iframe 内游戏再调 getUserMedia 时
-   * 浏览器已记住 granted 状态，不会弹窗 → 不会退出全屏。
-   *
-   * - 已经 granted → 同步手势栈内直接全屏
-   * - 需要 prompt → 先弹窗拿权限 → 拿到后尝试全屏（若浏览器拒绝则显示恢复按钮）
-   * - 不需要摄像头的游戏 → 直接全屏
-   */
-  var cameraPreGranted = false;
-
   function enterFullscreen() {
-    markFullscreenIntent();
-
     // 已授权过，直接全屏
     if (cameraPreGranted) {
       requestFs();
@@ -123,10 +124,10 @@
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
       .then(function (stream) {
-        // 拿到权限后立即释放 stream（不需要用它，只是为了让浏览器记住 granted）
-        stream.getTracks().forEach(function (t) { t.stop(); });
+        // ★ 不释放 stream！保持持有，让浏览器知道摄像头权限是活跃的
+        parentStream = stream;
         cameraPreGranted = true;
-        // 尝试全屏（异步回调中可能被浏览器阻止）
+        // 尝试全屏（getUserMedia 的 then 回调仍在用户手势栈内，大多数浏览器允许）
         requestFs();
         // 300ms 后检查是否成功进入全屏，若没有则显示按钮让用户手动点
         setTimeout(function () {
@@ -135,7 +136,7 @@
             document.webkitFullscreenElement ||
             document.msFullscreenElement
           );
-          if (!isFs && wantsFullscreenAfterCameraGrant) {
+          if (!isFs) {
             ensureRestoreButton().textContent = "摄像头已就绪 · 点击进入全屏";
             ensureRestoreButton().style.display = "block";
           }
@@ -241,32 +242,32 @@
     });
   }
 
+  // 安全兜底：页面卸载时释放父页面的 stream（避免摄像头被持续占用）
+  window.addEventListener("beforeunload", function () {
+    releaseParentStream();
+  });
+  // 如果 10 秒后 iframe 仍未通知 camera-granted/denied，主动释放
+  // （极端情况：游戏 JS 出错没发 postMessage）
+  setTimeout(function () {
+    releaseParentStream();
+  }, 10000);
+
   window.addEventListener("message", function (ev) {
     var d = ev && ev.data;
     if (!d || typeof d !== "object") return;
-    if (d.type === "cygame-camera-denied") {
-      wantsFullscreenAfterCameraGrant = false;
+
+    if (d.type === "cygame-camera-granted") {
+      // iframe 游戏已成功拿到自己的摄像头 stream
+      // 现在可以安全释放父页面持有的 stream 了
+      releaseParentStream();
       return;
     }
-    if (d.type !== "cygame-camera-granted") return;
-    if (!wantsFullscreenAfterCameraGrant) return;
-    wantsFullscreenAfterCameraGrant = false;
-    // 先尝试自动恢复全屏（部分浏览器会要求用户手势，可能失败）
-    setTimeout(function () {
-      requestFs();
-      // 若 500ms 后仍非全屏，则显示“点一下恢复全屏”按钮（用户手势即可成功）
-      setTimeout(function () {
-        var isFs =
-          !!(
-            document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.msFullscreenElement
-          );
-        if (!isFs) {
-          ensureRestoreButton().style.display = "block";
-        }
-      }, 500);
-    }, 200);
+
+    if (d.type === "cygame-camera-denied") {
+      // 摄像头被拒绝，也释放父页面的 stream
+      releaseParentStream();
+      return;
+    }
   });
 
   if (!game) {
