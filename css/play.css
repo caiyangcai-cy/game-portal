@@ -163,32 +163,27 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   grid-template-rows: 1fr;
-  gap: 16px;
+  gap: 0;
   min-height: 0;
   min-height: calc(100dvh - var(--play-header-h));
   width: 100%;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 16px;
 }
 
 .play-preview {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: transparent;
-  border-right: none;
+  background: #050506;
+  border-right: 1px solid var(--border, rgba(255, 255, 255, 0.07));
 }
 
 .play-frame-wrap {
   flex: 1;
   min-height: clamp(360px, 58vh, 720px);
   position: relative;
-  background: radial-gradient(ellipse 140% 90% at 50% 0%, #171720 0%, #070709 55%);
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.55);
+  background: radial-gradient(ellipse 100% 80% at 50% 0%, #121218 0%, #050506 55%);
 }
 
 .play-frame {
@@ -210,16 +205,9 @@
 
 .play-sidebar {
   flex-shrink: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(28, 28, 34, 0.96) 0%,
-    rgba(18, 18, 21, 0.98) 100%
-  );
+  background: linear-gradient(180deg, #141418 0%, #101013 100%);
   overflow-y: auto;
-  border-left: none;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 12px 52px rgba(0, 0, 0, 0.45);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .play-sheet-handle {
@@ -228,7 +216,8 @@
 
 .play-sidebar-inner {
   padding: 1.5rem 1.35rem 2rem;
-  position: static;
+  position: sticky;
+  top: 0;
 }
 
 .play-sidebar-inner::before {
@@ -238,7 +227,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(251, 251, 253, 0.55);
+  color: rgba(183, 110, 121, 0.85);
   margin-bottom: 0.75rem;
 }
 
@@ -316,89 +305,85 @@
 }
 
 @media (max-width: 840px) {
+  .play-page {
+    --sheet-peek: 56px;
+    --sheet-radius: 20px;
+  }
+
   .play-split {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr;
     min-height: 0;
-    padding: 0;
-    gap: 0;
   }
 
   .play-preview {
-    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.06));
+    border-right: none;
+    border-bottom: none;
   }
 
   .play-frame-wrap {
-    /* 手机端：缩略展示游戏画面，确保同屏容纳简介与按钮 */
-    --frame-scale: 0.86;
-    min-height: min(52vh, 420px);
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    box-shadow: none;
+    /* 让游戏优先占满屏幕：给底部抽屉留出 peek 高度 */
+    min-height: calc(100dvh - var(--play-header-h) - var(--sheet-peek));
   }
 
   .play-frame {
-    min-height: min(52vh, 420px);
-    /* 让 iframe 内容整体缩放以便“完整露出”更多画面 */
-    width: calc(100% / var(--frame-scale));
-    height: calc(100% / var(--frame-scale));
-    transform: scale(var(--frame-scale));
-    transform-origin: top center;
+    min-height: calc(100dvh - var(--play-header-h) - var(--sheet-peek));
   }
 
   .play-sidebar {
-    position: static;
-    border-radius: 0;
-    border: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 30;
+    border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: none;
-    overflow: visible;
+    border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+    background: linear-gradient(180deg, rgba(20, 20, 24, 0.96) 0%, rgba(16, 16, 19, 0.98) 100%);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+    max-height: min(70dvh, 560px);
+    transform: translateY(calc(100% - var(--sheet-peek)));
+    transition: transform 0.22s ease;
+  }
+
+  .play-body.play-sheet-open .play-sidebar {
+    transform: translateY(0);
   }
 
   .play-sheet-handle {
-    display: none;
+    display: flex;
+    width: 100%;
+    height: var(--sheet-peek);
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .play-sheet-grip {
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
   }
 
   .play-sidebar-inner {
     position: static;
-    padding: 1.05rem 1rem 1.25rem;
+    padding-top: 0.25rem;
   }
 
   .play-sidebar-inner::before {
     margin-top: 0.25rem;
   }
 
-  .play-intro-title {
-    font-size: 1.15rem;
-    margin-bottom: 0.45rem;
-  }
-
-  .play-intro-desc {
-    font-size: 0.9rem;
-    margin-bottom: 0.85rem;
-  }
-
-  .play-intro-tags {
-    margin-bottom: 0.85rem;
-  }
-
-  .play-intro-tips {
-    margin-bottom: 1.05rem;
-    padding: 0.7rem 0.75rem 0.7rem 1.55rem;
-  }
-
-  .play-intro-tips li {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* 手机端改为上下布局，不再需要「简介」按钮 */
+  /* 顶栏的「简介」按钮仅在移动端展示 */
   .play-info-toggle {
-    display: none;
+    display: inline-flex;
   }
 }
 
