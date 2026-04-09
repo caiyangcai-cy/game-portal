@@ -2,7 +2,7 @@ window.PORTFOLIO_GAMES = [
   {
     id: "sakura",
     title: "小樱魔法卡",
-    tags: ["卡牌", "休闲", "治愈"],
+    tags: [],
     coverImage: "assets/covers/sakura-cover.png",
     coverStyle: "#1a0d18",
     coverPosition: "center top",
@@ -11,15 +11,15 @@ window.PORTFOLIO_GAMES = [
     btnText: "立即召唤",
     introBadge: "H5 · 手势互动",
     introTips: [
-      "需授权摄像头用于手势识别，画面在本地处理",
-      "建议使用 Chrome / Edge 等现代浏览器",
-      "左侧加载真实游戏后，可随时用「全屏体验」或顶部「全屏」沉浸游玩",
+      "需授权摄像头用于手势识别，画面全程本地处理。放心，没有账号登录，也不收集任何数据！",
+      "手机、电脑、平板浏览器都能玩，推荐电脑或平板，大屏体验更爽！",
+      "点「全屏体验」进入沉浸模式，效果拉满！",
     ],
   },
   {
     id: "tarot",
     title: "心灵塔罗牌",
-    tags: ["塔罗", "心灵", "每日"],
+    tags: [],
     coverImage: "assets/covers/tarot-cover.jpg",
     coverStyle: "#c9a01e",
     coverPosition: "center top",
@@ -28,9 +28,9 @@ window.PORTFOLIO_GAMES = [
     btnText: "立即抽牌",
     introBadge: "H5 · 塔罗 · 手势",
     introTips: [
-      "需授权摄像头用于隔空抽牌，数据不上传服务器",
-      "建议在光线充足、正对摄像头的环境下游玩",
-      "点「全屏体验」会先请求摄像头权限，授权后自动进入全屏",
+      "需授权摄像头用于手势识别，画面全程本地处理。放心，没有账号登录，也不收集任何数据！",
+      "手机、电脑、平板浏览器都能玩，推荐电脑或平板，大屏体验更爽！",
+      "点「全屏体验」进入沉浸模式，效果拉满！",
     ],
   },
   {
