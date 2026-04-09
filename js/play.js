@@ -1,6 +1,12 @@
 (function () {
   var params = new URLSearchParams(window.location.search);
   var id = params.get("game");
+  var variant = params.get("variant");
+  if (variant) {
+    document.body.dataset.variant = String(variant);
+  } else {
+    delete document.body.dataset.variant;
+  }
   var games = window.PORTFOLIO_GAMES || [];
   var game = games.find(function (g) {
     return g.id === id;
