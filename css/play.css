@@ -329,7 +329,9 @@
   }
 
   .play-frame-wrap {
-    min-height: min(56vh, 460px);
+    /* 手机端：缩略展示游戏画面，确保同屏容纳简介与按钮 */
+    --frame-scale: 0.86;
+    min-height: min(52vh, 420px);
     border-radius: 0;
     border-left: none;
     border-right: none;
@@ -338,7 +340,12 @@
   }
 
   .play-frame {
-    min-height: min(56vh, 460px);
+    min-height: min(52vh, 420px);
+    /* 让 iframe 内容整体缩放以便“完整露出”更多画面 */
+    width: calc(100% / var(--frame-scale));
+    height: calc(100% / var(--frame-scale));
+    transform: scale(var(--frame-scale));
+    transform-origin: top center;
   }
 
   .play-sidebar {
