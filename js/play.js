@@ -20,6 +20,10 @@
   var infoToggleBtn = document.getElementById("play-info-toggle");
   var sheetHandleBtn = document.getElementById("play-sheet-handle");
   var sidebar = document.getElementById("play-sidebar");
+  var wechatTip = document.getElementById("wechat-tip");
+  var wechatCopyBtn = document.getElementById("wechat-copy-link");
+  var wechatCloseBtn = document.getElementById("wechat-close-tip");
+  var wechatCopyStatus = document.getElementById("wechat-copy-status");
 
   /** 用户点过「全屏」后，若因摄像头授权弹窗退出全屏，授权结束后自动恢复 */
   var wantsFullscreenAfterCameraGrant = false;
@@ -76,6 +80,68 @@
     startFullBtn.addEventListener("click", function () {
       markFullscreenIntent();
       requestFs();
+    });
+  }
+
+  function isWeChat() {
+    var ua = (navigator && navigator.userAgent) || "";
+    return /MicroMessenger/i.test(ua);
+  }
+
+  function showWeChatTip() {
+    if (!wechatTip) return;
+    wechatTip.hidden = false;
+    // 尽量避免底层页面可滚动/可点
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+  }
+
+  function hideWeChatTip() {
+    if (!wechatTip) return;
+    wechatTip.hidden = true;
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  }
+
+  function setCopyStatus(msg) {
+    if (!wechatCopyStatus) return;
+    wechatCopyStatus.textContent = msg || "";
+  }
+
+  async function copyLink() {
+    var url = window.location.href;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        setCopyStatus("已复制链接。去浏览器打开即可。");
+        return;
+      }
+    } catch (e) {}
+    try {
+      var input = document.createElement("input");
+      input.value = url;
+      input.setAttribute("readonly", "readonly");
+      input.style.position = "fixed";
+      input.style.left = "-9999px";
+      document.body.appendChild(input);
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+      var ok = document.execCommand && document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopyStatus(ok ? "已复制链接。去浏览器打开即可。" : "复制失败，请手动复制地址栏链接。");
+    } catch (e2) {
+      setCopyStatus("复制失败，请手动复制地址栏链接。");
+    }
+  }
+
+  if (wechatCloseBtn) {
+    wechatCloseBtn.addEventListener("click", function () {
+      hideWeChatTip();
+    });
+  }
+  if (wechatCopyBtn) {
+    wechatCopyBtn.addEventListener("click", function () {
+      copyLink();
     });
   }
 
@@ -170,6 +236,11 @@
 
   // 移动端默认收起简介抽屉，让游戏画面优先占满
   setSheetOpen(false);
+
+  // 微信内置浏览器：提前提醒用户使用系统浏览器（摄像头/手势体验更稳定）
+  if (isWeChat()) {
+    showWeChatTip();
+  }
 
   var tags = game.tags || [];
   if (tagsEl && tags.length) {

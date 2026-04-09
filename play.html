@@ -18,6 +18,38 @@
   </head>
   <body class="play-body">
     <div id="play-page" class="play-page" aria-live="polite">
+      <div
+        class="wechat-tip"
+        id="wechat-tip"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wechat-tip-title"
+        hidden
+      >
+        <div class="wechat-tip__card" role="document">
+          <p class="wechat-tip__badge">微信内打开</p>
+          <h2 class="wechat-tip__title" id="wechat-tip-title">需要在浏览器体验</h2>
+          <p class="wechat-tip__desc">
+            由于微信内置浏览器对摄像头/手势能力支持有限，可能会出现「授权后无响应」。
+            建议点击右上角「…」→「在浏览器打开」再体验。
+          </p>
+          <ol class="wechat-tip__steps">
+            <li>点右上角 <strong>…</strong></li>
+            <li>选择 <strong>在浏览器打开</strong>（或 Safari / Chrome）</li>
+            <li>回到页面后重新进入游戏</li>
+          </ol>
+          <div class="wechat-tip__actions">
+            <button type="button" class="btn--play wechat-tip__copy" id="wechat-copy-link">
+              复制链接
+            </button>
+            <button type="button" class="btn btn--ghost wechat-tip__close" id="wechat-close-tip">
+              我知道了
+            </button>
+          </div>
+          <p class="wechat-tip__fineprint" id="wechat-copy-status" aria-live="polite"></p>
+        </div>
+      </div>
+
       <header class="play-header">
         <a class="btn btn--ghost play-back" href="index.html">← 返回游戏库</a>
         <a class="logo play-header-logo" href="index.html"
