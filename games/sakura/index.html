@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>百变小樱 · 塔罗手势版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -797,6 +800,39 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   .card{width:82px;height:180px;margin-left:-41px;margin-top:-90px}
   .selected-card-wrapper{width:230px;height:506px}
 }
+
+/* ── CYou Games 品牌水印 ── */
+.cyou-watermark{
+  position:fixed;right:12px;bottom:10px;z-index:200;
+  font-family:'Outfit','PingFang SC',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:0.03em;
+  line-height:1;pointer-events:none;user-select:none;
+  opacity:0.35;
+  display:flex;align-items:baseline;gap:0.06em;
+}
+.cyou-watermark .wm-cyou{
+  background:linear-gradient(135deg,#e0bfb8,#b76e79);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cyou-watermark .wm-games{
+  color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em;letter-spacing:0.06em;
+}
+
+/* ── 启动页品牌署名 ── */
+.start-brand{
+  margin-top:28px;
+  font-family:'Outfit','PingFang SC',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:0.03em;
+  display:flex;align-items:baseline;gap:0.06em;justify-content:center;
+  opacity:0.3;
+}
+.start-brand .wm-cyou{
+  background:linear-gradient(135deg,#e0bfb8,#b76e79);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.start-brand .wm-games{
+  color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em;letter-spacing:0.06em;
+}
   </style>
 </head>
 <body>
@@ -845,9 +881,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     <div class="start-subtitle">CARDCAPTOR SAKURA</div>
     <button class="start-btn" id="btn-start">封印解除 · 开始占卜</button>
     <div id="loading-status"></div>
+    <div class="start-brand"><span class="wm-cyou">CYou</span><span class="wm-games">Games</span></div>
   </div>
 
   <div id="app" class="hidden">
+    <!-- CYou Games 品牌水印 -->
+    <div class="cyou-watermark"><span class="wm-cyou">CYou</span><span class="wm-games">Games</span></div>
+
     <canvas id="starfield"></canvas>
 
     <div id="scene">
