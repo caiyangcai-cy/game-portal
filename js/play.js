@@ -71,13 +71,80 @@
   }
 
   /**
-   * 直接进全屏，不再预请求摄像头。
-   * 摄像头授权由 iframe 内的游戏自行处理，避免弹出两次权限弹窗。
-   * 游戏授权成功后会通过 postMessage('cygame-camera-granted') 通知父页面。
+   * 流程：先在非全屏状态下拿到摄像头权限（弹窗不会打断全屏），
+   * 授权后再进全屏。这样 iframe 内游戏再调 getUserMedia 时
+   * 浏览器已记住 granted 状态，不会弹窗 → 不会退出全屏。
+   *
+   * - 已经 granted → 同步手势栈内直接全屏
+   * - 需要 prompt → 先弹窗拿权限 → 拿到后尝试全屏（若浏览器拒绝则显示恢复按钮）
+   * - 不需要摄像头的游戏 → 直接全屏
    */
+  var cameraPreGranted = false;
+
   function enterFullscreen() {
     markFullscreenIntent();
-    requestFs();
+
+    // 已授权过，直接全屏
+    if (cameraPreGranted) {
+      requestFs();
+      return;
+    }
+
+    // 检查游戏是否需要摄像头（comingSoon 或无 entry 的不需要）
+    var needsCamera = !!(game && !game.comingSoon && game.entry);
+    if (!needsCamera) {
+      requestFs();
+      return;
+    }
+
+    // 用 permissions API 检查当前权限状态
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions
+        .query({ name: "camera" })
+        .then(function (status) {
+          if (status.state === "granted") {
+            cameraPreGranted = true;
+            requestFs();
+          } else {
+            // prompt 或 denied → 先请求权限再全屏
+            requestCameraThenFullscreen();
+          }
+        })
+        .catch(function () {
+          requestCameraThenFullscreen();
+        });
+    } else {
+      // 不支持 permissions API → 直接尝试
+      requestCameraThenFullscreen();
+    }
+  }
+
+  function requestCameraThenFullscreen() {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: false })
+      .then(function (stream) {
+        // 拿到权限后立即释放 stream（不需要用它，只是为了让浏览器记住 granted）
+        stream.getTracks().forEach(function (t) { t.stop(); });
+        cameraPreGranted = true;
+        // 尝试全屏（异步回调中可能被浏览器阻止）
+        requestFs();
+        // 300ms 后检查是否成功进入全屏，若没有则显示按钮让用户手动点
+        setTimeout(function () {
+          var isFs = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement
+          );
+          if (!isFs && wantsFullscreenAfterCameraGrant) {
+            ensureRestoreButton().textContent = "摄像头已就绪 · 点击进入全屏";
+            ensureRestoreButton().style.display = "block";
+          }
+        }, 300);
+      })
+      .catch(function () {
+        // 摄像头被拒绝也允许进全屏（游戏内部会自行提示错误）
+        requestFs();
+      });
   }
 
   if (fsBtn) {
