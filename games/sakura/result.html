@@ -97,7 +97,7 @@
       display:flex;align-items:center;justify-content:center;
       box-sizing:border-box;
     }
-    .sc-card-img img{width:100%;height:100%;object-fit:contain;display:block}
+    .sc-card-img img{width:100%;height:100%;object-fit:cover;display:block}
     .sc-name-row{display:none!important}
     .sc-persona{display:none!important}
     .sc-quote{
@@ -314,7 +314,7 @@
     const imgWrap = document.getElementById('sc-card-img');
     imgWrap.style.borderColor = 'rgba(255,215,0,0.55)';
     imgWrap.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
-    imgWrap.innerHTML = `<img src="${card.image}" alt="" style="width:100%;height:100%;object-fit:contain;display:block">`;
+    imgWrap.innerHTML = `<img src="${card.image}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`;
     const destinyText = MEANINGS[card.element] || '';
     const q = QUOTES[card.element] || '';
     document.getElementById('sc-quote').textContent = q ? `「${q}」` : '';
