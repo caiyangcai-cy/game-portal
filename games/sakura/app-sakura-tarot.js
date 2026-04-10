@@ -1503,9 +1503,8 @@ class SakuraTarotApp {
     if (!el) return;
     const wrapper = el.parentElement;
 
-    const restoreWrapper = () => {
-      if (wrapper) wrapper.style.cssText = '';
-    };
+    let restoreWrapper = () => {};
+    let restoreImages = () => {};
 
     try {
       if (btn) {
@@ -1514,8 +1513,17 @@ class SakuraTarotApp {
         btn.style.opacity = '0.75';
       }
 
-      if (wrapper) {
-        wrapper.style.cssText = 'position:fixed;left:0;top:0;z-index:-9999;pointer-events:none;';
+      const cap = window.sakuraShareCapture;
+      if (cap) {
+        restoreWrapper = cap.styleShareWrapperForCapture(wrapper);
+        restoreImages = await cap.prepareImagesForHtml2Canvas(el);
+      } else if (wrapper) {
+        const prev = wrapper.style.cssText;
+        wrapper.style.cssText =
+          'position:fixed;left:0;top:0;width:360px;height:640px;transform:translate3d(-120vw,0,0);z-index:2147483646;pointer-events:none;opacity:1;overflow:visible;';
+        restoreWrapper = () => {
+          wrapper.style.cssText = prev;
+        };
       }
 
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -1540,7 +1548,7 @@ class SakuraTarotApp {
         backgroundColor: '#0a0818',
         scale: 2,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         logging: false,
       });
       const timeoutPromise = new Promise((_, reject) =>
@@ -1548,9 +1556,16 @@ class SakuraTarotApp {
       );
       const canvas = await Promise.race([h2cPromise, timeoutPromise]);
 
+      restoreImages();
       restoreWrapper();
 
-      const url = canvas.toDataURL('image/png');
+      let url;
+      try {
+        url = canvas.toDataURL('image/png');
+      } catch (err) {
+        console.error('[ShareImage] toDataURL', err);
+        throw err;
+      }
       const a = document.createElement('a');
       a.href = url;
       a.download = `sakura-${card.element}-result.png`;
@@ -1564,7 +1579,12 @@ class SakuraTarotApp {
       }
     } catch (e) {
       console.error('[ShareImage]', e);
-      restoreWrapper();
+      try {
+        restoreImages();
+      } catch (_) {}
+      try {
+        restoreWrapper();
+      } catch (_) {}
       if (btn) {
         btn.textContent = '生成失败，建议截图';
         setTimeout(() => (btn.textContent = btnDefault()), 1800);
