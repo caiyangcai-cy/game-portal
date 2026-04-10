@@ -349,7 +349,7 @@
     background: linear-gradient(180deg, rgba(20, 20, 24, 0.96) 0%, rgba(16, 16, 19, 0.98) 100%);
     backdrop-filter: blur(18px) saturate(1.1);
     -webkit-backdrop-filter: blur(18px) saturate(1.1);
-    max-height: min(70dvh, 560px);
+    max-height: min(58dvh, 460px);
     transform: translateY(calc(100% - var(--sheet-peek)));
     transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
   }
@@ -378,27 +378,62 @@
     background: rgba(255, 255, 255, 0.18);
   }
 
-  /* grip 旁边的文字标签：收起时显示，展开后隐藏 */
+  /* grip 旁的文字：收起时「游戏简介 ▴」，展开时「收起 ▾」 */
   .play-sheet-handle::after {
     content: "游戏简介 ▴";
     font-size: 0.72rem;
     font-weight: 600;
     color: rgba(183, 110, 121, 0.75);
     letter-spacing: 0.06em;
-    transition: opacity 0.2s;
+    transition: opacity 0.15s;
   }
 
   .play-body.play-sheet-open .play-sheet-handle::after {
-    opacity: 0;
+    content: "收起 ▾";
+    opacity: 0.6;
   }
 
+  /* ── 移动端简介内容紧凑化 ── */
   .play-sidebar-inner {
     position: static;
-    padding-top: 0.25rem;
+    padding: 0 1.1rem 1.1rem;
   }
 
   .play-sidebar-inner::before {
-    margin-top: 0.25rem;
+    margin-top: 0;
+    margin-bottom: 0.45rem;
+    font-size: 0.6rem;
+  }
+
+  .play-intro-badge {
+    margin-bottom: 0.25rem;
+    font-size: 0.65rem;
+  }
+
+  .play-intro-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .play-intro-desc {
+    font-size: 0.82rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .play-intro-tips {
+    margin-bottom: 0.85rem;
+    padding: 0.6rem 0.7rem 0.6rem 1.5rem;
+    font-size: 0.72rem;
+    line-height: 1.55;
+  }
+
+  .play-intro-tips li {
+    margin-bottom: 0.3rem;
+  }
+
+  .play-intro-actions .btn--play {
+    padding: 0.6rem 0.95rem;
+    font-size: 0.82rem;
   }
 
   /* 顶栏的「简介」按钮仅在移动端展示 */
