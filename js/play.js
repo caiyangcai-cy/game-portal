@@ -26,19 +26,24 @@
   var wechatCopyStatus = document.getElementById("wechat-copy-status");
 
   /**
-   * 全屏 + 摄像头策略（v2 — 统一路径，不再按浏览器分流）
+   * 全屏 + 摄像头策略 v3
    *
-   * 新策略：所有浏览器走同一条路径——
-   *   点全屏 → 先在父页面 getUserMedia 请求摄像头权限（非全屏弹窗无痛）
-   *   → 用户同意 → 关掉临时 stream → 进入全屏
-   *   → iframe 内再次 getUserMedia 时，浏览器已记住该域名授权，不再弹窗 ✓
+   * 核心问题：Safari iframe 有独立权限域，父页面获取的摄像头权限不能传递给 iframe。
+   * 所以父页面预请求没用，iframe 内一定会再弹一次权限窗，导致退出全屏。
    *
-   * 如果用户拒绝摄像头，也直接进全屏（游戏内自会处理拒绝提示）。
-   * 如果摄像头权限已获取过，直接进全屏。
+   * v3 方案：让 iframe 自己先请求摄像头权限（在非全屏状态下），然后再进全屏。
+   *   点全屏 → postMessage 通知 iframe「请立即请求摄像头」
+   *   → iframe 内 getUserMedia 弹窗（非全屏，不打断任何东西）
+   *   → 用户同意 → iframe 回复 cygame-camera-granted → play.js 进全屏
+   *   → iframe 后续再 getUserMedia 时已有权限，不再弹窗 ✓
+   *
+   * 如果 iframe 还没加载完或不支持预请求：8s 超时后直接全屏（降级到旧行为）。
+   * 如果摄像头权限已获取过（cygame-camera-granted 已收到）：直接全屏。
    */
   var wantsFullscreen = false;
   var cameraPreGranted = false;
   var restoreOverlay = null;
+  var pendingFullscreen = false; // 正在等 iframe 回复中
 
   function requestFs() {
     var root = frameWrap || document.querySelector(".play-frame-wrap");
@@ -57,7 +62,7 @@
     }
   }
 
-  /** 创建醒目的全屏恢复覆盖层（仅做后备，正常流程不再需要） */
+  /** 创建全屏恢复覆盖层（后备：万一 requestFs 因非用户手势被拒绝） */
   function showRestoreOverlay() {
     if (restoreOverlay) {
       restoreOverlay.style.display = "flex";
@@ -69,7 +74,7 @@
       '<div style="text-align:center;max-width:320px;padding:0 20px;">' +
         '<div style="font-size:48px;margin-bottom:16px;">📷</div>' +
         '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">摄像头已就绪</div>' +
-        '<div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:1.5;">权限已获取，点击下方按钮恢复全屏继续游戏</div>' +
+        '<div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:1.5;">权限已获取，点击下方按钮进入全屏</div>' +
         '<button type="button" id="btn-restore-fs" style="' +
           "padding:14px 36px;border-radius:999px;border:none;" +
           "background:linear-gradient(135deg,#ff6fa7,#ff8a50);color:#fff;" +
@@ -93,69 +98,40 @@
     if (restoreOverlay) restoreOverlay.style.display = "none";
   }
 
-  /**
-   * 统一路径：先请求摄像头权限 → 再进全屏
-   * 所有浏览器（Chrome / Firefox / Safari）走同一条路
-   */
-  function requestCameraThenFullscreen() {
-    // 检查游戏是否需要摄像头
-    var needsCamera = !!(game && !game.comingSoon && game.entry);
-    if (!needsCamera || cameraPreGranted) {
+  function enterFullscreen() {
+    wantsFullscreen = true;
+
+    // 如果摄像头已经授权过（iframe 之前已通知），直接全屏
+    if (cameraPreGranted) {
       requestFs();
       return;
     }
 
-    // 先尝试 permissions.query 检查是否已授权（Safari 不支持会 catch）
-    var checkPermission;
-    if (navigator.permissions && navigator.permissions.query) {
-      checkPermission = navigator.permissions
-        .query({ name: "camera" })
-        .then(function (status) { return status.state; })
-        .catch(function () { return "unknown"; });
-    } else {
-      checkPermission = Promise.resolve("unknown");
+    // 检查游戏是否需要摄像头
+    var needsCamera = !!(game && !game.comingSoon && game.entry);
+    if (!needsCamera) {
+      requestFs();
+      return;
     }
 
-    checkPermission.then(function (state) {
-      if (state === "granted") {
-        // 已授权，直接全屏
-        cameraPreGranted = true;
-        requestFs();
-        return;
-      }
+    // 通知 iframe：请立即请求摄像头权限（在非全屏状态下弹窗）
+    if (frame && frame.contentWindow) {
+      pendingFullscreen = true;
+      try {
+        frame.contentWindow.postMessage({ type: "cygame-request-camera" }, "*");
+      } catch (e) {}
 
-      // 未授权或无法查询 → 在非全屏状态下弹出摄像头权限请求
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: false })
-        .then(function (stream) {
-          // 拿到权限后立即关掉临时流
-          stream.getTracks().forEach(function (t) { t.stop(); });
-          cameraPreGranted = true;
-          // 权限已获取，尝试进全屏
+      // 超时保底：如果 8s 内 iframe 没回复，直接全屏（降级）
+      setTimeout(function () {
+        if (pendingFullscreen) {
+          pendingFullscreen = false;
           requestFs();
-          // Safari 可能在异步 .then 中丢失用户手势上下文，导致 requestFullscreen 静默失败
-          // 400ms 后检查：如果没成功进全屏，就弹恢复覆盖层让用户一键全屏
-          setTimeout(function () {
-            var isFs = !!(
-              document.fullscreenElement ||
-              document.webkitFullscreenElement ||
-              document.msFullscreenElement
-            );
-            if (!isFs && wantsFullscreen) {
-              showRestoreOverlay();
-            }
-          }, 400);
-        })
-        .catch(function () {
-          // 用户拒绝摄像头或出错，也进全屏（游戏内自行处理拒绝）
-          requestFs();
-        });
-    });
-  }
-
-  function enterFullscreen() {
-    wantsFullscreen = true;
-    requestCameraThenFullscreen();
+        }
+      }, 8000);
+    } else {
+      // iframe 还没准备好，直接全屏
+      requestFs();
+    }
   }
 
   if (fsBtn) {
@@ -257,29 +233,58 @@
     if (!d || typeof d !== "object") return;
 
     if (d.type === "cygame-camera-denied") {
-      // 摄像头被拒绝，不处理全屏恢复
+      // 摄像头被拒绝 — 如果正在等预请求结果，直接进全屏（游戏内自行处理）
+      if (pendingFullscreen) {
+        pendingFullscreen = false;
+        requestFs();
+        // requestFs 可能因非用户手势被拒，400ms 后检查
+        setTimeout(function () {
+          var isFs = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement
+          );
+          if (!isFs && wantsFullscreen) {
+            showRestoreOverlay();
+          }
+        }, 400);
+      }
       return;
     }
 
     if (d.type === "cygame-camera-granted") {
       cameraPreGranted = true;
 
+      // 如果正在等 iframe 预请求结果 → 摄像头搞定了，现在进全屏
+      if (pendingFullscreen) {
+        pendingFullscreen = false;
+        requestFs();
+        // requestFs 可能因非用户手势被拒，400ms 后检查
+        setTimeout(function () {
+          var isFs = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement
+          );
+          if (!isFs && wantsFullscreen) {
+            showRestoreOverlay();
+          }
+        }, 400);
+        return;
+      }
+
       if (!wantsFullscreen) return;
 
-      // 检查当前是否还在全屏中
+      // 非预请求场景（比如用户没点全屏就直接玩游戏触发了摄像头）
       var isFs = !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.msFullscreenElement
       );
-
-      if (isFs) {
-        // 还在全屏（Chrome 路径，或 Safari 没退出），不需要恢复
-        return;
+      if (!isFs) {
+        // 不在全屏（可能是旧的 Safari 降级路径）→ 显示恢复覆盖层
+        showRestoreOverlay();
       }
-
-      // 不在全屏（Safari 被弹窗打断了）→ 显示恢复覆盖层
-      showRestoreOverlay();
       return;
     }
   });

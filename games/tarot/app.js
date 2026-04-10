@@ -11,6 +11,30 @@
      → 选满3张 → RESULT (占卜结果页)
    ======================================== */
 
+/**
+ * 父页面预请求摄像头协议：
+ * play.js 在用户点全屏时发送 cygame-request-camera，
+ * iframe 在非全屏状态下弹出 getUserMedia 权限窗，
+ * 成功后缓存 stream 并回复 cygame-camera-granted，
+ * 后续 _initCamera 检测到缓存 stream 直接复用，不再弹窗。
+ */
+var __preCameraStream = null;
+window.addEventListener('message', function (ev) {
+  var d = ev && ev.data;
+  if (!d || typeof d !== 'object') return;
+  if (d.type === 'cygame-request-camera' && !__preCameraStream) {
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    }).then(function (stream) {
+      __preCameraStream = stream;
+      try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
+    }).catch(function () {
+      try { window.parent.postMessage({ type: 'cygame-camera-denied' }, '*'); } catch (_) {}
+    });
+  }
+});
+
 const STATE = {
   IDLE: 'idle',
   SUMMONED: 'summoned',
@@ -231,10 +255,17 @@ class App {
   async _initCamera() {
     this._setLoading('正在开启灵视之眼…');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      });
+      // 优先使用父页面预请求时缓存的 stream（避免 Safari 全屏下二次弹窗）
+      var stream;
+      if (typeof __preCameraStream !== 'undefined' && __preCameraStream) {
+        stream = __preCameraStream;
+        __preCameraStream = null; // 用完清空
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        });
+      }
       this.els.camera.srcObject = stream;
       await new Promise(resolve => { this.els.camera.onloadedmetadata = resolve; });
       await this.els.camera.play();

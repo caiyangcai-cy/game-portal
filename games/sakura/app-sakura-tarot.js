@@ -1,5 +1,29 @@
 /* 小樱魔法阵 + 塔罗手势/翻牌/高亮逻辑 */
 
+/**
+ * 父页面预请求摄像头协议：
+ * play.js 在用户点全屏时发送 cygame-request-camera，
+ * iframe 在非全屏状态下弹出 getUserMedia 权限窗，
+ * 成功后缓存 stream 并回复 cygame-camera-granted，
+ * 后续 _initCamera 检测到缓存 stream 直接复用，不再弹窗。
+ */
+var __preCameraStream = null;
+window.addEventListener('message', function (ev) {
+  var d = ev && ev.data;
+  if (!d || typeof d !== 'object') return;
+  if (d.type === 'cygame-request-camera' && !__preCameraStream) {
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 320, max: 480 }, height: { ideal: 240, max: 360 }, frameRate: { ideal: 20, max: 24 } },
+      audio: false
+    }).then(function (stream) {
+      __preCameraStream = stream;
+      try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
+    }).catch(function () {
+      try { window.parent.postMessage({ type: 'cygame-camera-denied' }, '*'); } catch (_) {}
+    });
+  }
+});
+
 const SAKURA_CARDS = [
   { id: 'wind', name: '风', nameEn: 'WINDY', image: '小樱卡片/1774582442715.png', color: '#4fc3f7', element: 'wind', spell: 'WINDY', spellSub: '风之精灵' },
   { id: 'water', name: '水', nameEn: 'WATERY', image: '小樱卡片/1774582448138.png', color: '#29b6f6', element: 'water', spell: 'WATERY', spellSub: '水之精灵' },
@@ -843,15 +867,22 @@ class SakuraTarotApp {
   async _initCamera() {
     this._setLoading('正在连接摄像头…');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 320, max: 480 },
-          height: { ideal: 240, max: 360 },
-          frameRate: { ideal: 20, max: 24 },
-        },
-        audio: false,
-      });
+      // 优先使用父页面预请求时缓存的 stream（避免 Safari 全屏下二次弹窗）
+      var stream;
+      if (typeof __preCameraStream !== 'undefined' && __preCameraStream) {
+        stream = __preCameraStream;
+        __preCameraStream = null; // 用完清空
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 320, max: 480 },
+            height: { ideal: 240, max: 360 },
+            frameRate: { ideal: 20, max: 24 },
+          },
+          audio: false,
+        });
+      }
       this.els.camera.srcObject = stream;
       await new Promise(r => {
         this.els.camera.onloadedmetadata = r;
