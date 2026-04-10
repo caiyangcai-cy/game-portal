@@ -852,7 +852,7 @@ html, body {
 .sr-card-area{
   position:relative;
   width:min(38vw, 148px);
-  aspect-ratio:539/1200;
+  aspect-ratio:140/238;
   height:auto;
   margin-bottom:4px;
   flex-shrink:0;
@@ -882,7 +882,7 @@ html, body {
   background:transparent;
   box-sizing:border-box;
 }
-.sr-card-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.sr-card-frame img{width:100%;height:100%;object-fit:contain;display:block}
 
 .sr-card-titles{display:none!important}
 
@@ -1016,7 +1016,7 @@ html, body {
 }
 .sr-share-card .sc-card-img{
   width:185px;
-  aspect-ratio:539/1200;
+  aspect-ratio:140/238;
   height:auto;
   max-height:none;
   border-radius:9px;
@@ -1027,7 +1027,7 @@ html, body {
   display:flex;align-items:center;justify-content:center;
   box-sizing:border-box;
 }
-.sr-share-card .sc-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.sr-share-card .sc-card-img img{width:100%;height:100%;object-fit:contain;display:block}
 .sr-share-card .sc-name-row{display:none!important}
 
 .sr-share-card .sc-persona{display:none!important}
