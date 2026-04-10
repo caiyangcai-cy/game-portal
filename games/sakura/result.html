@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>小樱魔法卡 · 结果分享</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#070616;
+      --text:#f0ebe3;
+      --muted:rgba(255,255,255,0.55);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      background:radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 55%),
+                 linear-gradient(180deg,#06061a 0%,#0c0a22 40%,#080818 100%);
+      color:var(--text);
+      font-family:'PingFang SC','Microsoft YaHei',sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px 14px 26px;
+    }
+    .wrap{
+      width:100%;
+      max-width:360px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+    }
+    .title{
+      text-align:center;
+      letter-spacing:5px;
+      font-size:14px;
+      color:rgba(255,255,255,0.75);
+      font-weight:300;
+    }
+    .sub{
+      text-align:center;
+      font-size:11px;
+      letter-spacing:2px;
+      color:rgba(255,255,255,0.25);
+      margin-top:-6px;
+    }
+
+    /* 分享卡片（与游戏内一致的结构与质感） */
+    .share-card{
+      width:300px;
+      border-radius:20px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#08061a 0%,#0f0b28 50%,#0a0818 100%);
+      box-shadow:0 12px 60px rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.06);
+      padding:28px 24px 20px;
+      display:flex;flex-direction:column;align-items:center;
+      position:relative;
+    }
+    .share-card::before{
+      content:'';
+      position:absolute;top:0;left:0;right:0;height:120px;
+      background:radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .sc-header{text-align:center;margin-bottom:20px;position:relative}
+    .sc-title{font-size:14px;font-weight:300;color:#f0ebe3;letter-spacing:5px}
+    .sc-sub{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px}
+    .sc-card-area{position:relative;margin-bottom:16px}
+    .sc-ring{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:200px;height:200px;border-radius:50%;
+      border:1px solid rgba(255,182,193,0.15);
+      pointer-events:none;
+    }
+    .sc-ring::before{
+      content:'';position:absolute;inset:15%;
+      border-radius:50%;border:1px dashed rgba(255,215,0,0.1);
+    }
+    .sc-card-img{
+      width:140px;height:238px;border-radius:10px;
+      border:2px solid rgba(255,215,0,0.5);
+      box-shadow:0 0 20px rgba(255,215,0,0.15),0 12px 40px rgba(0,0,0,0.6);
+      background:#0f1123;
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .sc-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .sc-name{
+      font-size:20px;font-weight:700;letter-spacing:5px;
+      color:#f0ebe3;margin-bottom:2px;
+      text-shadow:0 0 16px rgba(255,215,0,0.25);
+    }
+    .sc-name-sub{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:3px;margin-bottom:14px}
+    .sc-meaning{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.8;text-align:center;font-weight:300;margin-bottom:18px;padding:0 4px}
+    .sc-divider{width:40px;height:1px;background:linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);margin-bottom:14px}
+    .sc-cta{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:12px}
+    .sc-brand{
+      display:flex;align-items:baseline;gap:0.06em;
+      font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;
+      opacity:0.6;
+    }
+    .wm-cyou{
+      background:linear-gradient(135deg,#e0bfb8,#b76e79);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .wm-games{color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em}
+    .wm-site{color:rgba(168,168,173,0.4);font-weight:400;font-size:0.62em;margin-left:0.5em}
+    .sc-author{font-size:9px;color:rgba(255,255,255,0.2);margin-top:6px;letter-spacing:0.5px}
+
+    .actions{
+      width:300px;
+      display:flex;
+      gap:10px;
+    }
+    .btn{
+      flex:1;
+      padding:12px 0;
+      border-radius:14px;
+      border:none;
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:1px;
+      cursor:pointer;
+      font-family:inherit;
+      -webkit-tap-highlight-color:transparent;
+      transition:transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+    }
+    .btn:active{transform:scale(0.98);opacity:0.92}
+    .btn-save{background:linear-gradient(135deg,#ff6fa7,#ff8a50);color:#fff;box-shadow:0 4px 16px rgba(255,111,167,0.3)}
+    .btn-play{background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15)}
+
+    .hint{
+      width:300px;
+      text-align:center;
+      font-size:11px;
+      color:rgba(255,255,255,0.3);
+      line-height:1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <div class="title">✦ 魔法揭示 ✦</div>
+      <div class="sub">小樱魔法卡 · 结果分享</div>
+    </div>
+
+    <div class="share-card" id="share-card">
+      <div class="sc-header">
+        <div class="sc-title">✦ 魔法揭示 ✦</div>
+        <div class="sc-sub">小樱魔法卡 · CARDCAPTOR SAKURA</div>
+      </div>
+      <div class="sc-card-area">
+        <div class="sc-ring"></div>
+        <div class="sc-card-img" id="sc-card-img"></div>
+      </div>
+      <div class="sc-name" id="sc-name">—</div>
+      <div class="sc-name-sub" id="sc-sub">—</div>
+      <div class="sc-meaning" id="sc-meaning">—</div>
+      <div class="sc-divider"></div>
+      <div class="sc-cta">你也来召唤你的命运之牌 →</div>
+      <div class="sc-brand">
+        <span class="wm-cyou">CYou</span><span class="wm-games">Games</span>
+        <span class="wm-site">cyougames.site</span>
+      </div>
+      <div class="sc-author">✦ @羊仔coding不停 出品 ✦</div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-save" id="btn-save">📤 保存分享图</button>
+      <a class="btn btn-play" id="btn-play" href="index.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center">🔮 去占卜</a>
+    </div>
+    <div class="hint">提示：如果你在 iOS 微信里下载失败，可用“截图”保存。</div>
+  </div>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    const CARDS = {
+      wind: { element:'wind', spell:'WINDY', sub:'风之精灵', image:'小樱卡片/1774582442715.png', color:'#4fc3f7' },
+      water:{ element:'water',spell:'WATERY',sub:'水之精灵', image:'小樱卡片/1774582448138.png', color:'#29b6f6' },
+      fire: { element:'fire', spell:'FIERY', sub:'火之精灵', image:'小樱卡片/1774582452433.png', color:'#ff7043' },
+      light:{ element:'light',spell:'LIGHT',sub:'光之精灵', image:'小樱卡片/1774582457953.png', color:'#fdd835' },
+      shadow:{element:'shadow',spell:'SHADOW',sub:'影之精灵', image:'小樱卡片/1774582462348.png', color:'#7c4dff' },
+      flower:{element:'flower',spell:'FLOWER',sub:'花之精灵', image:'小樱卡片/1774582466893.png', color:'#f48fb1' },
+      thunder:{element:'thunder',spell:'THUNDER',sub:'雷之精灵', image:'小樱卡片/1774582472949.png', color:'#ffca28' },
+      time:{ element:'time', spell:'TIME', sub:'时之精灵', image:'小樱卡片/1774582477793.png', color:'#ce93d8' },
+    };
+    const MEANINGS = {
+      wind: '风的力量象征自由与变化。放下执念，顺势而为，新的方向自然会显现。',
+      water: '水是万物之源，代表包容与温柔。以柔克刚，用理解化解冲突。',
+      fire: '火焰代表热情与行动力。大胆去做那件犹豫了很久的事。',
+      light: '光芒驱散黑暗，象征希望与指引。心中有光，每一步都在靠近答案。',
+      shadow: '影是光的另一面，代表智慧与洞察。向内看，直觉与经验会指引你。',
+      flower: '花开自有时，象征美好与绽放。你值得被看见，美好正在发生。',
+      thunder: '雷电象征决断与突破。果断出击，犹豫才是最大的风险。',
+      time: '时间是最温柔也最强大的魔法。不要急，一切都有最好的安排。',
+    };
+
+    function getParam(name){
+      const u = new URL(location.href);
+      return u.searchParams.get(name);
+    }
+    const key = (getParam('card') || 'wind').toLowerCase();
+    const card = CARDS[key] || CARDS.wind;
+
+    const imgWrap = document.getElementById('sc-card-img');
+    imgWrap.style.borderColor = card.color + '80';
+    imgWrap.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
+    imgWrap.innerHTML = `<img src="${card.image}" alt="${card.spell}">`;
+    document.getElementById('sc-name').textContent = card.spell;
+    document.getElementById('sc-sub').textContent = card.sub;
+    document.getElementById('sc-meaning').textContent = MEANINGS[card.element] || '';
+
+    document.getElementById('btn-save').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-save');
+      if (!window.html2canvas) return;
+      btn.disabled = true;
+      const old = btn.textContent;
+      btn.textContent = '生成中…';
+      try{
+        const canvas = await window.html2canvas(document.getElementById('share-card'), {
+          backgroundColor: null,
+          scale: Math.min(2, window.devicePixelRatio || 1.5),
+          useCORS: true,
+        });
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `sakura-${card.element}-share.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        btn.textContent = '已保存到下载';
+        setTimeout(() => (btn.textContent = old), 1400);
+      }catch(e){
+        console.error(e);
+        btn.textContent = '失败，建议截图';
+        setTimeout(() => (btn.textContent = old), 1600);
+      }finally{
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

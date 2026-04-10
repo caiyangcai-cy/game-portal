@@ -833,6 +833,213 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .start-brand .wm-games{
   color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em;letter-spacing:0.06em;
 }
+
+/* ========================================
+   ✦ 魔法揭示结果页（对齐 mockup）
+   ======================================== */
+#sakura-result-view{
+  position:fixed;inset:0;z-index:200;
+  background:linear-gradient(180deg,#06061a 0%,#0c0a22 40%,#080818 100%);
+  display:flex;align-items:center;justify-content:center;
+  animation:srFadeIn 0.6s ease forwards;
+}
+@keyframes srFadeIn{from{opacity:0}to{opacity:1}}
+
+.sakura-result-inner{
+  width:100%;max-width:360px;
+  max-height:100vh;max-height:100dvh;
+  overflow-y:auto;
+  display:flex;flex-direction:column;align-items:center;
+  padding:28px 20px 24px;
+  -webkit-overflow-scrolling:touch;
+  position:relative;
+}
+.sr-header{text-align:center;margin-bottom:16px;animation:srSlideUp 0.6s ease 0.1s both}
+.sr-title{
+  font-size:16px;font-weight:300;color:var(--text-primary,#f0ebe3);
+  letter-spacing:5px;
+}
+.sr-card-area{
+  position:relative;width:150px;height:256px;
+  margin-bottom:14px;
+  animation:srSlideUp 0.6s ease 0.2s both;
+}
+.sr-card-glow{
+  position:absolute;inset:-28px;border-radius:50%;
+  animation:srGlowPulse 3s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes srGlowPulse{0%{opacity:0.5;transform:scale(0.95)}100%{opacity:1;transform:scale(1.06)}}
+.sr-magic-ring{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:210px;height:210px;border-radius:50%;
+  border:1px solid rgba(255,182,193,0.18);
+  animation:srRingSpin 20s linear infinite;
+  pointer-events:none;z-index:0;
+}
+.sr-magic-ring::before{
+  content:'';position:absolute;inset:12%;border-radius:50%;
+  border:1px dashed rgba(255,215,0,0.12);
+}
+@keyframes srRingSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.sr-card-frame{
+  position:relative;z-index:2;
+  width:150px;height:256px;border-radius:10px;overflow:hidden;
+  border:2px solid rgba(255,215,0,0.5);
+  box-shadow:0 0 18px rgba(255,215,0,0.15),0 10px 36px rgba(0,0,0,0.6);
+  background:#0f1123;
+}
+.sr-card-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.sr-card-name{
+  font-size:20px;font-weight:700;letter-spacing:5px;
+  color:var(--text-primary,#f0ebe3);
+  text-shadow:0 0 16px rgba(255,215,0,0.25);
+  margin-bottom:2px;
+  animation:srSlideUp 0.6s ease 0.35s both;
+}
+.sr-card-sub{
+  font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:3px;
+  margin-bottom:14px;
+  animation:srSlideUp 0.6s ease 0.4s both;
+}
+.sr-meaning{
+  width:100%;max-width:300px;
+  padding:14px 16px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  font-size:13px;color:rgba(255,255,255,0.55);
+  line-height:1.85;text-align:center;font-weight:300;
+  margin-bottom:18px;
+  animation:srSlideUp 0.6s ease 0.5s both;
+}
+.sr-actions{
+  display:flex;gap:10px;width:100%;max-width:300px;
+  margin-bottom:18px;
+  animation:srSlideUp 0.6s ease 0.6s both;
+}
+.sr-btn{
+  flex:1;padding:12px 0;border-radius:14px;border:none;
+  font-size:13px;font-weight:600;letter-spacing:1px;
+  cursor:pointer;transition:all 0.2s;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.sr-btn-save{
+  background:linear-gradient(135deg,#ff6fa7,#ff8a50);color:#fff;
+  box-shadow:0 4px 16px rgba(255,111,167,0.3);
+}
+.sr-btn-save:active{transform:scale(0.97);opacity:0.9}
+.sr-btn-retry{
+  background:transparent;color:rgba(255,255,255,0.6);
+  border:1px solid rgba(255,255,255,0.15);
+}
+.sr-btn-retry:active{transform:scale(0.97);background:rgba(255,255,255,0.05)}
+.sr-brand{
+  text-align:center;
+  font-family:'Outfit','PingFang SC',sans-serif;
+  font-size:11px;font-weight:700;
+  opacity:0.45;
+  display:flex;align-items:baseline;justify-content:center;gap:0.06em;
+  animation:srSlideUp 0.6s ease 0.7s both;
+}
+.sr-brand .wm-cyou{
+  background:linear-gradient(135deg,#e0bfb8,#b76e79);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.sr-brand .wm-games{color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em}
+.sr-brand .wm-site{color:rgba(168,168,173,0.38);font-weight:400;font-size:0.62em;margin-left:0.5em}
+.sr-credit{
+  font-size:9px;color:rgba(255,255,255,0.2);
+  letter-spacing:0.5px;text-align:center;
+  margin-top:6px;
+  animation:srSlideUp 0.6s ease 0.76s both;
+}
+@keyframes srSlideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:380px){
+  .sr-card-area{width:130px;height:221px}
+  .sr-card-frame{width:130px;height:221px}
+  .sr-magic-ring{width:180px;height:180px}
+  .sr-card-name{font-size:18px}
+  .sr-meaning{font-size:12px;padding:12px 14px}
+}
+
+/* 分享卡片（html2canvas 生成） */
+.sr-share-canvas{
+  position:absolute;
+  left:-99999px;top:0;
+  width:1px;height:1px;
+  overflow:hidden;
+  pointer-events:none;
+}
+.sr-share-card{
+  width:300px;
+  border-radius:20px;
+  overflow:hidden;
+  background:linear-gradient(180deg,#08061a 0%,#0f0b28 50%,#0a0818 100%);
+  box-shadow:0 12px 60px rgba(0,0,0,0.5);
+  border:1px solid rgba(255,255,255,0.06);
+  padding:28px 24px 20px;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;
+  color:#fff;
+}
+.sr-share-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:120px;
+  background:radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+  pointer-events:none;
+}
+.sr-share-card .sc-header{text-align:center;margin-bottom:20px;position:relative}
+.sr-share-card .sc-title{font-size:14px;font-weight:300;color:#f0ebe3;letter-spacing:5px}
+.sr-share-card .sc-sub{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px}
+.sr-share-card .sc-card-area{position:relative;margin-bottom:16px}
+.sr-share-card .sc-ring{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:200px;height:200px;border-radius:50%;
+  border:1px solid rgba(255,182,193,0.15);
+  pointer-events:none;
+}
+.sr-share-card .sc-ring::before{
+  content:'';position:absolute;inset:15%;
+  border-radius:50%;border:1px dashed rgba(255,215,0,0.1);
+}
+.sr-share-card .sc-card-img{
+  width:140px;height:238px;border-radius:10px;
+  border:2px solid rgba(255,215,0,0.5);
+  box-shadow:0 0 20px rgba(255,215,0,0.15),0 12px 40px rgba(0,0,0,0.6);
+  background:#0f1123;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.sr-share-card .sc-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.sr-share-card .sc-name{
+  font-size:20px;font-weight:700;letter-spacing:5px;
+  color:#f0ebe3;margin-bottom:2px;
+  text-shadow:0 0 16px rgba(255,215,0,0.25);
+}
+.sr-share-card .sc-name-sub{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:3px;margin-bottom:14px}
+.sr-share-card .sc-meaning{
+  font-size:11px;color:rgba(255,255,255,0.5);line-height:1.8;
+  text-align:center;font-weight:300;margin-bottom:18px;padding:0 4px;
+}
+.sr-share-card .sc-divider{
+  width:40px;height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);
+  margin-bottom:14px;
+}
+.sr-share-card .sc-cta{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:12px}
+.sr-share-card .sc-brand{
+  display:flex;align-items:baseline;gap:0.06em;
+  font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;
+  opacity:0.6;
+}
+.sr-share-card .sc-brand .wm-cyou{
+  background:linear-gradient(135deg,#e0bfb8,#b76e79);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.sr-share-card .sc-brand .wm-games{color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em}
+.sr-share-card .sc-brand .wm-site{color:rgba(168,168,173,0.4);font-weight:400;font-size:0.62em;margin-left:0.5em}
+.sr-share-card .sc-author{font-size:9px;color:rgba(255,255,255,0.2);margin-top:6px;letter-spacing:0.5px}
   </style>
 </head>
 <body>
@@ -1022,8 +1229,63 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     </div>
   </div>
 
+  <!-- ✦ 魔法揭示结果页（翻牌特效结束后展示）✦ -->
+  <div id="sakura-result-view" style="display:none">
+    <div class="sakura-result-inner" role="dialog" aria-modal="true" aria-label="魔法揭示结果">
+      <div class="sr-header">
+        <div class="sr-title">✦ 魔法揭示 ✦</div>
+      </div>
+
+      <div class="sr-card-area" id="sr-card-area">
+        <div class="sr-card-glow" id="sr-card-glow"></div>
+        <div class="sr-magic-ring"></div>
+        <div class="sr-card-frame" id="sr-card-frame"></div>
+      </div>
+
+      <div class="sr-card-name" id="sr-card-name">—</div>
+      <div class="sr-card-sub" id="sr-card-sub">—</div>
+      <div class="sr-meaning" id="sr-meaning">—</div>
+
+      <div class="sr-actions">
+        <button type="button" class="sr-btn sr-btn-save" id="sr-btn-save">📤 保存分享</button>
+        <button type="button" class="sr-btn sr-btn-retry" id="sr-btn-retry">🔮 继续翻牌</button>
+      </div>
+
+      <div class="sr-brand">
+        <span class="wm-cyou">CYou</span><span class="wm-games">Games</span>
+        <span class="wm-site">cyougames.site</span>
+      </div>
+      <div class="sr-credit">✦ @羊仔coding不停 出品 ✦</div>
+
+      <!-- 用于生成分享图的卡片（不显示在界面上） -->
+      <div class="sr-share-canvas" aria-hidden="true">
+        <div class="sr-share-card" id="sr-share-card">
+          <div class="sc-header">
+            <div class="sc-title">✦ 魔法揭示 ✦</div>
+            <div class="sc-sub">小樱魔法卡 · CARDCAPTOR SAKURA</div>
+          </div>
+          <div class="sc-card-area">
+            <div class="sc-ring"></div>
+            <div class="sc-card-img" id="sr-share-img"></div>
+          </div>
+          <div class="sc-name" id="sr-share-name">—</div>
+          <div class="sc-name-sub" id="sr-share-sub">—</div>
+          <div class="sc-meaning" id="sr-share-meaning">—</div>
+          <div class="sc-divider"></div>
+          <div class="sc-cta">你也来召唤你的命运之牌 →</div>
+          <div class="sc-brand">
+            <span class="wm-cyou">CYou</span><span class="wm-games">Games</span>
+            <span class="wm-site">cyougames.site</span>
+          </div>
+          <div class="sc-author">✦ @羊仔coding不停 出品 ✦</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="effects.js"></script>
   <script src="gestures-tarot.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="app-sakura-tarot.js"></script>
   <script type="module" src="bootstrap-sakura-tarot.js"></script>
 </body>

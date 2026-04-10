@@ -36,6 +36,18 @@ const SAKURA_CARDS = [
 ];
 const CARD_BACKS = ['小樱卡片/背面1.jpeg', '小樱卡片/背面2.jpeg'];
 const NUM_CARDS = 8;
+
+/** 每张卡牌的魔法寓意 */
+const CARD_MEANINGS = {
+  wind: '风的力量象征自由与变化。当风牌出现，意味着你正迎来一股清新的能量——放下执念，顺势而为，新的方向自然会显现。',
+  water: '水是万物之源，代表包容与温柔。水牌提醒你：以柔克刚，用理解化解冲突，你的温柔正是此刻最需要的力量。',
+  fire: '火焰代表热情与行动力。火牌降临时，你内心的力量正处于巅峰——大胆去做那件犹豫了很久的事，此刻的勇气就是你最强的魔法。',
+  light: '光芒驱散黑暗，象征希望与指引。光牌告诉你：即使前方暂时看不清路，只要心中有光，每一步都在靠近答案。',
+  shadow: '影是光的另一面，代表智慧与洞察。影牌出现意味着你需要向内看——那些隐藏的直觉和沉淀的经验，正是破局的关键。',
+  flower: '花开自有时，象征美好与绽放。花牌告诉你：你值得被看见。保持真诚地做自己，美好的事情正在悄悄发生。',
+  thunder: '雷电象征决断与突破。雷牌代表一个关键的转折点即将到来——果断出击，犹豫才是最大的风险。',
+  time: '时间是最温柔也最强大的魔法。时牌提醒你：不要急，一切都有最好的安排。你现在种下的每一颗种子，未来都会开花。',
+};
 const ST = { IDLE: 'idle', STACKED: 'stacked', SPREAD: 'spread' };
 
 const STATE = {
@@ -43,6 +55,7 @@ const STATE = {
   SUMMONED: 'summoned',
   FOCUSED: 'focused',
   HOLDING: 'holding',
+  RESULT: 'result',
 };
 
 /* ===== 星空 / 刻度 / 粒子 / 星尘（与原版一致）===== */
@@ -665,6 +678,7 @@ class SakuraTarotApp {
     this._lastIdlePalmHintAt = 0;
     this._summoning = false;
     this._spreading = false;
+    this._lastResultCard = null;
   }
 
   async boot() {
@@ -758,6 +772,13 @@ class SakuraTarotApp {
       cardRingContainer: document.getElementById('card-ring-container'),
       bgm: document.getElementById('bgm'),
       selectedCardWrap: document.querySelector('#card-selected-view .selected-card-wrapper'),
+      // 结果页
+      resultView: document.getElementById('sakura-result-view'),
+      srCardGlow: document.getElementById('sr-card-glow'),
+      srCardFrame: document.getElementById('sr-card-frame'),
+      srCardName: document.getElementById('sr-card-name'),
+      srCardSub: document.getElementById('sr-card-sub'),
+      srMeaning: document.getElementById('sr-meaning'),
       debugPanel: document.getElementById('debug-panel'),
       debugCanvas: document.getElementById('debug-canvas'),
       dbgGesture: document.getElementById('dbg-gesture'),
@@ -782,6 +803,14 @@ class SakuraTarotApp {
     });
     document.getElementById('btn-mirror')?.addEventListener('click', () => {
       this.gestureEngine.mirrored = !this.gestureEngine.mirrored;
+    });
+
+    // 结果页按钮
+    document.getElementById('sr-btn-retry')?.addEventListener('click', () => {
+      this._closeResultToContinue();
+    });
+    document.getElementById('sr-btn-save')?.addEventListener('click', async () => {
+      await this._saveShareImage();
     });
   }
 
@@ -972,11 +1001,11 @@ class SakuraTarotApp {
         break;
 
       case STATE.HOLDING:
-        if (gesture === GESTURE.OPEN_PALM) {
-          this._releaseCard();
-        } else if (gesture === GESTURE.FIST) {
-          this._recallToIdle();
-        }
+        // 翻牌后不响应手势，一定出结果页
+        break;
+
+      case STATE.RESULT:
+        // 结果页不响应手势
         break;
 
       default:
@@ -1148,8 +1177,13 @@ class SakuraTarotApp {
       this.spellEffect.play(card, 3000);
     }, 1250);
 
-    this._updateHint('🖐️ 张开手掌回到牌阵 · ✊ 收回全部');
-    this._updateBadge('');
+    // Phase 6 (4500ms): 特效结束后自动展示结果页
+    setTimeout(() => {
+      this._showResult(card);
+    }, 4500);
+
+    this._updateHint('');
+    this._updateBadge('魔法释放中');
   }
 
   /* 生成樱花花瓣 */
@@ -1237,6 +1271,148 @@ class SakuraTarotApp {
 
     this._updateHint('🖐️ 左右滑动 · ☝️ 食指选定 · ✊ 握拳收牌');
     this._updateBadge('感知牌阵');
+  }
+
+  /** 展示魔法揭示结果页 */
+  _showResult(card) {
+    this.state = STATE.RESULT;
+    this.spellEffect.stop();
+    this._lastResultCard = card;
+
+    // 清理翻牌视图
+    this.els.selectedView.classList.add('hidden');
+    this.els.selectedCardWrap?.classList.remove('card-revealed', 'seal-phase');
+    this.els.selectedFlipper.classList.remove('flipped', 'seal-breaking', 'flip-active');
+    ['flip-burst','flip-ring','flip-light-pillar','flip-halo-ring','seal-magic-circle'].forEach(id => {
+      document.getElementById(id)?.classList.remove('active');
+    });
+    const pc = document.getElementById('sakura-petals-container');
+    const sc = document.getElementById('magic-sparkles-container');
+    if (pc) pc.innerHTML = '';
+    if (sc) sc.innerHTML = '';
+
+    // 进入结果页时，暂时隐藏牌阵和提示
+    this.els.cardRingContainer.classList.add('ring-hidden');
+    document.getElementById('magic-circle-wrap')?.classList.remove('show');
+    this.els.gestureHint.style.opacity = '0';
+    this.els.gestureHint.style.pointerEvents = 'none';
+    this.els.stateBadge.style.opacity = '0';
+
+    // 填充结果页内容
+    if (this.els.srCardGlow) this.els.srCardGlow.style.background = `radial-gradient(ellipse, ${card.color}30 0%, transparent 65%)`;
+    if (this.els.srCardFrame) {
+      this.els.srCardFrame.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:8px;">`;
+      this.els.srCardFrame.style.borderColor = card.color + '80';
+      this.els.srCardFrame.style.boxShadow = `0 0 18px ${card.color}25, 0 10px 36px rgba(0,0,0,0.6)`;
+    }
+    if (this.els.srCardName) this.els.srCardName.textContent = card.spell;
+    if (this.els.srCardSub) this.els.srCardSub.textContent = card.spellSub;
+    if (this.els.srMeaning) this.els.srMeaning.textContent = CARD_MEANINGS[card.element] || '';
+
+    // 同步分享卡片内容（用于 html2canvas）
+    const shareImg = document.getElementById('sr-share-img');
+    if (shareImg) {
+      shareImg.style.borderColor = card.color + '80';
+      shareImg.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
+      shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}">`;
+    }
+    const sn = document.getElementById('sr-share-name');
+    const ss = document.getElementById('sr-share-sub');
+    const sm = document.getElementById('sr-share-meaning');
+    if (sn) sn.textContent = card.spell;
+    if (ss) ss.textContent = card.spellSub;
+    if (sm) sm.textContent = (CARD_MEANINGS[card.element] || '').replace(/。当.*?——/, '。').slice(0, 46);
+
+    // 显示结果页（用 !important 对抗 .hidden 的 !important）
+    const rv = document.getElementById('sakura-result-view');
+    if (rv) {
+      rv.style.setProperty('display', 'flex', 'important');
+      rv.style.setProperty('z-index', '9999', 'important');
+    }
+
+    this._updateHint('');
+    this._updateBadge('');
+  }
+
+  /** 从结果页返回继续翻牌（不强制结束） */
+  _closeResultToContinue() {
+    const rv = document.getElementById('sakura-result-view');
+    if (rv) {
+      rv.style.setProperty('display', 'none', 'important');
+      rv.style.removeProperty('z-index');
+    }
+
+    this._holdingCard = null;
+    this._focusedCard = null;
+    this.state = STATE.SUMMONED;
+    this._cardsSpread = true;
+
+    // 恢复 UI
+    this.els.cardRingContainer.classList.remove('ring-hidden', 'ring-dimmed');
+    document.getElementById('magic-circle-wrap')?.classList.add('show');
+    this.els.gestureHint.style.opacity = '1';
+    this.els.gestureHint.style.pointerEvents = '';
+    this.els.stateBadge.style.opacity = '';
+    const selMc = document.querySelector('.selected-magic-circle');
+    if (selMc) selMc.style.opacity = '';
+
+    // 继续在牌阵中
+    this.ring.state = ST.SPREAD;
+    this._updateHint('🖐️ 左右滑动 · ☝️ 食指选定 · ✌️ 翻牌 · ✊ 握拳收牌');
+    this._updateBadge('感知牌阵');
+  }
+
+  async _saveShareImage() {
+    const card = this._lastResultCard;
+    const btn = document.getElementById('sr-btn-save');
+    if (!card) return;
+    if (!window.html2canvas) {
+      if (btn) {
+        btn.textContent = '生成失败（缺少组件）';
+        setTimeout(() => (btn.textContent = '📤 保存分享'), 1600);
+      }
+      return;
+    }
+
+    const el = document.getElementById('sr-share-card');
+    if (!el) return;
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '生成中…';
+        btn.style.opacity = '0.75';
+      }
+
+      const canvas = await window.html2canvas(el, {
+        backgroundColor: null,
+        scale: Math.min(2, window.devicePixelRatio || 1.5),
+        useCORS: true,
+      });
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sakura-${card.element}-result.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      if (btn) {
+        btn.textContent = '已保存到下载';
+        setTimeout(() => (btn.textContent = '📤 保存分享'), 1400);
+      }
+    } catch (e) {
+      console.error(e);
+      if (btn) {
+        btn.textContent = '生成失败，建议截图';
+        setTimeout(() => (btn.textContent = '📤 保存分享'), 1800);
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '';
+      }
+    }
   }
 
   _recallToIdle() {

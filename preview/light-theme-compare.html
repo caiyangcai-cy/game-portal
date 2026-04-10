@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CYou Games 白底方案示意图</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;800&family=Outfit:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
+    background: #1a1a1e;
+    color: #fff;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+  
+  h1 { text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  h1 .acc { background: linear-gradient(135deg, #e0bfb8, #b76e79); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .page-sub { text-align: center; font-size: 13px; color: #888; margin-bottom: 48px; }
+  
+  .section-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #b76e79;
+    letter-spacing: 0.1em;
+    margin: 56px 0 24px;
+  }
+  
+  .row { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+  
+  .col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .label { font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 999px; letter-spacing: 0.03em; }
+  .label-dark { background: rgba(255,255,255,0.08); color: #aaa; border: 1px solid rgba(255,255,255,0.1); }
+  .label-light { background: rgba(183,110,121,0.12); color: #b76e79; border: 1px solid rgba(183,110,121,0.25); }
+  
+  /* ── Browser mockup ── */
+  .browser {
+    width: 520px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .browser-chrome {
+    height: 36px;
+    background: #2a2a2e;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .browser-url {
+    margin-left: 16px;
+    font-size: 11px;
+    color: #888;
+    background: rgba(255,255,255,0.06);
+    padding: 4px 14px;
+    border-radius: 6px;
+    flex: 1;
+    max-width: 240px;
+  }
+  .browser-body { overflow: hidden; }
+  
+  /* ── Phone mockup ── */
+  .phone {
+    width: 260px;
+    height: 540px;
+    border-radius: 32px;
+    border: 3px solid #333;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .phone.phone-dark { background: #09090b; }
+  .notch {
+    position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 72px; height: 20px; background: #000; border-radius: 10px; z-index: 50;
+  }
+  .phone-body { position: absolute; inset: 0; overflow: hidden; }
+  
+  /* ================================================================
+     DARK THEME (current) — 主页
+     ================================================================ */
+  .dark-home {
+    background: #09090b;
+    min-height: 100%;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  .dark-home .dh-header {
+    height: 52px;
+    background: rgba(9,9,11,0.88);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .dark-home .dh-logo { font-family: 'Outfit'; font-weight: 900; font-size: 14px; }
+  .dark-home .dh-logo .cy { background: linear-gradient(135deg, #e0bfb8, #b76e79); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .dark-home .dh-logo .gm { color: #888; font-size: 0.75em; margin-left: 2px; }
+  .dark-home .dh-nav { margin-left: auto; display: flex; gap: 10px; }
+  .dark-home .dh-nav a { font-size: 11px; color: #a8a8ad; padding: 4px 10px; border-radius: 10px; }
+  .dark-home .dh-nav a:hover, .dark-home .dh-nav .active { background: rgba(183,110,121,0.14); color: #e8c4c9; }
+  
+  .dark-home .dh-hero { padding: 28px 20px 12px; }
+  .dark-home .dh-hero h2 { font-size: 17px; font-weight: 800; color: #fbfbfd; letter-spacing: -0.01em; }
+  
+  .dark-home .dh-grid { padding: 10px 14px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .dark-home .dh-card {
+    background: #1a1a1e;
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  }
+  .dark-home .dh-card-cover {
+    height: 100px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center top;
+    position: relative;
+  }
+  .dark-home .dh-card-cover .badge {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 7px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,0.55); color: rgba(255,255,255,0.9);
+  }
+  .dark-home .dh-card-info { padding: 8px 4px 4px; }
+  .dark-home .dh-card-info h3 { font-size: 12px; font-weight: 800; color: #fbfbfd; margin-bottom: 3px; }
+  .dark-home .dh-card-info p { font-size: 9px; color: #a8a8ad; line-height: 1.5; margin-bottom: 8px; }
+  .dark-home .dh-card-btn {
+    display: block; text-align: center; padding: 8px; border-radius: 10px;
+    background: #5c2129; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 0.04em;
+  }
+  
+  /* ================================================================
+     LIGHT THEME (proposal) — 主页
+     ================================================================ */
+  .light-home {
+    background: #fbfbfd;
+    min-height: 100%;
+    font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    color: #1d1d1f;
+  }
+  .light-home .lh-header {
+    height: 52px;
+    background: rgba(251,251,253,0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .light-home .lh-logo { font-family: 'Outfit'; font-weight: 900; font-size: 14px; color: #1d1d1f; }
+  .light-home .lh-logo .cy { background: linear-gradient(135deg, #e0bfb8, #b76e79); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .light-home .lh-logo .gm { color: #86868b; font-size: 0.75em; margin-left: 2px; }
+  .light-home .lh-nav { margin-left: auto; display: flex; gap: 10px; }
+  .light-home .lh-nav a { font-size: 11px; color: #86868b; padding: 4px 10px; border-radius: 10px; font-weight: 500; }
+  
+  .light-home .lh-hero { padding: 28px 20px 12px; }
+  .light-home .lh-hero h2 { font-size: 17px; font-weight: 700; color: #1d1d1f; letter-spacing: -0.01em; }
+  
+  .light-home .lh-grid { padding: 10px 14px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .light-home .lh-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .light-home .lh-card-cover {
+    height: 100px;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center top;
+    position: relative;
+  }
+  .light-home .lh-card-cover .badge {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 7px; font-weight: 600; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 6px;
+    background: #f4ebeb; color: #b76e79;
+  }
+  .light-home .lh-card-info { padding: 8px 4px 4px; }
+  .light-home .lh-card-info h3 { font-size: 12px; font-weight: 700; color: #1d1d1f; margin-bottom: 3px; }
+  .light-home .lh-card-info p { font-size: 9px; color: #86868b; line-height: 1.5; margin-bottom: 8px; }
+  .light-home .lh-card-btn {
+    display: block; text-align: center; padding: 8px; border-radius: 12px;
+    background: #1d1d1f; color: #fff; font-size: 10px; font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  /* ================================================================
+     DARK THEME — 游戏页 (play.html)
+     ================================================================ */
+  .dark-play {
+    background: #09090b;
+    min-height: 100%;
+  }
+  .dark-play .dp-header {
+    height: 44px;
+    background: rgba(9,9,11,0.9);
+    display: flex; align-items: center; padding: 0 10px; gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .dark-play .dp-btn { font-size: 9px; font-weight: 700; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; }
+  .dark-play .dp-logo { flex: 1; text-align: center; font-family: 'Outfit'; font-size: 11px; font-weight: 900; }
+  .dark-play .dp-logo .cy { background: linear-gradient(135deg, #e0bfb8, #b76e79); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .dark-play .dp-logo .gm { color: #888; font-size: 0.75em; }
+  
+  .dark-play .dp-game {
+    background: #050506;
+    height: 260px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .dp-circle {
+    width: 120px; height: 120px; border: 2px solid rgba(212,160,23,0.4); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+    animation: spin 12s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .dark-play .dp-sheet {
+    background: linear-gradient(180deg, rgba(20,20,24,0.96), rgba(16,16,19,0.98));
+    border-radius: 16px 16px 0 0;
+    padding: 12px 14px 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .dark-play .dp-sheet-label { font-size: 8px; font-weight: 700; color: rgba(183,110,121,0.85); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .dark-play .dp-sheet-title { font-size: 13px; font-weight: 800; color: #fbfbfd; margin-bottom: 3px; }
+  .dark-play .dp-sheet-desc { font-size: 9px; color: #a8a8ad; line-height: 1.5; margin-bottom: 8px; }
+  .dark-play .dp-sheet-btn {
+    display: block; text-align: center; padding: 8px; border-radius: 10px; width: 100%;
+    background: linear-gradient(180deg, #6e2a35, #5c2129); color: #fff; font-size: 10px; font-weight: 800;
+  }
+  
+  /* ================================================================
+     LIGHT THEME — 游戏页 (play.html)
+     ================================================================ */
+  .light-play {
+    background: #fbfbfd;
+    min-height: 100%;
+    color: #1d1d1f;
+  }
+  .light-play .lp-header {
+    height: 44px;
+    background: rgba(251,251,253,0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    display: flex; align-items: center; padding: 0 10px; gap: 6px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .light-play .lp-btn { font-size: 9px; font-weight: 600; padding: 4px 8px; border-radius: 8px; background: rgba(0,0,0,0.04); color: #1d1d1f; }
+  .light-play .lp-logo { flex: 1; text-align: center; font-family: 'Outfit'; font-size: 11px; font-weight: 900; }
+  .light-play .lp-logo .cy { background: linear-gradient(135deg, #e0bfb8, #b76e79); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .light-play .lp-logo .gm { color: #86868b; font-size: 0.75em; }
+  
+  .light-play .lp-game {
+    background: #0a0812;
+    height: 260px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  
+  .light-play .lp-sheet {
+    background: #fff;
+    padding: 16px 16px 16px;
+    border-top: 1px solid rgba(0,0,0,0.04);
+  }
+  .light-play .lp-sheet-pre { font-size: 8px; font-weight: 700; color: #b76e79; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .light-play .lp-sheet-badge { font-size: 9px; font-weight: 600; color: #b76e79; margin-bottom: 2px; }
+  .light-play .lp-sheet-title { font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 3px; }
+  .light-play .lp-sheet-desc { font-size: 9.5px; color: #86868b; line-height: 1.5; margin-bottom: 10px; }
+  .light-play .lp-sheet-tips {
+    font-size: 9px; color: #86868b; line-height: 1.55;
+    padding: 8px 8px 8px 20px;
+    background: #f5f5f7; border-radius: 10px; border: 1px solid rgba(0,0,0,0.04);
+    margin-bottom: 10px;
+  }
+  .light-play .lp-sheet-tips li { margin-bottom: 3px; }
+  .light-play .lp-sheet-btn {
+    display: block; text-align: center; padding: 9px; border-radius: 12px; width: 100%;
+    background: #1d1d1f; color: #fff; font-size: 10px; font-weight: 600;
+  }
+
+  /* ── Note cards ── */
+  .notes {
+    max-width: 640px;
+    margin: 48px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .note {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 16px 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .note-title { font-size: 13px; font-weight: 700; color: #e0bfb8; margin-bottom: 4px; }
+  .note-body { font-size: 12px; color: #888; line-height: 1.65; }
+  .note-body em { color: #b76e79; font-style: normal; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1><span class="acc">CYou Games</span> 白底方案示意</h1>
+<p class="page-sub">参考 portfolio 苹果官网风白底 · 主页 + 游戏页对比</p>
+
+<!-- ============ 主页对比 ============ -->
+<div class="section-title">— 主页 index.html —</div>
+<div class="row">
+  <!-- 现在（暗色） -->
+  <div class="col">
+    <span class="label label-dark">现在 · 暗色</span>
+    <div class="phone phone-dark">
+      <div class="notch"></div>
+      <div class="phone-body">
+        <div class="dark-home">
+          <div class="dh-header">
+            <div class="dh-logo"><span class="cy">CYou</span><span class="gm"> Games</span></div>
+            <div class="dh-nav"><a class="active">游戏库</a><a>关于我</a></div>
+          </div>
+          <div class="dh-hero"><h2>点击畅玩，样样好玩</h2></div>
+          <div class="dh-grid">
+            <div class="dh-card">
+              <div class="dh-card-cover" style="background: linear-gradient(135deg, #1a0d18 30%, #2a1520); display:flex; align-items:center; justify-content:center;">
+                <div style="font-size:40px; opacity:0.6;">✦</div>
+                <span class="badge">H5</span>
+              </div>
+              <div class="dh-card-info">
+                <h3>小樱魔法卡</h3>
+                <p>手势即魔杖，隔空召唤魔法阵</p>
+                <div class="dh-card-btn">立即召唤</div>
+              </div>
+            </div>
+            <div class="dh-card">
+              <div class="dh-card-cover" style="background: linear-gradient(135deg, #1a1508, #2a2010); display:flex; align-items:center; justify-content:center;">
+                <div style="font-size:40px; opacity:0.6;">🔮</div>
+                <span class="badge">H5</span>
+              </div>
+              <div class="dh-card-info">
+                <h3>心灵塔罗牌</h3>
+                <p>隔空抽取你的命运之牌</p>
+                <div class="dh-card-btn">立即抽牌</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 白底方案 -->
+  <div class="col">
+    <span class="label label-light">白底 · Portfolio 风</span>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="phone-body">
+        <div class="light-home">
+          <div class="lh-header">
+            <div class="lh-logo"><span class="cy">CYou</span><span class="gm"> Games</span></div>
+            <div class="lh-nav"><a>游戏库</a><a>关于我</a></div>
+          </div>
+          <div class="lh-hero"><h2>点击畅玩，样样好玩</h2></div>
+          <div class="lh-grid">
+            <div class="lh-card">
+              <div class="lh-card-cover" style="background: linear-gradient(135deg, #1a0d18, #2a1520); display:flex; align-items:center; justify-content:center;">
+                <div style="font-size:40px; opacity:0.7;">✦</div>
+                <span class="badge">H5 游戏</span>
+              </div>
+              <div class="lh-card-info">
+                <h3>小樱魔法卡</h3>
+                <p>手势即魔杖，隔空召唤魔法阵</p>
+                <div class="lh-card-btn">立即召唤</div>
+              </div>
+            </div>
+            <div class="lh-card">
+              <div class="lh-card-cover" style="background: linear-gradient(135deg, #1a1508, #2a2010); display:flex; align-items:center; justify-content:center;">
+                <div style="font-size:40px; opacity:0.7;">🔮</div>
+                <span class="badge">H5 游戏</span>
+              </div>
+              <div class="lh-card-info">
+                <h3>心灵塔罗牌</h3>
+                <p>隔空抽取你的命运之牌</p>
+                <div class="lh-card-btn">立即抽牌</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 游戏页对比 ============ -->
+<div class="section-title">— 游戏页 play.html —</div>
+<div class="row">
+  <!-- 现在（暗色） -->
+  <div class="col">
+    <span class="label label-dark">现在 · 暗色</span>
+    <div class="phone phone-dark">
+      <div class="notch"></div>
+      <div class="phone-body">
+        <div class="dark-play">
+          <div class="dp-header">
+            <div class="dp-btn">← 返回</div>
+            <div class="dp-logo"><span class="cy">CYou</span> <span class="gm">Games</span></div>
+            <div class="dp-btn">简介</div>
+            <div class="dp-btn">全屏</div>
+          </div>
+          <div class="dp-game">
+            <div class="dp-circle">✦</div>
+          </div>
+          <div class="dp-sheet">
+            <div class="dp-sheet-label">关于本作</div>
+            <div class="dp-sheet-title">小樱魔法卡</div>
+            <div class="dp-sheet-desc">手势即魔杖，隔空召唤魔法阵</div>
+            <div class="dp-sheet-btn">全屏体验</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 白底方案 -->
+  <div class="col">
+    <span class="label label-light">白底 · Portfolio 风</span>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="phone-body">
+        <div class="light-play">
+          <div class="lp-header">
+            <div class="lp-btn">← 返回</div>
+            <div class="lp-logo"><span class="cy">CYou</span> <span class="gm">Games</span></div>
+            <div class="lp-btn">简介</div>
+            <div class="lp-btn">全屏</div>
+          </div>
+          <div class="lp-game">
+            <div class="dp-circle">✦</div>
+          </div>
+          <div class="lp-sheet">
+            <div class="lp-sheet-pre">关于本作</div>
+            <div class="lp-sheet-badge">H5 · 手势互动</div>
+            <div class="lp-sheet-title">小樱魔法卡</div>
+            <div class="lp-sheet-desc">手势即魔杖，隔空召唤魔法阵</div>
+            <ul class="lp-sheet-tips">
+              <li>需授权摄像头用于手势识别，画面全程本地处理</li>
+              <li>推荐电脑或平板，大屏体验更爽！</li>
+            </ul>
+            <div class="lp-sheet-btn">全屏体验</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 分析 ============ -->
+<div class="notes">
+  <div class="note">
+    <div class="note-title">🎮 游戏区始终是暗色</div>
+    <div class="note-body">两个游戏本身（小樱魔法阵、塔罗牌）都是 <em>深色/星空背景</em>，这个不会变。白底方案只影响 <em>门户页（index.html）</em> 和 <em>游戏页的导航栏 + 简介面板（play.html）</em>。</div>
+  </div>
+  <div class="note">
+    <div class="note-title">✨ 白底方案的优势</div>
+    <div class="note-body">
+      · 与 portfolio 站点 <em>风格统一</em>，品牌认知一致<br>
+      · 苹果官网式白底更 <em>高级、清爽</em>，女性向友好<br>
+      · 白色卡片 + 微影 + 玫瑰金标签，比深色卡片更 <em>精致</em><br>
+      · 毛玻璃导航 <em>质感更好</em>
+    </div>
+  </div>
+  <div class="note">
+    <div class="note-title">⚠️ 需要注意的点</div>
+    <div class="note-body">
+      · 游戏页的 <em>暗色游戏画面 ↔ 白色简介面板</em> 会有较强对比，需要加过渡处理<br>
+      · 游戏内（iframe）不变，只改门户外壳<br>
+      · 按钮风格从深红改为 <em>苹果风黑底按钮</em>（hover 变玫瑰金）
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
