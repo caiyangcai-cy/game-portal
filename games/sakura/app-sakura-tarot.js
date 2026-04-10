@@ -1528,16 +1528,15 @@ class SakuraTarotApp {
         });
       }));
 
-      // html2canvas + 20秒超时保护
+      // html2canvas + 8秒超时保护
       const h2cPromise = window.html2canvas(el, {
         backgroundColor: '#0a0818',
         scale: 2,
         useCORS: true,
-        allowTaint: true,
         logging: false,
       });
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('html2canvas 超时')), 20000)
+        setTimeout(() => reject(new Error('html2canvas 超时')), 8000)
       );
       const canvas = await Promise.race([h2cPromise, timeoutPromise]);
 
