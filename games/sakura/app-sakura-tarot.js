@@ -1431,9 +1431,6 @@ class SakuraTarotApp {
       rv.style.setProperty('z-index', '9999', 'important');
     }
 
-    const saveBtn = document.getElementById('sr-btn-save');
-    if (saveBtn && sakuraIsMobileShareDevice()) saveBtn.textContent = '保存到相册';
-
     this._updateHint('');
     this._updateBadge('');
   }
@@ -1496,7 +1493,7 @@ class SakuraTarotApp {
   async _saveShareImage() {
     const card = this._lastResultCard;
     const btn = document.getElementById('sr-btn-save');
-    const btnDefault = () => (sakuraIsMobileShareDevice() ? '保存到相册' : '保存分享');
+    const btnDefault = () => '保存分享';
 
     if (!card) return;
     if (

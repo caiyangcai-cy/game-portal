@@ -218,7 +218,7 @@
       <button type="button" class="btn btn-save" id="btn-save">保存分享</button>
       <a class="btn btn-play" id="btn-play" href="index.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center">重新占卜</a>
     </div>
-    <div class="hint">提示：手机浏览器点「保存到相册」后，用系统分享或长按大图即可存到相册。</div>
+    <div class="hint">提示：手机浏览器点「保存分享」后，可用系统分享或长按大图存到相册。</div>
   </div>
 
   <script src="share-capture.js?v=20260410b"></script>
@@ -320,13 +320,12 @@
       return false;
     }
     const saveBtnEl = document.getElementById('btn-save');
-    if (isMobileShareDevice()) saveBtnEl.textContent = '保存到相册';
 
     saveBtnEl.addEventListener('click', async () => {
       const btn = document.getElementById('btn-save');
       if (!window.sakuraExportShareToDataUrl) return;
       if (!window.html2canvas && !(window.htmlToImage && window.htmlToImage.toPng)) return;
-      const old = isMobileShareDevice() ? '保存到相册' : '保存分享';
+      const old = '保存分享';
       btn.disabled = true;
       btn.textContent = '生成中…';
       try {
