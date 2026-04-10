@@ -306,7 +306,7 @@
 
 @media (max-width: 840px) {
   .play-page {
-    --sheet-peek: 56px;
+    --sheet-peek: 40px;
     --sheet-radius: 20px;
   }
 
@@ -364,7 +364,7 @@
     height: var(--sheet-peek);
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
     padding: 0;
     border: none;
     background: transparent;
@@ -372,8 +372,8 @@
   }
 
   .play-sheet-grip {
-    width: 44px;
-    height: 5px;
+    width: 36px;
+    height: 4px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.18);
   }
@@ -381,7 +381,7 @@
   /* grip 旁的文字：收起时「游戏简介 ▴」，展开时「收起 ▾」 */
   .play-sheet-handle::after {
     content: "游戏简介 ▴";
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: rgba(183, 110, 121, 0.75);
     letter-spacing: 0.06em;
