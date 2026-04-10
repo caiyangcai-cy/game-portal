@@ -436,9 +436,13 @@
     font-size: 0.82rem;
   }
 
-  /* 顶栏的「简介」按钮仅在移动端展示 */
+  /* 顶栏的「简介」按钮仅在移动端展示，「全屏」按钮隐藏（手机不支持） */
   .play-info-toggle {
     display: inline-flex;
+  }
+
+  #play-fullscreen {
+    display: none;
   }
 }
 
