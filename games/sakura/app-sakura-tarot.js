@@ -1420,6 +1420,12 @@ class SakuraTarotApp {
       rv.style.setProperty('z-index', '9999', 'important');
     }
 
+    // 手机端按钮改成「长按保存」
+    const saveBtn = document.getElementById('sr-btn-save');
+    if (saveBtn && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      saveBtn.textContent = '长按保存';
+    }
+
     this._updateHint('');
     this._updateBadge('');
   }
@@ -1511,12 +1517,11 @@ class SakuraTarotApp {
       ctx.font = '300 12px "PingFang SC", sans-serif';
       ctx.fillText('小樱魔法卡 · CARDCAPTOR SAKURA', W / 2, 82);
 
-      // 加载卡牌图片
+      // 加载卡牌图片（同源，不设 crossOrigin）
       const img = new Image();
-      img.crossOrigin = 'anonymous';
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve) => {
         img.onload = resolve;
-        img.onerror = reject;
+        img.onerror = () => resolve(); // 即使失败也继续，画一个占位
         img.src = card.image;
         setTimeout(resolve, 5000); // 5秒超时
       });
@@ -1613,19 +1618,34 @@ class SakuraTarotApp {
       ctx.font = '700 13px Outfit, "PingFang SC", sans-serif';
       ctx.fillText('CYou Games  ·  cyougames.site', W / 2, H - 40);
 
-      // 导出
+      // 导出：移动端显示图片让用户长按保存，桌面端下载
       const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sakura-' + card.element + '-result.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-      if (btn) { btn.textContent = '已保存到下载'; setTimeout(() => (btn.textContent = '保存分享'), 1400); }
+      if (isMobile) {
+        // 移动端：创建全屏覆盖层，展示图片让用户长按保存
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+        overlay.innerHTML = '<p style="color:#fff;font-size:13px;margin-bottom:12px;opacity:0.7;">长按图片保存到相册</p>' +
+          '<img src="' + url + '" style="max-width:85vw;max-height:75vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">' +
+          '<button style="margin-top:16px;padding:10px 28px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;border-radius:20px;font-size:13px;cursor:pointer;">关闭</button>';
+        overlay.querySelector('button').onclick = function() { overlay.remove(); };
+        overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+        document.body.appendChild(overlay);
+        if (btn) { btn.textContent = '长按图片保存'; setTimeout(() => (btn.textContent = '长按保存'), 1400); }
+      } else {
+        // 桌面端：直接下载
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sakura-' + card.element + '-result.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        if (btn) { btn.textContent = '已保存到下载'; setTimeout(() => (btn.textContent = '保存分享'), 1400); }
+      }
     } catch (e) {
       console.error('[ShareImage]', e);
-      if (btn) { btn.textContent = '生成失败，建议截图'; setTimeout(() => (btn.textContent = '保存分享'), 1800); }
+      if (btn) { btn.textContent = '生成失败，建议截图'; setTimeout(() => (btn.textContent = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '长按保存' : '保存分享'), 2000); }
     } finally {
       if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     }
