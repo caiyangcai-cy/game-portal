@@ -1,9 +1,23 @@
 /**
- * 分享卡 DOM → PNG data URL（html-to-image 优先于 Safari，html2canvas 作备选）
+ * 分享卡 DOM → PNG data URL
+ * - WebKit（Safari / iOS / iOS Chrome）：优先 html-to-image，html2canvas 易长时间不返回
+ * - 其他浏览器：先 html2canvas，再 html-to-image
  * 依赖：sakuraShareCapture、window.html2canvas、window.htmlToImage
  */
 (function (global) {
   'use strict';
+
+  /** 1×1 透明 PNG，避免某张图加载失败导致 html-to-image 整段失败 */
+  var IMG_PLACEHOLDER =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+  /** WebKit（桌面 Safari / iOS / iOS Chrome）：html2canvas 常长时间不返回，优先 html-to-image */
+  function prefersHtmlToImageFirst() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod|CriOS/i.test(ua)) return true;
+    if (/Chrome|Chromium|Edg|Firefox/i.test(ua)) return false;
+    return /^((?!chrome|android).)*safari/i.test(ua);
+  }
 
   async function exportShareCardToDataUrl(el) {
     if (!el) throw new Error('缺少分享卡节点');
@@ -101,6 +115,8 @@
             allowTaint: false,
             logging: false,
             foreignObjectRendering: false,
+            scrollX: 0,
+            scrollY: 0,
             imageTimeout: 20000,
             removeContainer: false,
             onclone: function (clonedDoc) {
@@ -108,8 +124,9 @@
                 var st = clonedDoc.createElement('style');
                 st.setAttribute('data-sakura-capture', '1');
                 st.textContent =
-                  '#sr-share-card::before{display:none!important;content:none!important}' +
-                  '#sr-share-card{box-shadow:none!important}';
+                  '#sr-share-card::before,#share-card::before{display:none!important;content:none!important}' +
+                  '#sr-share-card,#share-card{box-shadow:none!important}' +
+                  '#sr-share-card *,#share-card *{animation:none!important;transition:none!important}';
                 (clonedDoc.head || clonedDoc.documentElement).appendChild(st);
               } catch (e) {
                 console.warn('[ShareImage] onclone', e);
@@ -131,13 +148,24 @@
       var hti = global.htmlToImage;
       if (!hti || typeof hti.toPng !== 'function') return Promise.reject(new Error('no html-to-image'));
       return runWithCaptureEnv(function () {
+        var bbox = el.getBoundingClientRect();
+        var outW = Math.max(1, Math.round(bbox.width || el.offsetWidth)) || 360;
+        var outH = Math.max(1, Math.round(bbox.height || el.offsetHeight)) || 640;
         return Promise.race([
           hti.toPng(el, {
             pixelRatio: scale,
+            width: outW,
+            height: outH,
             backgroundColor: '#0a0818',
             cacheBust: true,
             skipFonts: true,
             includeQueryParams: false,
+            imagePlaceholder: IMG_PLACEHOLDER,
+            fetchRequestInit: {
+              credentials: 'same-origin',
+              mode: 'cors',
+              cache: 'force-cache',
+            },
           }),
           new Promise(function (_, rej) {
             setTimeout(function () {
@@ -148,7 +176,9 @@
       });
     }
 
-    var order = [tryHtml2Canvas, tryHtmlToImage];
+    var order = prefersHtmlToImageFirst()
+      ? [tryHtmlToImage, tryHtml2Canvas]
+      : [tryHtml2Canvas, tryHtmlToImage];
     var lastErr;
     for (var i = 0; i < order.length; i++) {
       try {
