@@ -141,6 +141,8 @@
   }
   if (startFullBtn) {
     startFullBtn.addEventListener("click", function () {
+      // 收起简介面板，让游戏画面占满
+      setSheetOpen(false);
       enterFullscreen();
     });
   }
