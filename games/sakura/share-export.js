@@ -24,8 +24,8 @@
     var wrapper = el.parentElement;
     var cap = global.sakuraShareCapture;
 
-    // 线上 Safari：scale>1 易卡死；先保成功再谈清晰度
-    var scale = 1;
+    // 分享卡约 360×640，固定 2× 输出约 720×1280（避免 1× / 低采样发糊）
+    var exportScale = 2;
 
     function waitImages() {
       var imgs = el.querySelectorAll('img');
@@ -110,7 +110,7 @@
         return Promise.race([
           global.html2canvas(el, {
             backgroundColor: '#0a0818',
-            scale: scale,
+            scale: exportScale,
             useCORS: true,
             allowTaint: false,
             logging: false,
@@ -153,7 +153,7 @@
         var outH = Math.max(1, Math.round(bbox.height || el.offsetHeight)) || 640;
         return Promise.race([
           hti.toPng(el, {
-            pixelRatio: scale,
+            pixelRatio: exportScale,
             width: outW,
             height: outH,
             backgroundColor: '#0a0818',
@@ -191,5 +191,43 @@
     throw lastErr || new Error('分享图生成失败');
   }
 
+  /**
+   * 保存 PNG：优先系统「另存为」（File System Access API），否则 <a download>
+   * @returns {Promise<{ok:boolean, method:'picker'|'download'|'aborted'|'error', error?:* }>}
+   */
+  async function saveShareDataUrl(dataUrl, suggestedName) {
+    var name = suggestedName || 'sakura-share.png';
+    if (typeof global.showSaveFilePicker === 'function') {
+      try {
+        var blob = await (await fetch(dataUrl)).blob();
+        var handle = await global.showSaveFilePicker({
+          suggestedName: name,
+          types: [{ description: 'PNG 图片', accept: { 'image/png': ['.png'] } }],
+        });
+        var writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return { ok: true, method: 'picker' };
+      } catch (e) {
+        if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError')) {
+          return { ok: false, method: 'aborted', error: e };
+        }
+        console.warn('[ShareImage] 另存为不可用，回退为下载', e);
+      }
+    }
+    try {
+      var a = global.document.createElement('a');
+      a.href = dataUrl;
+      a.download = name;
+      global.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return { ok: true, method: 'download' };
+    } catch (e2) {
+      return { ok: false, method: 'error', error: e2 };
+    }
+  }
+
   global.sakuraExportShareToDataUrl = exportShareCardToDataUrl;
+  global.sakuraSaveShareDataUrl = saveShareDataUrl;
 })(typeof window !== 'undefined' ? window : globalThis);

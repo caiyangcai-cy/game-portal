@@ -1510,15 +1510,28 @@ class SakuraTarotApp {
       }
 
       const url = await window.sakuraExportShareToDataUrl(document.getElementById('sr-share-card'));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sakura-${card.element}-result.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
+      const fileName = `sakura-${card.element}-result.png`;
+      let save = { ok: true, method: 'download' };
+      if (typeof window.sakuraSaveShareDataUrl === 'function') {
+        save = await window.sakuraSaveShareDataUrl(url, fileName);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      if (!save.ok) {
+        if (btn) {
+          btn.textContent = save.method === 'aborted' ? '已取消' : '保存失败';
+          setTimeout(() => (btn.textContent = btnDefault()), save.method === 'aborted' ? 1200 : 1800);
+        }
+        return;
+      }
       if (btn) {
-        btn.textContent = '已保存到下载';
+        if (save.method === 'picker') btn.textContent = '已保存';
+        else btn.textContent = '已保存到下载';
         setTimeout(() => (btn.textContent = btnDefault()), 1400);
       }
     } catch (e) {

@@ -224,7 +224,7 @@
   <script src="share-capture.js?v=20260410b"></script>
   <script src="vendor/html2canvas.min.js?v=20260416"></script>
   <script src="vendor/html-to-image.min.js?v=20260416"></script>
-  <script src="share-export.js?v=20260410b"></script>
+  <script src="share-export.js?v=20260410c"></script>
   <script>
     const CARDS = {
       shield: { element:'shield', spell:'THE SHIELD', name:'盾', sub:'守护之盾', image:'小樱卡片/1774582442715.png', color:'#ffd700' },
@@ -321,13 +321,24 @@
       btn.textContent = '生成中…';
       try {
         const url = await window.sakuraExportShareToDataUrl(document.getElementById('share-card'));
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `sakura-${card.element}-share.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        btn.textContent = '已保存到下载';
+        const fileName = `sakura-${card.element}-share.png`;
+        let save = { ok: true, method: 'download' };
+        if (typeof window.sakuraSaveShareDataUrl === 'function') {
+          save = await window.sakuraSaveShareDataUrl(url, fileName);
+        } else {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+        if (!save.ok) {
+          btn.textContent = save.method === 'aborted' ? '已取消' : '保存失败';
+          setTimeout(() => (btn.textContent = old), save.method === 'aborted' ? 1200 : 1800);
+          return;
+        }
+        btn.textContent = save.method === 'picker' ? '已保存' : '已保存到下载';
         setTimeout(() => (btn.textContent = old), 1400);
       } catch (e) {
         console.error(e);
