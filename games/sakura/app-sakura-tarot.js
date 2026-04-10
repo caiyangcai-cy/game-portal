@@ -1483,89 +1483,151 @@ class SakuraTarotApp {
     const card = this._lastResultCard;
     const btn = document.getElementById('sr-btn-save');
     if (!card) return;
-    if (!window.html2canvas) {
-      if (btn) {
-        btn.textContent = '生成失败（缺少组件）';
-        setTimeout(() => (btn.textContent = '保存分享'), 1600);
-      }
-      return;
-    }
-
-    const el = document.getElementById('sr-share-card');
-    if (!el) return;
-    const wrapper = el.parentElement;
-
-    const restoreWrapper = () => {
-      if (wrapper) {
-        wrapper.style.cssText = '';
-      }
-    };
 
     try {
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = '生成中…';
-        btn.style.opacity = '0.75';
-      }
+      if (btn) { btn.disabled = true; btn.textContent = '生成中…'; btn.style.opacity = '0.75'; }
 
-      // 将分享卡片移到可渲染位置（不能用 opacity:0，html2canvas 会渲染透明）
-      if (wrapper) {
-        wrapper.style.cssText = 'position:fixed;left:0;top:0;z-index:-9999;pointer-events:none;';
-      }
+      // 用 Canvas API 手动绘制分享图（避免 html2canvas 中文路径问题）
+      const W = 600, H = 960;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
 
-      // 等一帧让浏览器渲染 + 开始加载图片
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      // 背景渐变
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#06061a');
+      bg.addColorStop(0.4, '#0c0a22');
+      bg.addColorStop(1, '#080818');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
 
-      // 确保所有图片加载完（检查 naturalWidth 排除加载失败）
-      const imgs = el.querySelectorAll('img');
-      await Promise.all(Array.from(imgs).map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise(resolve => {
-          const done = () => { img.onload = img.onerror = null; resolve(); };
-          img.onload = done;
-          img.onerror = done;
-          setTimeout(done, 6000);
-        });
-      }));
+      // 标题
+      ctx.fillStyle = '#f0ebe3';
+      ctx.font = '600 22px "PingFang SC", "Noto Sans SC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✦  魔 法 揭 示  ✦', W / 2, 56);
 
-      // html2canvas + 8秒超时保护
-      const h2cPromise = window.html2canvas(el, {
-        backgroundColor: '#0a0818',
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.font = '300 12px "PingFang SC", sans-serif';
+      ctx.fillText('小樱魔法卡 · CARDCAPTOR SAKURA', W / 2, 82);
+
+      // 加载卡牌图片
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = card.image;
+        setTimeout(resolve, 5000); // 5秒超时
       });
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('html2canvas 超时')), 8000)
-      );
-      const canvas = await Promise.race([h2cPromise, timeoutPromise]);
 
-      restoreWrapper();
+      // 绘制卡牌（居中）
+      const cardW = 220, cardH = 374;
+      const cardX = (W - cardW) / 2, cardY = 110;
 
+      // 光晕
+      const glow = ctx.createRadialGradient(W/2, cardY + cardH/2, 20, W/2, cardY + cardH/2, 200);
+      glow.addColorStop(0, card.color + '25');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, cardY - 50, W, cardH + 100);
+
+      // 卡牌圆角矩形裁剪
+      const r = 12;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cardX + r, cardY);
+      ctx.lineTo(cardX + cardW - r, cardY);
+      ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r);
+      ctx.lineTo(cardX + cardW, cardY + cardH - r);
+      ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH);
+      ctx.lineTo(cardX + r, cardY + cardH);
+      ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r);
+      ctx.lineTo(cardX, cardY + r);
+      ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, cardX, cardY, cardW, cardH);
+      ctx.restore();
+
+      // 卡牌边框
+      ctx.strokeStyle = card.color + '80';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cardX + r, cardY);
+      ctx.lineTo(cardX + cardW - r, cardY);
+      ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r);
+      ctx.lineTo(cardX + cardW, cardY + cardH - r);
+      ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH);
+      ctx.lineTo(cardX + r, cardY + cardH);
+      ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r);
+      ctx.lineTo(cardX, cardY + r);
+      ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
+      ctx.closePath();
+      ctx.stroke();
+
+      // 卡牌名
+      let nameY = cardY + cardH + 40;
+      ctx.fillStyle = '#f0ebe3';
+      ctx.font = '700 26px "PingFang SC", "Noto Sans SC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(card.spell, W / 2, nameY);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '300 13px "PingFang SC", sans-serif';
+      ctx.fillText(card.spellSub, W / 2, nameY + 24);
+
+      // 寓意文字（自动换行）
+      const meaning = CARD_MEANINGS[card.element] || '';
+      if (meaning) {
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.font = '300 14px "PingFang SC", "Noto Sans SC", sans-serif';
+        const maxW = W - 100;
+        const lines = [];
+        let line = '';
+        for (const ch of meaning) {
+          if (ctx.measureText(line + ch).width > maxW) { lines.push(line); line = ch; }
+          else { line += ch; }
+        }
+        if (line) lines.push(line);
+        let mY = nameY + 60;
+        for (const l of lines) { ctx.fillText(l, W / 2, mY); mY += 24; }
+      }
+
+      // 分隔线
+      const divY = H - 120;
+      ctx.strokeStyle = 'rgba(255,215,0,0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(W/2 - 30, divY);
+      ctx.lineTo(W/2 + 30, divY);
+      ctx.stroke();
+
+      // 引导语
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '300 12px "PingFang SC", sans-serif';
+      ctx.fillText('你也来召唤你的命运之牌 →', W / 2, divY + 24);
+
+      // 品牌
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.font = '700 13px Outfit, "PingFang SC", sans-serif';
+      ctx.fillText('CYou Games  ·  cyougames.site', W / 2, H - 40);
+
+      // 导出
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sakura-${card.element}-result.png`;
+      a.download = 'sakura-' + card.element + '-result.png';
       document.body.appendChild(a);
       a.click();
       a.remove();
 
-      if (btn) {
-        btn.textContent = '已保存到下载';
-        setTimeout(() => (btn.textContent = '保存分享'), 1400);
-      }
+      if (btn) { btn.textContent = '已保存到下载'; setTimeout(() => (btn.textContent = '保存分享'), 1400); }
     } catch (e) {
       console.error('[ShareImage]', e);
-      restoreWrapper();
-      if (btn) {
-        btn.textContent = '生成失败，建议截图';
-        setTimeout(() => (btn.textContent = '保存分享'), 1800);
-      }
+      if (btn) { btn.textContent = '生成失败，建议截图'; setTimeout(() => (btn.textContent = '保存分享'), 1800); }
     } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.style.opacity = '';
-      }
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     }
   }
 
