@@ -48,17 +48,21 @@
       margin-top:-6px;
     }
 
-    /* 分享卡片（与游戏内一致的结构与质感） */
+    /* 分享卡片：9:16 通用手机竖屏（360×640） */
     .share-card{
-      width:300px;
+      width:360px;
+      height:640px;
       border-radius:20px;
       overflow:hidden;
       background:linear-gradient(180deg,#08061a 0%,#0f0b28 50%,#0a0818 100%);
       box-shadow:0 12px 60px rgba(0,0,0,0.5);
       border:1px solid rgba(255,255,255,0.06);
-      padding:28px 24px 20px;
+      padding:42px 20px 16px;
       display:flex;flex-direction:column;align-items:center;
+      justify-content:flex-start;
+      gap:0;
       position:relative;
+      box-sizing:border-box;
     }
     .share-card::before{
       content:'';
@@ -66,13 +70,13 @@
       background:radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
       pointer-events:none;
     }
-    .sc-header{text-align:center;margin-bottom:20px;position:relative}
-    .sc-title{font-size:14px;font-weight:300;color:#f0ebe3;letter-spacing:5px}
-    .sc-sub{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px}
-    .sc-card-area{position:relative;margin-bottom:16px}
+    .sc-header{text-align:center;margin-bottom:24px;position:relative;flex-shrink:0}
+    .sc-title{font-size:24px;font-weight:300;color:#f0ebe3;letter-spacing:3px}
+    .sc-sub{font-size:12px;color:rgba(255,255,255,0.28);letter-spacing:3px;margin-top:6px}
+    .sc-card-area{position:relative;margin-bottom:28px;flex-shrink:0}
     .sc-ring{
       position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      width:200px;height:200px;border-radius:50%;
+      width:216px;height:216px;border-radius:50%;
       border:1px solid rgba(255,182,193,0.15);
       pointer-events:none;
     }
@@ -81,60 +85,103 @@
       border-radius:50%;border:1px dashed rgba(255,215,0,0.1);
     }
     .sc-card-img{
-      width:140px;height:238px;border-radius:10px;
+      width:185px;
+      aspect-ratio:140/238;
+      height:auto;
+      max-height:none;
+      border-radius:9px;
       border:2px solid rgba(255,215,0,0.5);
-      box-shadow:0 0 20px rgba(255,215,0,0.15),0 12px 40px rgba(0,0,0,0.6);
+      box-shadow:0 0 16px rgba(255,215,0,0.12),0 8px 28px rgba(0,0,0,0.55);
       background:#0f1123;
       overflow:hidden;
       display:flex;align-items:center;justify-content:center;
+      box-sizing:border-box;
     }
-    .sc-card-img img{width:100%;height:100%;object-fit:cover;display:block}
-    .sc-name{
-      font-size:20px;font-weight:700;letter-spacing:5px;
-      color:#f0ebe3;margin-bottom:2px;
-      text-shadow:0 0 16px rgba(255,215,0,0.25);
+    .sc-card-img img{width:100%;height:100%;object-fit:contain;display:block}
+    .sc-name-row{display:none!important}
+    .sc-persona{display:none!important}
+    .sc-quote{
+      width:100%;
+      text-align:center;
+      font-size:15px;
+      font-weight:900;
+      line-height:1.35;
+      letter-spacing:0.02em;
+      color:rgba(255,223,120,0.98);
+      text-shadow:0 0 22px rgba(255,215,0,0.4),0 2px 0 rgba(0,0,0,0.35);
+      margin-bottom:14px;
+      padding:0 6px;
+      box-sizing:border-box;
+      flex-shrink:0;
+      white-space:nowrap;
     }
-    .sc-name-sub{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:3px;margin-bottom:14px}
-    .sc-meaning{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.8;text-align:center;font-weight:300;margin-bottom:18px;padding:0 4px}
-    .sc-divider{width:40px;height:1px;background:linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);margin-bottom:14px}
-    .sc-cta{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:12px}
-    .sc-brand{
-      display:flex;align-items:baseline;gap:0.06em;
-      font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;
-      opacity:0.6;
+    .sc-destiny-card{
+      width:100%;
+      height:auto;
+      flex:1 1 auto;
+      padding:0 10px;
+      border-radius:0;
+      background:none;
+      border:none;
+      box-sizing:border-box;
+      overflow:visible;
+      display:flex;
+      align-items:flex-start;
     }
-    .wm-cyou{
-      background:linear-gradient(135deg,#e0bfb8,#b76e79);
-      -webkit-background-clip:text;background-clip:text;color:transparent;
+    .sc-destiny-label{display:none}
+    .sc-destiny-body{
+      font-size:13.5px;
+      line-height:1.85;
+      color:rgba(255,255,255,0.55);
+      font-weight:400;
+      text-align:left;
     }
+    .sc-footer-block{width:100%;flex-shrink:0;text-align:center;padding-top:12px}
+    .sc-divider{width:40px;height:1px;background:linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);margin:0 auto 6px}
+    .sc-cta{font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-bottom:6px}
+    .sc-brand{display:none!important}
+    .wm-cyou{color:rgba(224,191,184,0.95)}
     .wm-games{color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em}
     .wm-site{color:rgba(168,168,173,0.4);font-weight:400;font-size:0.62em;margin-left:0.5em}
-    .sc-author{font-size:9px;color:rgba(255,255,255,0.2);margin-top:6px;letter-spacing:0.5px}
+    .sc-author{
+      font-size:9px;
+      color:rgba(255,255,255,0.22);
+      margin-top:7px;
+      letter-spacing:0.4px;
+      line-height:1.25;
+      text-align:center;
+    }
 
     .actions{
-      width:300px;
+      width:360px;
       display:flex;
       gap:10px;
     }
     .btn{
       flex:1;
       padding:12px 0;
-      border-radius:14px;
+      border-radius:40px;
       border:none;
       font-size:13px;
       font-weight:600;
-      letter-spacing:1px;
+      letter-spacing:2px;
       cursor:pointer;
       font-family:inherit;
       -webkit-tap-highlight-color:transparent;
-      transition:transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+      transition:all 0.3s;
     }
     .btn:active{transform:scale(0.98);opacity:0.92}
-    .btn-save{background:linear-gradient(135deg,#ff6fa7,#ff8a50);color:#fff;box-shadow:0 4px 16px rgba(255,111,167,0.3)}
-    .btn-play{background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15)}
+    .btn-save{
+      background:rgba(20,15,5,0.6);
+      color:#FFD700;
+      border:1px solid rgba(255,215,0,0.5);
+      box-shadow:0 0 16px rgba(255,215,0,0.12), inset 0 0 8px rgba(255,215,0,0.08);
+    }
+    .btn-save:active{background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.8)}
+    .btn-play{background:transparent;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.12)}
 
     .hint{
-      width:300px;
+      width:360px;
       text-align:center;
       font-size:11px;
       color:rgba(255,255,255,0.3);
@@ -158,62 +205,120 @@
         <div class="sc-ring"></div>
         <div class="sc-card-img" id="sc-card-img"></div>
       </div>
-      <div class="sc-name" id="sc-name">—</div>
-      <div class="sc-name-sub" id="sc-sub">—</div>
-      <div class="sc-meaning" id="sc-meaning">—</div>
-      <div class="sc-divider"></div>
-      <div class="sc-cta">你也来召唤你的命运之牌 →</div>
-      <div class="sc-brand">
-        <span class="wm-cyou">CYou</span><span class="wm-games">Games</span>
-        <span class="wm-site">cyougames.site</span>
+      <div class="sc-name-row">
+        <div class="sc-name-en" id="sc-name-en"></div>
+        <div class="sc-name-cn" id="sc-name-cn"></div>
       </div>
-      <div class="sc-author">✦ @羊仔coding不停 出品 ✦</div>
+      <div class="sc-persona" id="sc-persona">我抽到的命运之牌</div>
+      <div class="sc-quote" id="sc-quote">—</div>
+      <div class="sc-destiny-card">
+        <div class="sc-destiny-label">命运解读</div>
+        <div class="sc-destiny-body" id="sc-destiny-body"></div>
+      </div>
+      <div class="sc-footer-block">
+        <div class="sc-divider"></div>
+        <div class="sc-cta">你也来召唤你的命运之牌 →</div>
+        <div class="sc-brand">
+          <span class="wm-cyou">CYou</span><span class="wm-games">Games</span>
+        </div>
+        <div class="sc-author" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;letter-spacing:0.4px">https://cyougames.site</div>
+      </div>
     </div>
 
     <div class="actions">
-      <button type="button" class="btn btn-save" id="btn-save">📤 保存分享图</button>
-      <a class="btn btn-play" id="btn-play" href="index.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center">🔮 去占卜</a>
+      <button type="button" class="btn btn-save" id="btn-save">保存分享</button>
+      <a class="btn btn-play" id="btn-play" href="index.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center">重新占卜</a>
     </div>
     <div class="hint">提示：如果你在 iOS 微信里下载失败，可用“截图”保存。</div>
   </div>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script defer src="vendor/html2canvas.min.js"></script>
   <script>
     const CARDS = {
-      wind: { element:'wind', spell:'WINDY', sub:'风之精灵', image:'小樱卡片/1774582442715.png', color:'#4fc3f7' },
-      water:{ element:'water',spell:'WATERY',sub:'水之精灵', image:'小樱卡片/1774582448138.png', color:'#29b6f6' },
-      fire: { element:'fire', spell:'FIERY', sub:'火之精灵', image:'小樱卡片/1774582452433.png', color:'#ff7043' },
-      light:{ element:'light',spell:'LIGHT',sub:'光之精灵', image:'小樱卡片/1774582457953.png', color:'#fdd835' },
-      shadow:{element:'shadow',spell:'SHADOW',sub:'影之精灵', image:'小樱卡片/1774582462348.png', color:'#7c4dff' },
-      flower:{element:'flower',spell:'FLOWER',sub:'花之精灵', image:'小樱卡片/1774582466893.png', color:'#f48fb1' },
-      thunder:{element:'thunder',spell:'THUNDER',sub:'雷之精灵', image:'小樱卡片/1774582472949.png', color:'#ffca28' },
-      time:{ element:'time', spell:'TIME', sub:'时之精灵', image:'小樱卡片/1774582477793.png', color:'#ce93d8' },
+      shield: { element:'shield', spell:'THE SHIELD', name:'盾', sub:'守护之盾', image:'小樱卡片/1774582442715.png', color:'#ffd700' },
+      power: { element:'power', spell:'THE POWER', name:'力', sub:'力量之源', image:'小樱卡片/1774582448138.png', color:'#ff6b9d' },
+      loop: { element:'loop', spell:'THE LOOP', name:'轮', sub:'循环之轮', image:'小樱卡片/1774582452433.png', color:'#ff8a50' },
+      mirror1: { element:'mirror1', spell:'THE MIRROR', name:'镜', sub:'镜·壹', image:'小樱卡片/1774582457953.png', color:'#7c4dff' },
+      mirror2: { element:'mirror2', spell:'THE MIRROR', name:'镜', sub:'镜·贰', image:'小樱卡片/1774582462348.png', color:'#6f6cff' },
+      big: { element:'big', spell:'THE BIG', name:'大', sub:'放大之力', image:'小樱卡片/1774582466893.png', color:'#f48fb1' },
+      change: { element:'change', spell:'THE CHANGE', name:'替', sub:'变化之机', image:'小樱卡片/1774582472949.png', color:'#ffca28' },
+      firey: { element:'firey', spell:'THE FIREY', name:'火', sub:'烈焰之灵', image:'小樱卡片/1774582477793.png', color:'#ff7043' },
+      voice: { element:'voice', spell:'THE VOICE', name:'声', sub:'言灵之声', image:'小樱卡片/1774582486777.png', color:'#ce93d8' },
+      lock: { element:'lock', spell:'THE LOCK', name:'锁', sub:'封印之锁', image:'小樱卡片/1774582491394.png', color:'#80deea' },
+      cloud: { element:'cloud', spell:'THE CLOUD', name:'云', sub:'云雾之幕', image:'小樱卡片/1774582495411.png', color:'#29b6f6' },
+      rain: { element:'rain', spell:'THE RAIN', name:'雨', sub:'雨落之息', image:'小樱卡片/1774582504273.png', color:'#4fc3f7' },
+      watery: { element:'watery', spell:'THE WATERY', name:'水', sub:'水之精灵', image:'小樱卡片/1774582508431.png', color:'#29b6f6' },
+      jump: { element:'jump', spell:'THE JUMP', name:'跳', sub:'跃动之翼', image:'小樱卡片/1774582512090.png', color:'#ffd700' },
+      silent: { element:'silent', spell:'THE SILENT', name:'静', sub:'静默之域', image:'小樱卡片/1774582515925.png', color:'#b388ff' },
+      time: { element:'time', spell:'THE TIME', name:'时', sub:'时之精灵', image:'小樱卡片/1774582526216.png', color:'#ce93d8' },
+      return: { element:'return', spell:'THE RETURN', name:'戻', sub:'归还之刻', image:'小樱卡片/1774582530351.png', color:'#80deea' },
+      erase: { element:'erase', spell:'THE ERASE', name:'消', sub:'抹消之印', image:'小樱卡片/1774582534383.png', color:'#ff6b9d' },
     };
+    const QUOTES = {
+      shield: '守住该守的，放下该放的。',
+      power: '真正的力量，是相信自己能做到。',
+      loop: '循环不是困局，是更上一层楼的阶梯。',
+      mirror1: '最好的伪装，是不再需要伪装。',
+      mirror2: '你眼中的自己，远不如别人眼中的你闪耀。',
+      big: '放大梦想，世界才会跟着变大。',
+      change: '换位思考，是最被低估的超能力。',
+      firey: '心中有火，眼中便有光。',
+      voice: '你的声音值得被世界听见。',
+      lock: '每一把锁，都在等那把对的钥匙。',
+      cloud: '拨开云雾，自有晴天。',
+      rain: '每一场雨，都在浇灌未来的花。',
+      watery: '不争不抢，水到自然渠成。',
+      jump: '每一次起跳，都是对平庸的告别。',
+      silent: '安静下来，才能听到内心的声音。',
+      time: '时间从不辜负，每一步都算数。',
+      return: '回头看一眼，然后大步向前。',
+      erase: '失去是另一种形式的获得。',
+      light: '你不必追光，你就是光。',
+      shadow: '每一道影子，都在证明光的存在。',
+      snow: '大雪覆盖一切，也藏着崭新的开始。',
+      flower: '你值得一场毫无理由的盛放。',
+    };
+
     const MEANINGS = {
-      wind: '风的力量象征自由与变化。放下执念，顺势而为，新的方向自然会显现。',
-      water: '水是万物之源，代表包容与温柔。以柔克刚，用理解化解冲突。',
-      fire: '火焰代表热情与行动力。大胆去做那件犹豫了很久的事。',
-      light: '光芒驱散黑暗，象征希望与指引。心中有光，每一步都在靠近答案。',
-      shadow: '影是光的另一面，代表智慧与洞察。向内看，直觉与经验会指引你。',
-      flower: '花开自有时，象征美好与绽放。你值得被看见，美好正在发生。',
-      thunder: '雷电象征决断与突破。果断出击，犹豫才是最大的风险。',
-      time: '时间是最温柔也最强大的魔法。不要急，一切都有最好的安排。',
+      shield: '这张牌出现时，说明你正需要自我保护。守好边界没有错，但也别忘了让温暖进来。',
+      power: '愿望正在靠近你。你比自己以为的更有力量——但接受帮助不是软弱，而是更大的力量。',
+      loop: '最近是不是觉得生活在原地打转？别急——每一圈你都在变得更成熟。螺旋也是上升。',
+      mirror1: '不要害怕被看穿。那些真正懂你的人，爱的就是真实的你——不完美才最动人。',
+      mirror2: '试着站在他人的镜中看看自己——你在别人眼中，比你想象的好得多。给自己多些认可吧。',
+      big: '是时候把格局打开了。别被眼前的小框框限住——你的舞台远比你看到的更广阔。',
+      change: '换个角度，世界就不一样了。困扰你的事，站到对面去看，也许一下就通了。',
+      firey: '你的内心正涌动着惊人的能量——去做那件一直不敢做的事吧！信念会帮你突破难关。',
+      voice: '有些话，不要再憋着了。说出来，才能被听到，才能被珍惜。',
+      lock: '也许你正觉得被什么困住了。但打开它的钥匙一直在你手中，只是你还没想起来用。',
+      cloud: '眼前的迷雾只是暂时的。没有永远的阴天——风一吹，答案就在云开之处。',
+      rain: '淋过雨的人，更懂得珍惜晴天。你现在经历的一切，终会变成最珍贵的养分。撑住。',
+      watery: '你拥有打开他人心扉的温柔力量。不必硬碰硬——以柔克刚，你会找到最聪明的那条路。',
+      jump: '恭喜，你正处于最佳状态！现在就是最好的起跳点——纵身一跃，你会飞得比想象中更高。',
+      silent: '给自己一段安静的时间吧。这不是逃避，而是沉淀——外界喧嚣褪去，内心的答案自然会浮现。',
+      time: '日子看似在原地踏步？别怕。每天看似重复的经历，都在为未来的你积蓄力量。磨练即成长。',
+      return: '过去的经历塑造了现在的你。回头看一眼是为了更好地理解自己——然后转身，大步向前。',
+      erase: '有些东西消失了，不必慌张。腾出空间，才装得下更好的。命运在说：稍等一下，好运马上就来。',
+      light: '别再向外寻找答案了。光一直在你心里——你本身就是光源，只是有时忘了点亮自己。',
+      shadow: '有影子恰恰说明身旁有光。那些令人不安的未知并不可怕——鼓起勇气正视，它们反而会变成你的力量。',
+      snow: '一切纷扰终会落定。现在的寒冷只是暂时的——雪融之后，便是崭新的起点。',
+      flower: '恭喜！这是最好的征兆之一——好事正在靠近，张开双手，迎接属于你的盛放吧！🌸',
     };
 
     function getParam(name){
       const u = new URL(location.href);
       return u.searchParams.get(name);
     }
-    const key = (getParam('card') || 'wind').toLowerCase();
-    const card = CARDS[key] || CARDS.wind;
+    const key = (getParam('card') || 'shield').toLowerCase();
+    const card = CARDS[key] || CARDS.shield;
 
     const imgWrap = document.getElementById('sc-card-img');
-    imgWrap.style.borderColor = card.color + '80';
+    imgWrap.style.borderColor = 'rgba(255,215,0,0.55)';
     imgWrap.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
-    imgWrap.innerHTML = `<img src="${card.image}" alt="${card.spell}">`;
-    document.getElementById('sc-name').textContent = card.spell;
-    document.getElementById('sc-sub').textContent = card.sub;
-    document.getElementById('sc-meaning').textContent = MEANINGS[card.element] || '';
+    imgWrap.innerHTML = `<img src="${card.image}" alt="" style="width:100%;height:100%;object-fit:contain;display:block">`;
+    const destinyText = MEANINGS[card.element] || '';
+    const q = QUOTES[card.element] || '';
+    document.getElementById('sc-quote').textContent = q ? `「${q}」` : '';
+    document.getElementById('sc-destiny-body').textContent = destinyText || '';
 
     document.getElementById('btn-save').addEventListener('click', async () => {
       const btn = document.getElementById('btn-save');
@@ -223,9 +328,10 @@
       btn.textContent = '生成中…';
       try{
         const canvas = await window.html2canvas(document.getElementById('share-card'), {
-          backgroundColor: null,
-          scale: Math.min(2, window.devicePixelRatio || 1.5),
+          backgroundColor: '#0a0818',
+          scale: Math.min(2, window.devicePixelRatio || 2),
           useCORS: true,
+          logging: false,
         });
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');

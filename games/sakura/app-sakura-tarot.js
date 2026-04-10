@@ -24,30 +24,85 @@ window.addEventListener('message', function (ev) {
   }
 });
 
+// 注意：这里的卡池严格以「小樱卡片/」文件夹内真实存在的卡面为准，
+// 避免出现“卡面是 SHIELD 但文案/标题是 WINDY”的错配。
 const SAKURA_CARDS = [
-  { id: 'wind', name: '风', nameEn: 'WINDY', image: '小樱卡片/1774582442715.png', color: '#4fc3f7', element: 'wind', spell: 'WINDY', spellSub: '风之精灵' },
-  { id: 'water', name: '水', nameEn: 'WATERY', image: '小樱卡片/1774582448138.png', color: '#29b6f6', element: 'water', spell: 'WATERY', spellSub: '水之精灵' },
-  { id: 'fire', name: '火', nameEn: 'FIERY', image: '小樱卡片/1774582452433.png', color: '#ff7043', element: 'fire', spell: 'FIERY', spellSub: '火之精灵' },
-  { id: 'light', name: '光', nameEn: 'LIGHT', image: '小樱卡片/1774582457953.png', color: '#fdd835', element: 'light', spell: 'LIGHT', spellSub: '光之精灵' },
-  { id: 'shadow', name: '影', nameEn: 'SHADOW', image: '小樱卡片/1774582462348.png', color: '#7c4dff', element: 'shadow', spell: 'SHADOW', spellSub: '影之精灵' },
-  { id: 'flower', name: '花', nameEn: 'FLOWER', image: '小樱卡片/1774582466893.png', color: '#f48fb1', element: 'flower', spell: 'FLOWER', spellSub: '花之精灵' },
-  { id: 'thunder', name: '雷', nameEn: 'THUNDER', image: '小樱卡片/1774582472949.png', color: '#ffca28', element: 'thunder', spell: 'THUNDER', spellSub: '雷之精灵' },
-  { id: 'time', name: '时', nameEn: 'TIME', image: '小樱卡片/1774582477793.png', color: '#ce93d8', element: 'time', spell: 'TIME', spellSub: '时之精灵' },
+  { id: 'shield', name: '盾', nameEn: 'THE SHIELD', image: '小樱卡片/1774582442715.png', color: '#ffd700', element: 'shield', spell: 'THE SHIELD', spellSub: '守护之盾' },
+  { id: 'power', name: '力', nameEn: 'THE POWER', image: '小樱卡片/1774582448138.png', color: '#ff6b9d', element: 'power', spell: 'THE POWER', spellSub: '力量之源' },
+  { id: 'loop', name: '轮', nameEn: 'THE LOOP', image: '小樱卡片/1774582452433.png', color: '#ff8a50', element: 'loop', spell: 'THE LOOP', spellSub: '循环之轮' },
+  { id: 'mirror-a', name: '镜', nameEn: 'THE MIRROR', image: '小樱卡片/1774582457953.png', color: '#7c4dff', element: 'mirror1', spell: 'THE MIRROR', spellSub: '镜·壹' },
+  { id: 'mirror-b', name: '镜', nameEn: 'THE MIRROR', image: '小樱卡片/1774582462348.png', color: '#6f6cff', element: 'mirror2', spell: 'THE MIRROR', spellSub: '镜·贰' },
+  { id: 'big', name: '大', nameEn: 'THE BIG', image: '小樱卡片/1774582466893.png', color: '#f48fb1', element: 'big', spell: 'THE BIG', spellSub: '放大之力' },
+  { id: 'change', name: '替', nameEn: 'THE CHANGE', image: '小樱卡片/1774582472949.png', color: '#ffca28', element: 'change', spell: 'THE CHANGE', spellSub: '变化之机' },
+  { id: 'firey', name: '火', nameEn: 'THE FIREY', image: '小樱卡片/1774582477793.png', color: '#ff7043', element: 'firey', spell: 'THE FIREY', spellSub: '烈焰之灵' },
+  { id: 'voice', name: '声', nameEn: 'THE VOICE', image: '小樱卡片/1774582486777.png', color: '#ce93d8', element: 'voice', spell: 'THE VOICE', spellSub: '言灵之声' },
+  { id: 'lock', name: '锁', nameEn: 'THE LOCK', image: '小樱卡片/1774582491394.png', color: '#80deea', element: 'lock', spell: 'THE LOCK', spellSub: '封印之锁' },
+  { id: 'cloud', name: '云', nameEn: 'THE CLOUD', image: '小樱卡片/1774582495411.png', color: '#29b6f6', element: 'cloud', spell: 'THE CLOUD', spellSub: '云雾之幕' },
+  { id: 'rain', name: '雨', nameEn: 'THE RAIN', image: '小樱卡片/1774582504273.png', color: '#4fc3f7', element: 'rain', spell: 'THE RAIN', spellSub: '雨落之息' },
+  { id: 'watery', name: '水', nameEn: 'THE WATERY', image: '小樱卡片/1774582508431.png', color: '#29b6f6', element: 'watery', spell: 'THE WATERY', spellSub: '水之精灵' },
+  { id: 'jump', name: '跳', nameEn: 'THE JUMP', image: '小樱卡片/1774582512090.png', color: '#ffd700', element: 'jump', spell: 'THE JUMP', spellSub: '跃动之翼' },
+  { id: 'silent', name: '静', nameEn: 'THE SILENT', image: '小樱卡片/1774582515925.png', color: '#b388ff', element: 'silent', spell: 'THE SILENT', spellSub: '静默之域' },
+  { id: 'time', name: '时', nameEn: 'THE TIME', image: '小樱卡片/1774582526216.png', color: '#ce93d8', element: 'time', spell: 'THE TIME', spellSub: '时之精灵' },
+  { id: 'return', name: '戻', nameEn: 'THE RETURN', image: '小樱卡片/1774582530351.png', color: '#80deea', element: 'return', spell: 'THE RETURN', spellSub: '归还之刻' },
+  { id: 'erase', name: '消', nameEn: 'THE ERASE', image: '小樱卡片/1774582534383.png', color: '#ff6b9d', element: 'erase', spell: 'THE ERASE', spellSub: '抹消之印' },
 ];
 const CARD_BACKS = ['小樱卡片/背面1.jpeg', '小樱卡片/背面2.jpeg'];
+// 牌阵展示数量保持适中（不一次铺满18张），但抽取卡池仍来自 SAKURA_CARDS 全量
 const NUM_CARDS = 8;
 
-/** 每张卡牌的魔法寓意 */
+/** 命运解读（仅保留"解读"一句） */
 const CARD_MEANINGS = {
-  wind: '风的力量象征自由与变化。当风牌出现，意味着你正迎来一股清新的能量——放下执念，顺势而为，新的方向自然会显现。',
-  water: '水是万物之源，代表包容与温柔。水牌提醒你：以柔克刚，用理解化解冲突，你的温柔正是此刻最需要的力量。',
-  fire: '火焰代表热情与行动力。火牌降临时，你内心的力量正处于巅峰——大胆去做那件犹豫了很久的事，此刻的勇气就是你最强的魔法。',
-  light: '光芒驱散黑暗，象征希望与指引。光牌告诉你：即使前方暂时看不清路，只要心中有光，每一步都在靠近答案。',
-  shadow: '影是光的另一面，代表智慧与洞察。影牌出现意味着你需要向内看——那些隐藏的直觉和沉淀的经验，正是破局的关键。',
-  flower: '花开自有时，象征美好与绽放。花牌告诉你：你值得被看见。保持真诚地做自己，美好的事情正在悄悄发生。',
-  thunder: '雷电象征决断与突破。雷牌代表一个关键的转折点即将到来——果断出击，犹豫才是最大的风险。',
-  time: '时间是最温柔也最强大的魔法。时牌提醒你：不要急，一切都有最好的安排。你现在种下的每一颗种子，未来都会开花。',
+  shield: '这张牌出现时，说明你正需要自我保护。守好边界没有错，但也别忘了让温暖进来。',
+  power: '愿望正在靠近你。你比自己以为的更有力量——但接受帮助不是软弱，而是更大的力量。',
+  loop: '最近是不是觉得生活在原地打转？别急——每一圈你都在变得更成熟。螺旋也是上升。',
+  mirror1: '不要害怕被看穿。那些真正懂你的人，爱的就是真实的你——不完美才最动人。',
+  mirror2: '试着站在他人的镜中看看自己——你在别人眼中，比你想象的好得多。给自己多些认可吧。',
+  big: '是时候把格局打开了。别被眼前的小框框限住——你的舞台远比你看到的更广阔。',
+  change: '换个角度，世界就不一样了。困扰你的事，站到对面去看，也许一下就通了。',
+  firey: '你的内心正涌动着惊人的能量——去做那件一直不敢做的事吧！信念会帮你突破难关。',
+  voice: '有些话，不要再憋着了。说出来，才能被听到，才能被珍惜。',
+  lock: '也许你正觉得被什么困住了。但打开它的钥匙一直在你手中，只是你还没想起来用。',
+  cloud: '眼前的迷雾只是暂时的。没有永远的阴天——风一吹，答案就在云开之处。',
+  rain: '淋过雨的人，更懂得珍惜晴天。你现在经历的一切，终会变成最珍贵的养分。撑住。',
+  watery: '你拥有打开他人心扉的温柔力量。不必硬碰硬——以柔克刚，你会找到最聪明的那条路。',
+  jump: '恭喜，你正处于最佳状态！现在就是最好的起跳点——纵身一跃，你会飞得比想象中更高。',
+  silent: '给自己一段安静的时间吧。这不是逃避，而是沉淀——外界喧嚣褪去，内心的答案自然会浮现。',
+  time: '日子看似在原地踏步？别怕。每天看似重复的经历，都在为未来的你积蓄力量。磨练即成长。',
+  return: '过去的经历塑造了现在的你。回头看一眼是为了更好地理解自己——然后转身，大步向前。',
+  erase: '有些东西消失了，不必慌张。腾出空间，才装得下更好的。命运在说：稍等一下，好运马上就来。',
+  light: '别再向外寻找答案了。光一直在你心里——你本身就是光源，只是有时忘了点亮自己。',
+  shadow: '有影子恰恰说明身旁有光。那些令人不安的未知并不可怕——鼓起勇气正视，它们反而会变成你的力量。',
+  snow: '一切纷扰终会落定。现在的寒冷只是暂时的——雪融之后，便是崭新的起点。',
+  flower: '恭喜！这是最好的征兆之一——好事正在靠近，张开双手，迎接属于你的盛放吧！🌸',
 };
+
+/** 一句金句 */
+const CARD_QUOTES = {
+  shield: '守住该守的，放下该放的。',
+  power: '真正的力量，是相信自己能做到。',
+  loop: '循环不是困局，是更上一层楼的阶梯。',
+  mirror1: '最好的伪装，是不再需要伪装。',
+  mirror2: '你眼中的自己，远不如别人眼中的你闪耀。',
+  big: '放大梦想，世界才会跟着变大。',
+  change: '换位思考，是最被低估的超能力。',
+  firey: '心中有火，眼中便有光。',
+  voice: '你的声音值得被世界听见。',
+  lock: '每一把锁，都在等那把对的钥匙。',
+  cloud: '拨开云雾，自有晴天。',
+  rain: '每一场雨，都在浇灌未来的花。',
+  watery: '不争不抢，水到自然渠成。',
+  jump: '每一次起跳，都是对平庸的告别。',
+  silent: '安静下来，才能听到内心的声音。',
+  time: '时间从不辜负，每一步都算数。',
+  return: '回头看一眼，然后大步向前。',
+  erase: '失去是另一种形式的获得。',
+  light: '你不必追光，你就是光。',
+  shadow: '每一道影子，都在证明光的存在。',
+  snow: '大雪覆盖一切，也藏着崭新的开始。',
+  flower: '你值得一场毫无理由的盛放。',
+};
+
+// 属性标签功能已移除
 const ST = { IDLE: 'idle', STACKED: 'stacked', SPREAD: 'spread' };
 
 const STATE = {
@@ -306,6 +361,8 @@ class SakuraTarotRing {
     this._friction = 0.92;
     this._frontCardPending = false;
     this._palmIdleTimer = null;
+    this.deck = [];
+    this._resizeBound = false;
     this._setupTouch();
   }
 
@@ -325,7 +382,21 @@ class SakuraTarotRing {
     return `translate3d(${x}px, ${y}px, ${zLift}px) rotateZ(${baseAngle}deg) rotateX(-90deg)`;
   }
 
-  create() {
+  _shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  _buildDeck() {
+    // 从全量卡池随机取 NUM_CARDS 张（不重复），用于本轮牌阵展示与抽取
+    this.deck = this._shuffle(SAKURA_CARDS.slice()).slice(0, NUM_CARDS);
+  }
+
+  create(force = false) {
+    if (!this.deck.length || force) this._buildDeck();
     this.ring.innerHTML = '';
     this.cards = [];
     const radius = this._getRadius();
@@ -337,7 +408,7 @@ class SakuraTarotRing {
       el.dataset.index = i;
       el.style.transform = this._cardTransform(angle, radius);
       el.dataset.angle = angle;
-      const c = SAKURA_CARDS[i];
+      const c = this.deck[i];
       el.innerHTML = `
         <div class="card-star-halo" aria-hidden="true"></div>
         <div class="card-inner">
@@ -350,7 +421,10 @@ class SakuraTarotRing {
     }
     this._dragMoved = false;
     this._layoutCards();
-    addEventListener('resize', () => this._onResize());
+    if (!this._resizeBound) {
+      this._resizeBound = true;
+      addEventListener('resize', () => this._onResize());
+    }
   }
 
   _onResize() {
@@ -390,7 +464,7 @@ class SakuraTarotRing {
   }
 
   getCurrentCard() {
-    return SAKURA_CARDS[this.getCurrentIndex()];
+    return this.deck[this.getCurrentIndex()];
   }
 
   _updateFrontCard() {
@@ -776,9 +850,11 @@ class SakuraTarotApp {
       resultView: document.getElementById('sakura-result-view'),
       srCardGlow: document.getElementById('sr-card-glow'),
       srCardFrame: document.getElementById('sr-card-frame'),
-      srCardName: document.getElementById('sr-card-name'),
-      srCardSub: document.getElementById('sr-card-sub'),
-      srMeaning: document.getElementById('sr-meaning'),
+      srSpellEn: document.getElementById('sr-spell-en'),
+      srSpellCn: document.getElementById('sr-spell-cn'),
+      srTags: document.getElementById('sr-tags'),
+      srQuote: document.getElementById('sr-quote'),
+      srDestinyBody: document.getElementById('sr-destiny-body'),
       debugPanel: document.getElementById('debug-panel'),
       debugCanvas: document.getElementById('debug-canvas'),
       dbgGesture: document.getElementById('dbg-gesture'),
@@ -807,7 +883,7 @@ class SakuraTarotApp {
 
     // 结果页按钮
     document.getElementById('sr-btn-retry')?.addEventListener('click', () => {
-      this._closeResultToContinue();
+      this._restartDivination();
     });
     document.getElementById('sr-btn-save')?.addEventListener('click', async () => {
       await this._saveShareImage();
@@ -1019,10 +1095,8 @@ class SakuraTarotApp {
     this.state = STATE.SUMMONED;
     this._cardsSpread = false;
     setDecorPaused(true);
-    // 只在首次或recall后才重建DOM，否则复用已有卡牌
-    if (!this.ring.cards.length) {
-      this.ring.create();
-    }
+    // 每次召唤都刷新牌阵（保证从全量卡池随机抽到对应卡牌）
+    this.ring.create(true);
     this.ring.summon();
     this.particles.emitSummon('#d4af37', 15);
     if (this.sd) this.sd.fullBurst(10);
@@ -1301,27 +1375,43 @@ class SakuraTarotApp {
     // 填充结果页内容
     if (this.els.srCardGlow) this.els.srCardGlow.style.background = `radial-gradient(ellipse, ${card.color}30 0%, transparent 65%)`;
     if (this.els.srCardFrame) {
-      this.els.srCardFrame.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:8px;">`;
-      this.els.srCardFrame.style.borderColor = card.color + '80';
+      if (card.image) {
+        this.els.srCardFrame.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+      } else {
+        this.els.srCardFrame.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
+      }
+      this.els.srCardFrame.style.borderColor = 'rgba(255,215,0,0.55)';
       this.els.srCardFrame.style.boxShadow = `0 0 18px ${card.color}25, 0 10px 36px rgba(0,0,0,0.6)`;
     }
-    if (this.els.srCardName) this.els.srCardName.textContent = card.spell;
-    if (this.els.srCardSub) this.els.srCardSub.textContent = card.spellSub;
-    if (this.els.srMeaning) this.els.srMeaning.textContent = CARD_MEANINGS[card.element] || '';
+    if (this.els.srSpellEn) this.els.srSpellEn.textContent = card.spell || '';
+    if (this.els.srSpellCn) {
+      const cn = (card.element === 'mirror1' || card.element === 'mirror2') ? card.spellSub : card.name;
+      this.els.srSpellCn.textContent = cn || '';
+    }
 
-    // 同步分享卡片内容（用于 html2canvas）
+    if (this.els.srTags) this.els.srTags.innerHTML = '';
+
+    const destinyText = CARD_MEANINGS[card.element] || '';
+    const rawQuote = CARD_QUOTES[card.element] || '';
+
+    if (this.els.srQuote) this.els.srQuote.textContent = rawQuote ? `「${rawQuote}」` : '';
+    if (this.els.srDestinyBody) this.els.srDestinyBody.textContent = destinyText || '';
+
+    // 同步分享卡片内容
     const shareImg = document.getElementById('sr-share-img');
     if (shareImg) {
-      shareImg.style.borderColor = card.color + '80';
+      shareImg.style.borderColor = 'rgba(255,215,0,0.55)';
       shareImg.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
-      shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}">`;
+      if (card.image) {
+        shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
+      } else {
+        shareImg.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
+      }
     }
-    const sn = document.getElementById('sr-share-name');
-    const ss = document.getElementById('sr-share-sub');
-    const sm = document.getElementById('sr-share-meaning');
-    if (sn) sn.textContent = card.spell;
-    if (ss) ss.textContent = card.spellSub;
-    if (sm) sm.textContent = (CARD_MEANINGS[card.element] || '').replace(/。当.*?——/, '。').slice(0, 46);
+    const sq = document.getElementById('sr-share-quote');
+    const sdb = document.getElementById('sr-share-destiny');
+    if (sq) sq.textContent = rawQuote ? `「${rawQuote}」` : '';
+    if (sdb) sdb.textContent = destinyText || '';
 
     // 显示结果页（用 !important 对抗 .hidden 的 !important）
     const rv = document.getElementById('sakura-result-view');
@@ -1362,6 +1452,33 @@ class SakuraTarotApp {
     this._updateBadge('感知牌阵');
   }
 
+  _restartDivination() {
+    const rv = document.getElementById('sakura-result-view');
+    if (rv) {
+      rv.style.setProperty('display', 'none', 'important');
+      rv.style.removeProperty('z-index');
+    }
+    this._lastResultCard = null;
+    this._holdingCard = null;
+    this._focusedCard = null;
+    this._cardsSpread = false;
+    this.state = STATE.IDLE;
+
+    this.els.cardRingContainer.classList.remove('ring-hidden', 'ring-dimmed');
+    this.els.gestureHint.style.opacity = '1';
+    this.els.gestureHint.style.pointerEvents = '';
+    this.els.stateBadge.style.opacity = '';
+    document.getElementById('magic-circle-wrap')?.classList.remove('show');
+    this.ring.clearFocused();
+    this.ring.clearPalmTracking();
+    this.ring.state = ST.IDLE;
+    this.ring.spinAngle = 0;
+    if (this.ring.ring) this.ring.ring.style.transform = 'rotateZ(0deg)';
+
+    this._updateHint('✊ 握拳召唤 → 🖐️ 张手展开牌阵');
+    this._updateBadge('待命');
+  }
+
   async _saveShareImage() {
     const card = this._lastResultCard;
     const btn = document.getElementById('sr-btn-save');
@@ -1369,7 +1486,7 @@ class SakuraTarotApp {
     if (!window.html2canvas) {
       if (btn) {
         btn.textContent = '生成失败（缺少组件）';
-        setTimeout(() => (btn.textContent = '📤 保存分享'), 1600);
+        setTimeout(() => (btn.textContent = '保存分享'), 1600);
       }
       return;
     }
@@ -1385,9 +1502,12 @@ class SakuraTarotApp {
       }
 
       const canvas = await window.html2canvas(el, {
-        backgroundColor: null,
-        scale: Math.min(2, window.devicePixelRatio || 1.5),
+        backgroundColor: '#0a0818',
+        scale: 2,
         useCORS: true,
+        logging: false,
+        imageTimeout: 5000,
+        removeContainer: true,
       });
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
@@ -1399,13 +1519,13 @@ class SakuraTarotApp {
 
       if (btn) {
         btn.textContent = '已保存到下载';
-        setTimeout(() => (btn.textContent = '📤 保存分享'), 1400);
+        setTimeout(() => (btn.textContent = '保存分享'), 1400);
       }
     } catch (e) {
       console.error(e);
       if (btn) {
         btn.textContent = '生成失败，建议截图';
-        setTimeout(() => (btn.textContent = '📤 保存分享'), 1800);
+        setTimeout(() => (btn.textContent = '保存分享'), 1800);
       }
     } finally {
       if (btn) {

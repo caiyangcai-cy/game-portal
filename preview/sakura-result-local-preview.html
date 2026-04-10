@@ -146,8 +146,12 @@
     sel.addEventListener('change', () => setCard(sel.value));
 
     btn.addEventListener('click', () => {
-      // 让 iframe 内自己生成并下载，避免跨域限制
-      frame.contentWindow?.document?.getElementById('btn-save')?.click();
+      // file:// 下 iframe 往往会被拦，这里尽量直接跳转到分享页让用户点保存
+      try {
+        frame.contentWindow?.document?.getElementById('btn-save')?.click();
+      } catch (_) {
+        window.open(`../games/sakura/result.html?card=${encodeURIComponent(sel.value)}`, '_blank');
+      }
     });
   </script>
 </body>
