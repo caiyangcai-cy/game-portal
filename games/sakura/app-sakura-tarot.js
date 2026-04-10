@@ -1376,7 +1376,7 @@ class SakuraTarotApp {
     if (this.els.srCardGlow) this.els.srCardGlow.style.background = `radial-gradient(ellipse, ${card.color}30 0%, transparent 65%)`;
     if (this.els.srCardFrame) {
       if (card.image) {
-        this.els.srCardFrame.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+        this.els.srCardFrame.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block;">`;
       } else {
         this.els.srCardFrame.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
       }
@@ -1403,7 +1403,7 @@ class SakuraTarotApp {
       shareImg.style.borderColor = 'rgba(255,215,0,0.55)';
       shareImg.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
       if (card.image) {
-        shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:cover;display:block">`;
+        shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
       } else {
         shareImg.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
       }
