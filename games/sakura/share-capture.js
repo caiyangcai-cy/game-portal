@@ -9,7 +9,20 @@
 
   var FETCH_MS = 6000;
 
+  /** iOS / Chrome(iOS) / 桌面 Safari：blob→img 在截图管线里易触发 WebKitBlobResource / 卡死 */
+  function skipBlobForCapture() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua)) return true;
+    if (/CriOS/i.test(ua)) return true;
+    if (/Chrome|Chromium|Edg|Firefox/i.test(ua)) return false;
+    return /^((?!chrome|android).)*safari/i.test(ua);
+  }
+
   async function prepareImagesForHtml2Canvas(containerEl) {
+    if (skipBlobForCapture()) {
+      return function () {};
+    }
+
     var imgs = Array.from(containerEl.querySelectorAll('img'));
     var cleanups = [];
 

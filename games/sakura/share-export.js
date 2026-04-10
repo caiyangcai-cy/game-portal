@@ -10,10 +10,8 @@
     var wrapper = el.parentElement;
     var cap = global.sakuraShareCapture;
 
-    var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    // 始终先 html2canvas（同源 blob 图 + 无跨域读 CSS 问题）；html-to-image 作备选
-    // 注意：html-to-image 会尝试内联远程 CSS，Safari 对 fonts.googleapis.com 等会 SecurityError
-    var scale = isIOS ? 1 : Math.min(2, global.devicePixelRatio || 2);
+    // 线上 Safari：scale>1 易卡死；先保成功再谈清晰度
+    var scale = 1;
 
     function waitImages() {
       var imgs = el.querySelectorAll('img');
@@ -30,7 +28,16 @@
             setTimeout(done, 5000);
           });
         })
-      );
+      ).then(function () {
+        return Promise.all(
+          Array.prototype.map.call(imgs, function (img) {
+            if (img.decode && typeof img.decode === 'function') {
+              return img.decode().catch(function () {});
+            }
+            return Promise.resolve();
+          })
+        );
+      });
     }
 
     function runWithCaptureEnv(captureFn) {
@@ -94,11 +101,25 @@
             allowTaint: false,
             logging: false,
             foreignObjectRendering: false,
+            imageTimeout: 20000,
+            removeContainer: false,
+            onclone: function (clonedDoc) {
+              try {
+                var st = clonedDoc.createElement('style');
+                st.setAttribute('data-sakura-capture', '1');
+                st.textContent =
+                  '#sr-share-card::before{display:none!important;content:none!important}' +
+                  '#sr-share-card{box-shadow:none!important}';
+                (clonedDoc.head || clonedDoc.documentElement).appendChild(st);
+              } catch (e) {
+                console.warn('[ShareImage] onclone', e);
+              }
+            },
           }),
           new Promise(function (_, rej) {
             setTimeout(function () {
               rej(new Error('html2canvas 超时'));
-            }, 28000);
+            }, 55000);
           }),
         ]).then(function (canvas) {
           return canvas.toDataURL('image/png');
@@ -116,11 +137,12 @@
             backgroundColor: '#0a0818',
             cacheBust: true,
             skipFonts: true,
+            includeQueryParams: false,
           }),
           new Promise(function (_, rej) {
             setTimeout(function () {
               rej(new Error('html-to-image 超时'));
-            }, 32000);
+            }, 55000);
           }),
         ]);
       });

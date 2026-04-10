@@ -1,14 +1,30 @@
 /* Bootstrap: 加载 MediaPipe 后启动小樱塔罗手势版 */
-const CDN_SOURCES = [
-  './mediapipe/vision_bundle.mjs',
-  'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs',
-  'https://unpkg.com/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs',
-];
-const WASM_SOURCES = [
-  './mediapipe/wasm',
-  'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm',
-  'https://unpkg.com/@mediapipe/tasks-vision@0.10.18/wasm',
-];
+const _h = typeof location !== 'undefined' ? location.hostname : '';
+const _useRemoteFirst =
+  /edgeone\.|cyougames\.site/i.test(_h) ||
+  (typeof location !== 'undefined' && location.protocol === 'https:');
+const CDN_SOURCES = _useRemoteFirst
+  ? [
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs',
+      'https://unpkg.com/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs',
+      './mediapipe/vision_bundle.mjs',
+    ]
+  : [
+      './mediapipe/vision_bundle.mjs',
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs',
+      'https://unpkg.com/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs',
+    ];
+const WASM_SOURCES = _useRemoteFirst
+  ? [
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm',
+      'https://unpkg.com/@mediapipe/tasks-vision@0.10.18/wasm',
+      './mediapipe/wasm',
+    ]
+  : [
+      './mediapipe/wasm',
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm',
+      'https://unpkg.com/@mediapipe/tasks-vision@0.10.18/wasm',
+    ];
 
 const statusEl = document.getElementById('loading-status');
 const startBtn = document.getElementById('btn-start');
