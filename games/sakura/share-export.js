@@ -27,30 +27,62 @@
     // 分享卡约 360×640，固定 2× 输出约 720×1280（避免 1× / 低采样发糊）
     var exportScale = 2;
 
+    /**
+     * Safari/WebKit：常出现 complete 已 true 但 naturalWidth 仍为 0、或已 load 未 decode 就截图 → 首存无卡图
+     * 必须等到 naturalWidth>0，再 decode，并轮询覆盖「缓存秒 complete」的竞态
+     */
+    function waitForImageReady(img) {
+      return new Promise(function (resolve) {
+        var settled = false;
+        var pollTimer = null;
+        var deadlineTimer = null;
+        function finish() {
+          if (settled) return;
+          settled = true;
+          if (pollTimer != null) {
+            try {
+              clearInterval(pollTimer);
+            } catch (_) {}
+            pollTimer = null;
+          }
+          if (deadlineTimer != null) {
+            try {
+              clearTimeout(deadlineTimer);
+            } catch (_) {}
+            deadlineTimer = null;
+          }
+          img.onload = img.onerror = null;
+          if (img.decode && typeof img.decode === 'function') {
+            img.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+        }
+        function maybeReady() {
+          if (img.naturalWidth > 0 && img.naturalHeight > 0) finish();
+        }
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          return finish();
+        }
+        img.onload = maybeReady;
+        img.onerror = finish;
+        maybeReady();
+        pollTimer = setInterval(maybeReady, 40);
+        deadlineTimer = setTimeout(finish, 15000);
+      });
+    }
+
     function waitImages() {
       var imgs = el.querySelectorAll('img');
-      return Promise.all(
-        Array.prototype.map.call(imgs, function (img) {
-          return new Promise(function (resolve) {
-            if (img.complete && img.naturalWidth > 0) return resolve();
-            var done = function () {
-              img.onload = img.onerror = null;
-              resolve();
-            };
-            img.onload = done;
-            img.onerror = done;
-            setTimeout(done, 5000);
+      if (!imgs.length) return Promise.resolve();
+      return Promise.all(Array.prototype.map.call(imgs, waitForImageReady)).then(function () {
+        return new Promise(function (r) {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(r);
+            });
           });
-        })
-      ).then(function () {
-        return Promise.all(
-          Array.prototype.map.call(imgs, function (img) {
-            if (img.decode && typeof img.decode === 'function') {
-              return img.decode().catch(function () {});
-            }
-            return Promise.resolve();
-          })
-        );
+        });
       });
     }
 

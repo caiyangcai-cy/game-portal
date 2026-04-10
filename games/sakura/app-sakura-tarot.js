@@ -1413,6 +1413,8 @@ class SakuraTarotApp {
       shareImg.style.boxShadow = 'none';
       if (card.image) {
         shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
+        const subImg = shareImg.querySelector('img');
+        if (subImg && subImg.decode) subImg.decode().catch(function () {});
       } else {
         shareImg.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
       }
