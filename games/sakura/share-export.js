@@ -11,10 +11,8 @@
     var cap = global.sakuraShareCapture;
 
     var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    var isSafariDesktop =
-      /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
-    var preferHtmlToImage = isIOS || isSafariDesktop;
-
+    // 始终先 html2canvas（同源 blob 图 + 无跨域读 CSS 问题）；html-to-image 作备选
+    // 注意：html-to-image 会尝试内联远程 CSS，Safari 对 fonts.googleapis.com 等会 SecurityError
     var scale = isIOS ? 1 : Math.min(2, global.devicePixelRatio || 2);
 
     function waitImages() {
@@ -117,6 +115,7 @@
             pixelRatio: scale,
             backgroundColor: '#0a0818',
             cacheBust: true,
+            skipFonts: true,
           }),
           new Promise(function (_, rej) {
             setTimeout(function () {
@@ -127,7 +126,7 @@
       });
     }
 
-    var order = preferHtmlToImage ? [tryHtmlToImage, tryHtml2Canvas] : [tryHtml2Canvas, tryHtmlToImage];
+    var order = [tryHtml2Canvas, tryHtmlToImage];
     var lastErr;
     for (var i = 0; i < order.length; i++) {
       try {

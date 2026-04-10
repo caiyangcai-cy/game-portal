@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>百变小樱 · 塔罗手势版</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+  <!-- 不使用 Google Fonts：html-to-image / 截图库在 Safari 下无法读取跨域 stylesheet，会导致分享图生成失败 -->
   <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -805,7 +803,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 /* ── CYou Games 品牌水印 ── */
 .cyou-watermark{
   position:fixed;right:12px;bottom:10px;z-index:200;
-  font-family:'Outfit','PingFang SC',sans-serif;
+  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
   font-size:11px;font-weight:700;letter-spacing:0.03em;
   line-height:1;pointer-events:none;user-select:none;
   opacity:0.35;
@@ -819,7 +817,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 /* ── 启动页品牌署名 ── */
 .start-brand{
   margin-top:28px;
-  font-family:'Outfit','PingFang SC',sans-serif;
+  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
   font-size:11px;font-weight:700;letter-spacing:0.03em;
   display:flex;align-items:baseline;gap:0.06em;justify-content:center;
   opacity:0.3;
@@ -1340,13 +1338,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     </div>
   </div>
 
-  <script src="effects.js?v=20260414"></script>
-  <script src="gestures-tarot.js?v=20260414"></script>
-  <script src="share-capture.js?v=20260414"></script>
-  <script src="vendor/html2canvas.min.js?v=20260414"></script>
-  <script src="vendor/html-to-image.min.js?v=20260414"></script>
-  <script src="share-export.js?v=20260414"></script>
-  <script src="app-sakura-tarot.js?v=20260414"></script>
-  <script type="module" src="bootstrap-sakura-tarot.js?v=20260414"></script>
+  <script src="effects.js?v=20260415"></script>
+  <script src="gestures-tarot.js?v=20260415"></script>
+  <script src="share-capture.js?v=20260415"></script>
+  <script src="vendor/html2canvas.min.js?v=20260415"></script>
+  <script src="vendor/html-to-image.min.js?v=20260415"></script>
+  <script src="share-export.js?v=20260415"></script>
+  <script src="app-sakura-tarot.js?v=20260415"></script>
+  <script type="module" src="bootstrap-sakura-tarot.js?v=20260415"></script>
 </body>
 </html>
