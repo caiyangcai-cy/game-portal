@@ -24,6 +24,15 @@ window.addEventListener('message', function (ev) {
   }
 });
 
+/** 手机 / 触摸平板：分享图走相册（分享面板 / 长按图片），不用 a[download] 进「文件」 */
+function sakuraIsMobileShareDevice() {
+  var ua = navigator.userAgent || '';
+  if (/iPhone|iPod|Android/i.test(ua)) return true;
+  if (/iPad/i.test(ua)) return true;
+  if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+  return false;
+}
+
 // 注意：这里的卡池严格以「小樱卡片/」文件夹内真实存在的卡面为准，
 // 避免出现“卡面是 SHIELD 但文案/标题是 WINDY”的错配。
 const SAKURA_CARDS = [
@@ -1420,11 +1429,8 @@ class SakuraTarotApp {
       rv.style.setProperty('z-index', '9999', 'important');
     }
 
-    // 手机端按钮改成「长按保存」
     const saveBtn = document.getElementById('sr-btn-save');
-    if (saveBtn && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      saveBtn.textContent = '长按保存';
-    }
+    if (saveBtn && sakuraIsMobileShareDevice()) saveBtn.textContent = '保存到相册';
 
     this._updateHint('');
     this._updateBadge('');
@@ -1488,7 +1494,7 @@ class SakuraTarotApp {
   async _saveShareImage() {
     const card = this._lastResultCard;
     const btn = document.getElementById('sr-btn-save');
-    const btnDefault = () => (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '长按保存' : '保存分享');
+    const btnDefault = () => (sakuraIsMobileShareDevice() ? '保存到相册' : '保存分享');
 
     if (!card) return;
     if (
@@ -1511,6 +1517,24 @@ class SakuraTarotApp {
 
       const url = await window.sakuraExportShareToDataUrl(document.getElementById('sr-share-card'));
       const fileName = `sakura-${card.element}-result.png`;
+
+      if (sakuraIsMobileShareDevice() && typeof window.sakuraPresentShareImageForAlbum === 'function') {
+        const mob = await window.sakuraPresentShareImageForAlbum(url, fileName);
+        if (!mob.ok) {
+          if (btn) {
+            btn.textContent = mob.method === 'aborted' ? '已取消' : '保存失败';
+            setTimeout(() => (btn.textContent = btnDefault()), mob.method === 'aborted' ? 1200 : 1800);
+          }
+          return;
+        }
+        if (btn) {
+          if (mob.method === 'share') btn.textContent = '请在分享里选「存储图像」';
+          else btn.textContent = '长按图片存相册';
+          setTimeout(() => (btn.textContent = btnDefault()), 2200);
+        }
+        return;
+      }
+
       let save = { ok: true, method: 'download' };
       if (typeof window.sakuraSaveShareDataUrl === 'function') {
         save = await window.sakuraSaveShareDataUrl(url, fileName);

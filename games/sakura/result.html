@@ -218,13 +218,13 @@
       <button type="button" class="btn btn-save" id="btn-save">保存分享</button>
       <a class="btn btn-play" id="btn-play" href="index.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center">重新占卜</a>
     </div>
-    <div class="hint">提示：如果你在 iOS 微信里下载失败，可用“截图”保存。</div>
+    <div class="hint">提示：手机浏览器点「保存到相册」后，用系统分享或长按大图即可存到相册。</div>
   </div>
 
   <script src="share-capture.js?v=20260410b"></script>
   <script src="vendor/html2canvas.min.js?v=20260416"></script>
   <script src="vendor/html-to-image.min.js?v=20260416"></script>
-  <script src="share-export.js?v=20260410c"></script>
+  <script src="share-export.js?v=20260410d"></script>
   <script>
     const CARDS = {
       shield: { element:'shield', spell:'THE SHIELD', name:'盾', sub:'守护之盾', image:'小樱卡片/1774582442715.png', color:'#ffd700' },
@@ -312,16 +312,39 @@
     document.getElementById('sc-quote').textContent = q ? `「${q}」` : '';
     document.getElementById('sc-destiny-body').textContent = destinyText || '';
 
-    document.getElementById('btn-save').addEventListener('click', async () => {
+    function isMobileShareDevice() {
+      const ua = navigator.userAgent || '';
+      if (/iPhone|iPod|Android/i.test(ua)) return true;
+      if (/iPad/i.test(ua)) return true;
+      if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+      return false;
+    }
+    const saveBtnEl = document.getElementById('btn-save');
+    if (isMobileShareDevice()) saveBtnEl.textContent = '保存到相册';
+
+    saveBtnEl.addEventListener('click', async () => {
       const btn = document.getElementById('btn-save');
       if (!window.sakuraExportShareToDataUrl) return;
       if (!window.html2canvas && !(window.htmlToImage && window.htmlToImage.toPng)) return;
+      const old = isMobileShareDevice() ? '保存到相册' : '保存分享';
       btn.disabled = true;
-      const old = btn.textContent;
       btn.textContent = '生成中…';
       try {
         const url = await window.sakuraExportShareToDataUrl(document.getElementById('share-card'));
         const fileName = `sakura-${card.element}-share.png`;
+
+        if (isMobileShareDevice() && typeof window.sakuraPresentShareImageForAlbum === 'function') {
+          const mob = await window.sakuraPresentShareImageForAlbum(url, fileName);
+          if (!mob.ok) {
+            btn.textContent = mob.method === 'aborted' ? '已取消' : '保存失败';
+            setTimeout(() => (btn.textContent = old), mob.method === 'aborted' ? 1200 : 1800);
+            return;
+          }
+          btn.textContent = mob.method === 'share' ? '请在分享里选「存储图像」' : '长按图片存相册';
+          setTimeout(() => (btn.textContent = old), 2200);
+          return;
+        }
+
         let save = { ok: true, method: 'download' };
         if (typeof window.sakuraSaveShareDataUrl === 'function') {
           save = await window.sakuraSaveShareDataUrl(url, fileName);

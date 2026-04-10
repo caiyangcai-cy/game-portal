@@ -228,6 +228,116 @@
     }
   }
 
+  function ensureAlbumOverlayStyles() {
+    var doc = global.document;
+    if (doc.getElementById('sakura-share-album-style')) return;
+    var s = doc.createElement('style');
+    s.id = 'sakura-share-album-style';
+    s.textContent =
+      '.sakura-share-album-overlay{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;' +
+      'padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));' +
+      'box-sizing:border-box;}' +
+      '.sakura-share-album-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.92);}' +
+      '.sakura-share-album-panel{position:relative;z-index:1;max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;}' +
+      '.sakura-share-album-img{max-width:100%;max-height:min(56vh,640px);width:auto;height:auto;border-radius:12px;' +
+      'box-shadow:0 12px 48px rgba(0,0,0,.55);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;' +
+      'pointer-events:auto;touch-action:manipulation;}' +
+      '.sakura-share-album-hint{color:#f0ebe3;font-size:15px;font-weight:600;text-align:center;line-height:1.55;padding:0 10px;margin:0;}' +
+      '.sakura-share-album-sub{color:rgba(255,255,255,.48);font-size:12px;text-align:center;margin:0;line-height:1.45;}' +
+      '.sakura-share-album-close{padding:11px 26px;border-radius:40px;border:1px solid rgba(255,215,0,.5);' +
+      'background:rgba(255,215,0,.1);color:#ffd700;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}' +
+      '.sakura-share-album-dl{color:rgba(255,255,255,.5);font-size:13px;text-decoration:underline;margin-top:4px;}';
+    (doc.head || doc.documentElement).appendChild(s);
+  }
+
+  /**
+   * 手机端：优先系统分享（可选「存储图像/照片」），否则全屏展示图片供长按存相册
+   * 不使用 a[download]，避免只进「下载/文件」且与「长按保存」文案不符
+   */
+  async function presentShareImageForAlbum(dataUrl, suggestedName) {
+    ensureAlbumOverlayStyles();
+    var name = suggestedName || 'sakura-share.png';
+    var blob = await (await fetch(dataUrl)).blob();
+
+    if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+      try {
+        var file = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: '小樱塔罗分享图' });
+          return { ok: true, method: 'share' };
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return { ok: false, method: 'aborted' };
+        console.warn('[ShareImage] Web Share 不可用，使用长按预览', e);
+      }
+    }
+
+    return new Promise(function (resolve) {
+      var objectUrl = URL.createObjectURL(blob);
+      var doc = global.document;
+      var root = doc.createElement('div');
+      root.className = 'sakura-share-album-overlay';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-modal', 'true');
+
+      var backdrop = doc.createElement('div');
+      backdrop.className = 'sakura-share-album-backdrop';
+
+      var panel = doc.createElement('div');
+      panel.className = 'sakura-share-album-panel';
+
+      var img = doc.createElement('img');
+      img.className = 'sakura-share-album-img';
+      img.src = objectUrl;
+      img.alt = '分享图，长按可保存到相册';
+
+      var hint = doc.createElement('p');
+      hint.className = 'sakura-share-album-hint';
+      hint.textContent = '长按图片，选择「存储到照片」或「存储图像」';
+
+      var hint2 = doc.createElement('p');
+      hint2.className = 'sakura-share-album-sub';
+      hint2.textContent = '部分机型也可在分享面板里选「存储到相册」';
+
+      var closeBtn = doc.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'sakura-share-album-close';
+      closeBtn.textContent = '关闭';
+
+      var dl = doc.createElement('a');
+      dl.className = 'sakura-share-album-dl';
+      dl.href = dataUrl;
+      dl.download = name;
+      dl.textContent = '仅下载到文件（备用）';
+
+      function cleanup() {
+        try {
+          URL.revokeObjectURL(objectUrl);
+        } catch (_) {}
+        if (root.parentNode) root.parentNode.removeChild(root);
+      }
+
+      function finish() {
+        cleanup();
+        resolve({ ok: true, method: 'overlay' });
+      }
+
+      closeBtn.addEventListener('click', finish);
+      backdrop.addEventListener('click', finish);
+
+      panel.appendChild(img);
+      panel.appendChild(hint);
+      panel.appendChild(hint2);
+      panel.appendChild(closeBtn);
+      panel.appendChild(dl);
+
+      root.appendChild(backdrop);
+      root.appendChild(panel);
+      doc.body.appendChild(root);
+    });
+  }
+
   global.sakuraExportShareToDataUrl = exportShareCardToDataUrl;
   global.sakuraSaveShareDataUrl = saveShareDataUrl;
+  global.sakuraPresentShareImageForAlbum = presentShareImageForAlbum;
 })(typeof window !== 'undefined' ? window : globalThis);
