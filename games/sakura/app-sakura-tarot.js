@@ -1380,8 +1380,8 @@ class SakuraTarotApp {
       } else {
         this.els.srCardFrame.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
       }
-      this.els.srCardFrame.style.borderColor = 'rgba(255,215,0,0.55)';
-      this.els.srCardFrame.style.boxShadow = `0 0 18px ${card.color}25, 0 10px 36px rgba(0,0,0,0.6)`;
+      this.els.srCardFrame.style.border = 'none';
+      this.els.srCardFrame.style.boxShadow = 'none';
     }
     if (this.els.srSpellEn) this.els.srSpellEn.textContent = card.spell || '';
     if (this.els.srSpellCn) {
@@ -1400,8 +1400,8 @@ class SakuraTarotApp {
     // 同步分享卡片内容
     const shareImg = document.getElementById('sr-share-img');
     if (shareImg) {
-      shareImg.style.borderColor = 'rgba(255,215,0,0.55)';
-      shareImg.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
+      shareImg.style.border = 'none';
+      shareImg.style.boxShadow = 'none';
       if (card.image) {
         shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
       } else {

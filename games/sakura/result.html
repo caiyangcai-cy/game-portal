@@ -74,24 +74,15 @@
     .sc-title{font-size:24px;font-weight:300;color:#f0ebe3;letter-spacing:3px}
     .sc-sub{font-size:12px;color:rgba(255,255,255,0.28);letter-spacing:3px;margin-top:6px}
     .sc-card-area{position:relative;margin-bottom:28px;flex-shrink:0}
-    .sc-ring{
-      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      width:216px;height:216px;border-radius:50%;
-      border:1px solid rgba(255,182,193,0.15);
-      pointer-events:none;
-    }
-    .sc-ring::before{
-      content:'';position:absolute;inset:15%;
-      border-radius:50%;border:1px dashed rgba(255,215,0,0.1);
-    }
+    .sc-ring{display:none!important}
     .sc-card-img{
       width:185px;
       aspect-ratio:140/238;
       height:auto;
       max-height:none;
       border-radius:9px;
-      border:2px solid rgba(255,215,0,0.5);
-      box-shadow:0 0 16px rgba(255,215,0,0.12),0 8px 28px rgba(0,0,0,0.55);
+      border:none;
+      box-shadow:none;
       background:transparent;
       overflow:hidden;
       display:flex;align-items:center;justify-content:center;
@@ -312,8 +303,8 @@
     const card = CARDS[key] || CARDS.shield;
 
     const imgWrap = document.getElementById('sc-card-img');
-    imgWrap.style.borderColor = 'rgba(255,215,0,0.55)';
-    imgWrap.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
+    imgWrap.style.border = 'none';
+    imgWrap.style.boxShadow = 'none';
     imgWrap.innerHTML = `<img src="${card.image}" alt="" style="width:100%;height:100%;object-fit:contain;display:block">`;
     const destinyText = MEANINGS[card.element] || '';
     const q = QUOTES[card.element] || '';

@@ -858,27 +858,17 @@ html, body {
   flex-shrink:0;
   animation:srSlideUp 0.6s ease 0.2s both;
 }
-.sr-card-glow{
-  position:absolute;inset:-28px;border-radius:50%;
-  background:radial-gradient(ellipse, var(--sr-color,rgba(255,215,0,0.2)) 0%, transparent 65%);
-  animation:srGlowPulse 3s ease-in-out infinite alternate;
-  pointer-events:none;
-}
-@keyframes srGlowPulse{0%{opacity:0.5;transform:scale(0.95)}100%{opacity:1;transform:scale(1.06)}}
-
-.sr-magic-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:164px;height:164px;border-radius:50%;border:1px solid rgba(255,182,193,0.18);animation:srRingSpin 20s linear infinite;pointer-events:none;z-index:0;will-change:transform}
-.sr-magic-ring::before{
-  content:'';position:absolute;inset:12%;border-radius:50%;
-  border:1px dashed rgba(255,215,0,0.12);
-}
-@keyframes srRingSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.sr-card-glow{display:none!important}
+.sr-sigil{display:none!important}
+.sr-magic-ring{display:none!important}
+.sr-sparkles{display:none!important}
 
 .sr-card-frame{
   position:relative;z-index:2;
   width:100%;height:100%;
   border-radius:9px;overflow:hidden;
-  border:2px solid rgba(255,215,0,0.55);
-  box-shadow:0 0 14px rgba(255,215,0,0.12),0 8px 28px rgba(0,0,0,0.55);
+  border:none;
+  box-shadow:none;
   background:transparent;
   box-sizing:border-box;
 }
@@ -962,7 +952,6 @@ html, body {
 }
 
 @media(max-width:380px){
-  .sr-magic-ring{width:152px;height:152px}
   .sr-destiny-body{font-size:12px}
 }
 
@@ -1004,24 +993,15 @@ html, body {
 .sr-share-card .sc-sub{font-size:12px;color:rgba(255,255,255,0.28);letter-spacing:3px;margin-top:6px}
 
 .sr-share-card .sc-card-area{position:relative;margin-bottom:28px;flex-shrink:0}
-.sr-share-card .sc-ring{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:216px;height:216px;border-radius:50%;
-  border:1px solid rgba(255,182,193,0.15);
-  pointer-events:none;
-}
-.sr-share-card .sc-ring::before{
-  content:'';position:absolute;inset:15%;
-  border-radius:50%;border:1px dashed rgba(255,215,0,0.1);
-}
+.sr-share-card .sc-ring{display:none!important}
 .sr-share-card .sc-card-img{
   width:185px;
   aspect-ratio:140/238;
   height:auto;
   max-height:none;
   border-radius:9px;
-  border:2px solid rgba(255,215,0,0.55);
-  box-shadow:0 0 16px rgba(255,215,0,0.12),0 8px 28px rgba(0,0,0,0.55);
+  border:none;
+  box-shadow:none;
   background:transparent;
   overflow:hidden;
   display:flex;align-items:center;justify-content:center;

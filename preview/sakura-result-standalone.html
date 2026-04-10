@@ -71,17 +71,11 @@
     .sc-title{font-size:14px;font-weight:300;color:#f0ebe3;letter-spacing:5px}
     .sc-sub{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px}
     .sc-card-area{position:relative;margin-bottom:16px}
-    .sc-ring{
-      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      width:200px;height:200px;border-radius:50%;
-      border:1px solid rgba(255,182,193,0.15);
-      pointer-events:none;
-    }
-    .sc-ring::before{content:'';position:absolute;inset:15%;border-radius:50%;border:1px dashed rgba(255,215,0,0.1)}
+    .sc-ring{display:none!important}
     .sc-card-img{
       width:140px;height:238px;border-radius:10px;
-      border:2px solid rgba(255,215,0,0.5);
-      box-shadow:0 0 20px rgba(255,215,0,0.15),0 12px 40px rgba(0,0,0,0.6);
+      border:none;
+      box-shadow:none;
       background:transparent;
       overflow:hidden;
       display:flex;align-items:center;justify-content:center;
@@ -177,8 +171,8 @@
 
     function render(key){
       const card = CARDS[key] || CARDS.wind;
-      imgWrap.style.borderColor = 'rgba(255,215,0,0.55)';
-      imgWrap.style.boxShadow = `0 0 20px ${card.color}33, 0 12px 40px rgba(0,0,0,0.6)`;
+      imgWrap.style.border = 'none';
+      imgWrap.style.boxShadow = 'none';
       imgWrap.innerHTML = `<img src="${card.image}" alt="${card.spell}" style="width:100%;height:100%;object-fit:contain;display:block">`;
       n.textContent = card.spell;
       s.textContent = card.sub;
