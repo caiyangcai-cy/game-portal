@@ -329,8 +329,10 @@
   }
   if (previewHint) previewHint.hidden = true;
 
-  // 移动端默认收起简介抽屉，让游戏画面优先占满
-  setSheetOpen(false);
+  // 移动端默认展开简介抽屉，让新用户第一眼看到游戏介绍
+  // 桌面端侧栏始终可见，不需要展开
+  var isMobile = window.matchMedia("(max-width: 840px)").matches;
+  setSheetOpen(isMobile);
 
   // 微信内置浏览器：提前提醒用户使用系统浏览器（摄像头/手势体验更稳定）
   if (isWeChat()) {

@@ -319,6 +319,12 @@
   .play-preview {
     border-right: none;
     border-bottom: none;
+    transition: filter 0.3s ease;
+  }
+
+  /* 展开简介时游戏区微暗，聚焦注意力 */
+  .play-body.play-sheet-open .play-preview {
+    filter: brightness(0.55);
   }
 
   .play-frame-wrap {
@@ -345,7 +351,7 @@
     -webkit-backdrop-filter: blur(18px) saturate(1.1);
     max-height: min(70dvh, 560px);
     transform: translateY(calc(100% - var(--sheet-peek)));
-    transition: transform 0.22s ease;
+    transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
   }
 
   .play-body.play-sheet-open .play-sidebar {
@@ -370,6 +376,20 @@
     height: 5px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* grip 旁边的文字标签：收起时显示，展开后隐藏 */
+  .play-sheet-handle::after {
+    content: "游戏简介 ▴";
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(183, 110, 121, 0.75);
+    letter-spacing: 0.06em;
+    transition: opacity 0.2s;
+  }
+
+  .play-body.play-sheet-open .play-sheet-handle::after {
+    opacity: 0;
   }
 
   .play-sidebar-inner {
