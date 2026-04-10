@@ -225,6 +225,8 @@
 
   <script src="share-capture.js"></script>
   <script src="vendor/html2canvas.min.js"></script>
+  <script src="vendor/html-to-image.min.js"></script>
+  <script src="share-export.js"></script>
   <script>
     const CARDS = {
       shield: { element:'shield', spell:'THE SHIELD', name:'盾', sub:'守护之盾', image:'小樱卡片/1774582442715.png', color:'#ffd700' },
@@ -314,32 +316,15 @@
 
     document.getElementById('btn-save').addEventListener('click', async () => {
       const btn = document.getElementById('btn-save');
-      if (!window.html2canvas) return;
+      if (!window.sakuraExportShareToDataUrl) return;
+      if (!window.html2canvas && !(window.htmlToImage && window.htmlToImage.toPng)) return;
       btn.disabled = true;
       const old = btn.textContent;
       btn.textContent = '生成中…';
-      const cardEl = document.getElementById('share-card');
-      const wrap = cardEl ? cardEl.parentElement : null;
-      let restoreImages = () => {};
-      let restoreWrapper = () => {};
       try {
-        const cap = window.sakuraShareCapture;
-        if (cap && cardEl) {
-          restoreWrapper = cap.styleShareWrapperForCapture(wrap);
-          restoreImages = await cap.prepareImagesForHtml2Canvas(cardEl);
-        }
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const canvas = await window.html2canvas(cardEl, {
-          backgroundColor: '#0a0818',
-          scale: Math.min(2, window.devicePixelRatio || 2),
-          useCORS: true,
-          allowTaint: false,
-          logging: false,
-        });
-        restoreImages();
-        restoreWrapper();
+        const url = await window.sakuraExportShareToDataUrl(document.getElementById('share-card'));
         const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
+        a.href = url;
         a.download = `sakura-${card.element}-share.png`;
         document.body.appendChild(a);
         a.click();
@@ -348,12 +333,6 @@
         setTimeout(() => (btn.textContent = old), 1400);
       } catch (e) {
         console.error(e);
-        try {
-          restoreImages();
-        } catch (_) {}
-        try {
-          restoreWrapper();
-        } catch (_) {}
         btn.textContent = '失败，建议截图';
         setTimeout(() => (btn.textContent = old), 1600);
       } finally {

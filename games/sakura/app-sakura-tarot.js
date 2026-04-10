@@ -1491,20 +1491,16 @@ class SakuraTarotApp {
     const btnDefault = () => (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '长按保存' : '保存分享');
 
     if (!card) return;
-    if (!window.html2canvas) {
+    if (
+      !window.sakuraExportShareToDataUrl ||
+      (!window.html2canvas && !(window.htmlToImage && typeof window.htmlToImage.toPng === 'function'))
+    ) {
       if (btn) {
         btn.textContent = '生成失败（缺少组件）';
         setTimeout(() => (btn.textContent = btnDefault()), 1600);
       }
       return;
     }
-
-    const el = document.getElementById('sr-share-card');
-    if (!el) return;
-    const wrapper = el.parentElement;
-
-    let restoreWrapper = () => {};
-    let restoreImages = () => {};
 
     try {
       if (btn) {
@@ -1513,59 +1509,7 @@ class SakuraTarotApp {
         btn.style.opacity = '0.75';
       }
 
-      const cap = window.sakuraShareCapture;
-      if (cap) {
-        restoreWrapper = cap.styleShareWrapperForCapture(wrapper);
-        restoreImages = await cap.prepareImagesForHtml2Canvas(el);
-      } else if (wrapper) {
-        const prev = wrapper.style.cssText;
-        wrapper.style.cssText =
-          'position:fixed;left:0;top:0;width:360px;height:640px;transform:translate3d(-120vw,0,0);z-index:2147483646;pointer-events:none;opacity:1;overflow:visible;';
-        restoreWrapper = () => {
-          wrapper.style.cssText = prev;
-        };
-      }
-
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-      const imgs = el.querySelectorAll('img');
-      await Promise.all(
-        Array.from(imgs).map((img) => {
-          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-          return new Promise((resolve) => {
-            const done = () => {
-              img.onload = img.onerror = null;
-              resolve();
-            };
-            img.onload = done;
-            img.onerror = done;
-            setTimeout(done, 6000);
-          });
-        })
-      );
-
-      const h2cPromise = window.html2canvas(el, {
-        backgroundColor: '#0a0818',
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-      });
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('html2canvas 超时')), 20000)
-      );
-      const canvas = await Promise.race([h2cPromise, timeoutPromise]);
-
-      restoreImages();
-      restoreWrapper();
-
-      let url;
-      try {
-        url = canvas.toDataURL('image/png');
-      } catch (err) {
-        console.error('[ShareImage] toDataURL', err);
-        throw err;
-      }
+      const url = await window.sakuraExportShareToDataUrl(document.getElementById('sr-share-card'));
       const a = document.createElement('a');
       a.href = url;
       a.download = `sakura-${card.element}-result.png`;
@@ -1579,12 +1523,6 @@ class SakuraTarotApp {
       }
     } catch (e) {
       console.error('[ShareImage]', e);
-      try {
-        restoreImages();
-      } catch (_) {}
-      try {
-        restoreWrapper();
-      } catch (_) {}
       if (btn) {
         btn.textContent = '生成失败，建议截图';
         setTimeout(() => (btn.textContent = btnDefault()), 1800);
