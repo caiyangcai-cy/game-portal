@@ -1433,9 +1433,9 @@ class SakuraTarotApp {
       shareImg.style.border = 'none';
       shareImg.style.boxShadow = 'none';
       if (card.image) {
-        // Safari 下 html-to-image 截图时 <img> 可能还没光栅化
-        // 解决方案：先把图片画到一个临时 canvas 转成 base64 dataURL
-        // 再用 background-image: url(data:...) 设置，这样截图引擎一定能拿到像素
+        // Safari 的 html-to-image 截图引擎（基于 SVG foreignObject）
+        // 无法正确渲染外部 URL 的 <img> 和 background-image
+        // 唯一可靠方案：先用 canvas 把图片转成 base64 dataURL，再设为 <img src="data:...">
         const tempImg = new Image();
         tempImg.onload = () => {
           try {
@@ -1445,25 +1445,22 @@ class SakuraTarotApp {
             const ctx = cvs.getContext('2d');
             ctx.drawImage(tempImg, 0, 0);
             const dataUrl = cvs.toDataURL('image/png');
-            // 用 background-image 设置 base64 图片
-            shareImg.innerHTML = '';
-            shareImg.style.backgroundImage = `url(${dataUrl})`;
-            shareImg.style.backgroundSize = 'contain';
-            shareImg.style.backgroundRepeat = 'no-repeat';
-            shareImg.style.backgroundPosition = 'center';
+            shareImg.style.backgroundImage = '';
+            shareImg.style.backgroundSize = '';
+            shareImg.style.backgroundRepeat = '';
+            shareImg.style.backgroundPosition = '';
+            shareImg.innerHTML = `<img src="${dataUrl}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
             enableSave();
           } catch (e) {
-            // canvas 失败时回退到普通 img
             shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
-            setTimeout(enableSave, 1000);
+            setTimeout(enableSave, 1500);
           }
         };
         tempImg.onerror = () => {
           shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
-          setTimeout(enableSave, 1000);
+          setTimeout(enableSave, 1500);
         };
         tempImg.src = card.image;
-        // 兜底：最多等 5 秒
         setTimeout(() => { if (!this._shareImageReady) enableSave(); }, 5000);
       } else {
         shareImg.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
