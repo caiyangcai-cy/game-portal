@@ -1413,6 +1413,10 @@ class SakuraTarotApp {
       shareImg.style.boxShadow = 'none';
       if (card.image) {
         shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" loading="eager" decoding="sync" style="width:100%;height:100%;object-fit:contain;display:block">`;
+        // 预加载+预decode：确保Safari首次截图就有图
+        const preImg = new Image();
+        preImg.src = card.image;
+        if (preImg.decode) preImg.decode().catch(function () {});
         const subImg = shareImg.querySelector('img');
         if (subImg && subImg.decode) subImg.decode().catch(function () {});
       } else {

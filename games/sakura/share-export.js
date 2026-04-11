@@ -89,9 +89,9 @@
     /** decode 完成后，位图写入 GPU/合成仍可能落后一帧；WebKit 上更明显 → 首存空白卡 */
     function settleBeforeCapture() {
       var ua = navigator.userAgent || '';
-      var ms = 90;
-      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 200;
-      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 180;
+      var ms = 120;
+      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 500;
+      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 500;
       return new Promise(function (r) {
         setTimeout(r, ms);
       });
