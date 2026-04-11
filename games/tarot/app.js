@@ -353,8 +353,11 @@ class App {
 
   async _initGesture() {
     this._setLoading('正在加载手势模型…（首次约 8MB，请稍候）');
+    var narrow = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     await this.gestureEngine.init(this.els.camera, {
       onStatus: (msg) => this._setLoading(msg),
+      numHands: narrow ? 1 : 2,
+      detectIntervalMs: narrow ? 56 : 33,
     });
     this.gestureEngine.onGesture = (gesture, landmarks) => {
       this._handleGesture(gesture, landmarks);
@@ -840,6 +843,9 @@ class App {
   // ===== 调试面板 =====
 
   _drawDebug(results) {
+    if (this.els.debugPanel && this.els.debugPanel.classList.contains('hidden')) {
+      return;
+    }
     const ge = this.gestureEngine;
     this.els.dbgGesture.textContent = ge.debugData.gesture;
     this.els.dbgState.textContent = this.state;

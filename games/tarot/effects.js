@@ -26,9 +26,10 @@ class Starfield {
   }
 
   _resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = window.innerWidth;
     const h = window.innerHeight;
+    const mobile = w < 768;
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -45,8 +46,10 @@ class Starfield {
   _createStars() {
     const w = this._w;
     const h = this._h;
-    // 限制最大数量，避免大屏幕爆星
-    const count = Math.min(Math.floor((w * h) / 4000), 500);
+    const mobile = w < 768;
+    const density = mobile ? 9000 : 4000;
+    const cap = mobile ? 180 : 500;
+    const count = Math.min(Math.floor((w * h) / density), cap);
     this.stars = [];
 
     for (let i = 0; i < count; i++) {
@@ -211,9 +214,11 @@ class ParticleSystem {
   }
 
   _resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = window.innerWidth;
     const h = window.innerHeight;
+    const mobile = w < 768;
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+    this._MAX_PARTICLES = mobile ? 110 : 300;
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -382,9 +387,10 @@ class SpellEffect {
   }
 
   _resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = window.innerWidth;
     const h = window.innerHeight;
+    const mobile = w < 768;
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';

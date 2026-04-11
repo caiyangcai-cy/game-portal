@@ -19,6 +19,7 @@
   --cyan: #00e5ff;
   --card-w: 140px;
   --card-h: 238px;
+  --carousel-scale: 1;
   /* v6 新增配色 */
   --text-primary: #f0ebe3;
   --text-secondary: rgba(255, 255, 255, 0.55);
@@ -40,6 +41,27 @@ html, body {
   color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+}
+
+/* 主游戏层允许 3D 牌环略超出子盒子，减少被父级裁切 */
+#app {
+  overflow: visible;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --card-w: 118px;
+    --card-h: 200px;
+    --carousel-scale: 0.92;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --card-w: 108px;
+    --card-h: 184px;
+    --carousel-scale: 0.88;
+  }
 }
 
 /* 星空背景画布 — GPU 加速 */
@@ -695,6 +717,13 @@ html, body {
   perspective: 600px;
 }
 
+@media (max-width: 480px) {
+  #platform-3d {
+    transform: translateX(-50%) scale(0.68);
+    transform-origin: center bottom;
+  }
+}
+
 .platform-layers {
   position: relative;
   width: 100%;
@@ -948,6 +977,7 @@ html, body {
   justify-content: center;
   z-index: 10;
   pointer-events: none;
+  overflow: visible;
 }
 
 #carousel-wrapper {
@@ -957,6 +987,9 @@ html, body {
   align-items: center;
   justify-content: center;
   perspective: 1000px;
+  overflow: visible;
+  transform: scale(var(--carousel-scale));
+  transform-origin: 50% 48%;
 }
 
 #carousel {

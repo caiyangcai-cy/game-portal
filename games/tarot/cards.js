@@ -138,12 +138,61 @@ class CardCarousel {
     this._friction = 0.88;
     this._isAnimating = false;
     this._isStacked = true;
+    this._resizeTid = null;
+    this._bindResize();
+  }
+
+  /** 按视口宽度收缩环半径，避免窄屏右侧牌被裁切（html/body 为 overflow:hidden） */
+  _syncRadiusFromViewport() {
+    const vw = typeof window !== 'undefined' ? window.innerWidth || 400 : 400;
+    let cardW = 140;
+    if (typeof document !== 'undefined') {
+      const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-w'));
+      if (!Number.isNaN(v) && v > 0) cardW = v;
+    }
+    const margin = 28;
+    const half = Math.max(60, vw / 2 - margin);
+    // 环上最远点约 translateZ(radius)；留边后略保守
+    const r = Math.floor(Math.min(320, Math.max(100, half - cardW * 0.55)));
+    this.radius = r;
+  }
+
+  _bindResize() {
+    if (typeof window === 'undefined') return;
+    window.addEventListener(
+      'resize',
+      () => {
+        clearTimeout(this._resizeTid);
+        this._resizeTid = setTimeout(() => this._onResize(), 180);
+      },
+      { passive: true }
+    );
+  }
+
+  _onResize() {
+    const prev = this.radius;
+    this._syncRadiusFromViewport();
+    if (prev === this.radius) return;
+    if (this._isStacked) return;
+    this.cards.forEach((el, i) => {
+      const angle = this.anglePerCard * i;
+      el.style.transition = 'none';
+      el.style.transform = `rotateY(${angle}deg) translateZ(${this.radius}px)`;
+    });
+    requestAnimationFrame(() => {
+      this.cards.forEach(el => {
+        el.style.transition = 'filter 0.4s, opacity 0.4s';
+      });
+    });
+    this._applyRotation();
+    this._updateFrontCard();
   }
 
   create() {
     this.container.innerHTML = '';
     this.cards = [];
     this._isStacked = true;
+    this._syncRadiusFromViewport();
 
     const shuffledBacks = [...CARD_BACK_IMAGES].sort(() => Math.random() - 0.5);
 

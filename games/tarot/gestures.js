@@ -86,6 +86,7 @@ class GestureEngine {
     this.video = null;
     this.running = false;
     this.mirrored = true;
+    this._detectMinMs = 33;
 
     // 回调
     this.onGesture = null;
@@ -134,6 +135,9 @@ class GestureEngine {
   async init(videoElement, options = {}) {
     this.video = videoElement;
     const onStatus = typeof options.onStatus === 'function' ? options.onStatus : null;
+    const numHands = typeof options.numHands === 'number' ? options.numHands : 2;
+    this._detectMinMs =
+      typeof options.detectIntervalMs === 'number' ? options.detectIntervalMs : 33;
 
     const { HandLandmarker, FilesetResolver } = window;
     if (!HandLandmarker || !FilesetResolver) {
@@ -162,7 +166,7 @@ class GestureEngine {
         delegate,
       },
       runningMode: 'VIDEO',
-      numHands: 2,
+      numHands,
       minHandDetectionConfidence: 0.6,
       minHandPresenceConfidence: 0.6,
       minTrackingConfidence: 0.6,
@@ -201,8 +205,8 @@ class GestureEngine {
 
     const now = performance.now();
 
-    // 限制检测频率：最高 ~30fps，避免 Safari 上推理阻塞渲染
-    if (now - (this._lastDetectTime || 0) < 30) {
+    // 限制检测频率（移动端默认更疏，减轻 CPU/GPU 与主线程抢占）
+    if (now - (this._lastDetectTime || 0) < this._detectMinMs) {
       requestAnimationFrame(() => this._detect());
       return;
     }
