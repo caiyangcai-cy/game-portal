@@ -1827,80 +1827,81 @@ html, body {
     width: 100px;
     height: 170px;
   }
-  /* 塔罗结果：缩小牌面 + 压缩纵向，尽量 iPhone 一屏（仍过长时可轻微滚动） */
+  /* 塔罗结果：窄屏一屏优先，略松于上一版（牌 100×170 + 适度留白，仍过长时可轻滚） */
   #tarot-result-view {
-    --result-card-img-w: 92px;
-    --result-card-img-h: 156px;
-    --result-row-gap: 6px;
+    --result-card-img-w: 100px;
+    --result-card-img-h: 170px;
+    --result-row-gap: 8px;
   }
   #tarot-result-view .result-scroll-container {
     max-height: 100vh;
     max-height: 100dvh;
-    padding: max(6px, env(safe-area-inset-top, 0px)) 10px max(8px, env(safe-area-inset-bottom, 0px));
+    padding: max(10px, env(safe-area-inset-top, 0px)) 14px max(12px, env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   #tarot-result-view .result-header {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     animation: none;
   }
   #tarot-result-view .result-title-tarot {
-    font-size: 15px;
+    font-size: 16px;
     letter-spacing: 4px;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
   #tarot-result-view .result-subtitle-tarot {
     font-size: 8px;
     letter-spacing: 2px;
   }
   #tarot-result-view .result-showcase {
-    margin-bottom: 6px;
-    padding: 6px 0 8px;
+    margin-bottom: 10px;
+    padding: 10px 0 12px;
     border-radius: 12px;
   }
   #tarot-result-view .showcase-card .showcase-label {
     font-size: 8px;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
     letter-spacing: 2px;
   }
   #tarot-result-view .showcase-card .showcase-name {
-    font-size: 10px;
-    margin-top: 5px;
+    font-size: 11px;
+    margin-top: 6px;
     letter-spacing: 1px;
   }
   #tarot-result-view .result-doc-quote {
-    font-size: 13px;
-    margin: 4px auto 6px;
+    font-size: 14px;
+    margin: 8px auto 10px;
   }
   #tarot-result-view .result-doc-insight {
-    font-size: 12.5px;
-    line-height: 1.52;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
+    font-size: 13px;
+    line-height: 1.62;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
   }
   #tarot-result-view .result-actions-tarot {
-    margin-bottom: 4px;
-    gap: 8px;
+    margin-bottom: 8px;
+    gap: 10px;
   }
   #tarot-result-view .btn-tarot-save,
   #tarot-result-view .btn-tarot-replay {
-    min-height: 40px;
-    padding: 8px 4px;
+    min-height: 42px;
+    padding: 10px 6px;
     font-size: 12px;
     letter-spacing: 1px;
   }
   #tarot-result-view .result-upcoming {
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    margin-top: 2px;
   }
   #tarot-result-view .result-upcoming-text {
-    font-size: 7.5px;
-    line-height: 1.3;
+    font-size: 8px;
+    line-height: 1.4;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   #tarot-result-view .result-brand {
-    margin: 8px 0 2px;
+    margin: 12px 0 4px;
     font-size: 10px;
     opacity: 0.35;
     animation: none;
