@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260411j">
+  <link rel="stylesheet" href="style.css?v=20260418a">
 </head>
 <body>
   <!-- ✦ 开场欢迎页 — 魔法球/灵珠风格 ✦ -->
@@ -174,15 +174,23 @@
     <!-- 占卜结果展示（金句+解读来自文档能量组合；保存分享逻辑同 games/sakura/result.html） -->
     <div id="tarot-result-view" class="hidden">
       <div class="result-scroll-container">
-        <div class="result-header">
-          <div class="result-title result-title-tarot">✦ 命运揭示 ✦</div>
-          <div class="result-subtitle result-subtitle-tarot">TAROT READING</div>
+        <!-- 与离屏 #share-card 同结构/同度量，保证结果页与保存的分享图一致 -->
+        <div class="result-page-card">
+          <div class="sc-header">
+            <div class="sc-title">✦ 命运揭示 ✦</div>
+            <div class="sc-sub">心灵塔罗牌 · RIDER-WAITE TAROT</div>
+          </div>
+          <div class="result-showcase" id="result-showcase"></div>
+          <div class="sc-quote" id="result-doc-quote"></div>
+          <div class="sc-destiny-card">
+            <div class="sc-destiny-body" id="result-doc-insight"></div>
+          </div>
+          <div class="sc-footer-block">
+            <div class="sc-divider"></div>
+            <div class="sc-cta">隔空手势 · 三张牌阵占卜 →</div>
+            <div class="sc-url">https://cyougames.site</div>
+          </div>
         </div>
-
-        <div class="result-showcase" id="result-showcase"></div>
-
-        <div class="result-doc-quote" id="result-doc-quote"></div>
-        <div class="result-doc-insight" id="result-doc-insight"></div>
 
         <div class="result-actions-tarot">
           <button type="button" class="btn-tarot-replay" id="btn-restart-reading">重新占卜</button>
@@ -254,8 +262,8 @@
   <script src="../sakura/share-capture.js?v=20260411d"></script>
   <script src="../sakura/vendor/html2canvas.min.js?v=20260416"></script>
   <script src="../sakura/vendor/html-to-image.min.js?v=20260416"></script>
-  <script src="../sakura/share-export.js?v=20260412c"></script>
-  <script src="app.js?v=20260411f"></script>
+  <script src="../sakura/share-export.js?v=20260418a"></script>
+  <script src="app.js?v=20260418a"></script>
   <script type="module" src="bootstrap.js?v=20260417"></script>
 </body>
 </html>

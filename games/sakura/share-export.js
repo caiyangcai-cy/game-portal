@@ -310,7 +310,7 @@
       'touch-action:auto!important;-webkit-user-select:auto!important;user-select:auto!important;}' +
       '.sakura-share-album-img{max-width:100%;max-height:min(56vh,640px);width:auto;height:auto;border-radius:12px;' +
       'box-shadow:0 12px 48px rgba(0,0,0,.55);-webkit-touch-callout:default!important;' +
-      '-webkit-user-select:auto!important;user-select:auto!important;pointer-events:auto!important;touch-action:auto!important;}' +
+      '-webkit-user-select:auto!important;user-select:auto!important;pointer-events:auto!important;touch-action:manipulation!important;}' +
       '.sakura-share-album-hint{color:#f0ebe3;font-size:15px;font-weight:600;text-align:center;line-height:1.55;padding:0 10px;margin:0;}' +
       '.sakura-share-album-sub{color:rgba(255,255,255,.48);font-size:12px;text-align:center;margin:0;line-height:1.45;}' +
       '.sakura-share-album-android-save{width:min(92vw,320px);margin-top:4px;padding:13px 20px;border-radius:14px;border:2px solid rgba(255,215,0,.65);' +
@@ -322,23 +322,57 @@
   }
 
   /**
-   * 手机端：优先系统分享（可选「存储图像/照片」），否则全屏展示图片供长按存相册
-   * 不使用 a[download]，避免只进「下载/文件」且与「长按保存」文案不符
+   * 手机端：优先系统分享（可选「存储图像/照片」），否则全屏展示图片供长按存相册。
+   * 夸克等内核对超长 data: 与 a[download] 限制多，预览用 blob:；安卓保存按钮优先 blob 下载并可为严格环境新开一页长按。
    */
+  function isStrictAndroidInAppBrowser() {
+    var ua = navigator.userAgent || '';
+    return /Android/i.test(ua) && /Quark|UCBrowser|MQQBrowser|MiuiBrowser|VivoBrowser|HeyTapBrowser/i.test(ua);
+  }
+
+  function downloadWithBlobUrl(blob, filename) {
+    var u = URL.createObjectURL(blob);
+    try {
+      var a = global.document.createElement('a');
+      a.href = u;
+      a.download = filename;
+      a.rel = 'noopener';
+      a.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
+      global.document.body.appendChild(a);
+      a.click();
+      global.document.body.removeChild(a);
+    } finally {
+      setTimeout(function () {
+        try {
+          URL.revokeObjectURL(u);
+        } catch (_) {}
+      }, 5000);
+    }
+  }
+
   async function presentShareImageForAlbum(dataUrl, suggestedName) {
     ensureAlbumOverlayStyles();
     var name = suggestedName || 'sakura-share.png';
     var blob = await (await fetch(dataUrl)).blob();
+    var previewUrl = URL.createObjectURL(blob);
 
     if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
       try {
         var file = new File([blob], name, { type: 'image/png' });
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: '小樱塔罗分享图' });
+          try {
+            URL.revokeObjectURL(previewUrl);
+          } catch (_) {}
           return { ok: true, method: 'share' };
         }
       } catch (e) {
-        if (e && e.name === 'AbortError') return { ok: false, method: 'aborted' };
+        if (e && e.name === 'AbortError') {
+          try {
+            URL.revokeObjectURL(previewUrl);
+          } catch (_) {}
+          return { ok: false, method: 'aborted' };
+        }
         console.warn('[ShareImage] Web Share 不可用，使用长按预览', e);
       }
     }
@@ -346,6 +380,7 @@
     return new Promise(function (resolve) {
       var doc = global.document;
       var isAndroid = /Android/i.test(navigator.userAgent || '');
+      var strictInApp = isStrictAndroidInAppBrowser();
       var root = doc.createElement('div');
       root.className = 'sakura-share-album-overlay';
       root.setAttribute('role', 'dialog');
@@ -359,20 +394,24 @@
 
       var img = doc.createElement('img');
       img.className = 'sakura-share-album-img';
-      // Android Chrome 对 blob: 预览常不出「保存图片」菜单；用 data: 长按更可靠
-      img.src = dataUrl;
+      // 优先 blob：超长 data: 在夸克等内核上长按/合成易失效；Chrome 类仍可用长按
+      img.src = previewUrl;
       img.alt = '分享图';
 
       var hint = doc.createElement('p');
       hint.className = 'sakura-share-album-hint';
       hint.textContent = isAndroid
-        ? '安卓上若长按无菜单：请点下方黄色按钮保存到「下载」，再在相册里打开或移动。'
+        ? strictInApp
+          ? '若长按无菜单：先点黄色按钮；仍无反应会尝试新开一页展示图片，可在新页长按保存。'
+          : '安卓上若长按无菜单：请点下方黄色按钮保存到「下载」，再在相册里打开或移动。'
         : '长按图片，选择「存储到照片」或「存储图像」';
 
       var hint2 = doc.createElement('p');
       hint2.className = 'sakura-share-album-sub';
       hint2.textContent = isAndroid
-        ? '也可尝试长按上图（部分浏览器会出「保存图片」）。'
+        ? strictInApp
+          ? '夸克/部分内置浏览器对下载限制较多，黄色按钮会优先用系统下载通道。'
+          : '也可尝试长按上图（部分浏览器会出「保存图片」）。'
         : '部分机型也可在分享面板里选「存储到相册」';
 
       var closeBtn = doc.createElement('button');
@@ -380,7 +419,7 @@
       closeBtn.className = 'sakura-share-album-close';
       closeBtn.textContent = '关闭';
 
-      function triggerDownload() {
+      function triggerDownloadDataUrl() {
         try {
           var xa = doc.createElement('a');
           xa.href = dataUrl;
@@ -391,6 +430,36 @@
         } catch (_) {}
       }
 
+      /** 须在用户点击的同步栈内先 open，否则夸克等会拦截弹窗 */
+      function openBlobImageInNewTab(preOpened) {
+        try {
+          var u = URL.createObjectURL(blob);
+          var w = preOpened || global.open('', '_blank', 'noopener,noreferrer');
+          if (!w) {
+            URL.revokeObjectURL(u);
+            return false;
+          }
+          var d = w.document;
+          d.write(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width"/>' +
+              '<title>保存图片</title></head><body style="margin:0;background:#111;display:flex;min-height:100vh;' +
+              'align-items:center;justify-content:center;"><p style="color:#888;font:14px sans-serif;padding:16px;">' +
+              '长按下图保存到相册</p><img src="' +
+              u +
+              '" style="max-width:100%;height:auto;display:block;margin:0 auto;background:#000;" alt=""/></body></html>'
+          );
+          d.close();
+          setTimeout(function () {
+            try {
+              URL.revokeObjectURL(u);
+            } catch (_) {}
+          }, 120000);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
       var dl = doc.createElement('a');
       dl.className = 'sakura-share-album-dl';
       dl.href = dataUrl;
@@ -398,6 +467,9 @@
       dl.textContent = isAndroid ? '备用：文字链下载' : '仅下载到文件（备用）';
 
       function cleanup() {
+        try {
+          URL.revokeObjectURL(previewUrl);
+        } catch (_) {}
         if (root.parentNode) root.parentNode.removeChild(root);
       }
 
@@ -418,7 +490,32 @@
         saveBtn.className = 'sakura-share-album-android-save';
         saveBtn.textContent = '保存图片到手机（下载）';
         saveBtn.addEventListener('click', function () {
-          triggerDownload();
+          var preWin = null;
+          if (strictInApp) {
+            try {
+              preWin = global.open('', '_blank', 'noopener,noreferrer');
+            } catch (_) {
+              preWin = null;
+            }
+          }
+          void (async function () {
+            try {
+              downloadWithBlobUrl(blob, name);
+            } catch (_) {}
+            if (strictInApp) {
+              openBlobImageInNewTab(preWin);
+            } else {
+              var saved = null;
+              if (typeof global.sakuraSaveShareDataUrl === 'function') {
+                try {
+                  saved = await global.sakuraSaveShareDataUrl(dataUrl, name);
+                } catch (_) {
+                  saved = { ok: false };
+                }
+              }
+              if (!saved || !saved.ok) triggerDownloadDataUrl();
+            }
+          })();
         });
         panel.appendChild(saveBtn);
       }

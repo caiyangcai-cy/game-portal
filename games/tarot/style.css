@@ -1351,15 +1351,76 @@ html, body {
   flex-direction: column;
   align-items: center;
   overflow: hidden;
-  /* 与 .showcase-card img 同步：金句/解读/按钮区宽度 = 三列牌 + 两道间距 */
-  --result-card-img-w: 152px;
-  --result-card-img-h: 258px;
-  --result-row-gap: 14px;
+  /* 与离屏分享卡三列 mini 一致（92×156 / gap 8） */
+  --result-card-img-w: 92px;
+  --result-card-img-h: 156px;
+  --result-row-gap: 8px;
   --result-text-row-max: calc(3 * var(--result-card-img-w) + 2 * var(--result-row-gap));
 }
 
-#tarot-result-view .result-header {
-  margin-bottom: 18px;
+#tarot-result-view .result-scroll-container {
+  width: 100%;
+  max-width: 400px;
+  padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(20px, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  max-height: 100vh;
+  max-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  box-sizing: border-box;
+}
+
+/* 与 #share-card 同盒体（高度随内容，非固定 640） */
+#tarot-result-view .result-page-card {
+  width: 360px;
+  max-width: min(360px, calc(100vw - 24px));
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #08061a 0%, #0f0b28 50%, #0a0818 100%);
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 42px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  animation: resultFadeIn 0.75s ease forwards;
+}
+#tarot-result-view .result-page-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+#tarot-result-view .result-showcase {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  text-align: center;
+}
+#tarot-result-view .result-showcase .showcase-question {
+  font-size: 13px;
+  color: var(--accent-lavender);
+  margin-bottom: 14px;
+  letter-spacing: 0.06em;
+  font-style: italic;
+  font-weight: 300;
+  padding: 0 6px;
+  line-height: 1.45;
 }
 
 .result-scroll-container {
@@ -1827,82 +1888,30 @@ html, body {
     width: 100px;
     height: 170px;
   }
-  /* 塔罗结果：窄屏一屏优先，略松于上一版（牌 100×170 + 适度留白，仍过长时可轻滚） */
-  #tarot-result-view {
-    --result-card-img-w: 100px;
-    --result-card-img-h: 170px;
-    --result-row-gap: 8px;
-  }
+  /* 塔罗结果页已与分享卡同版式；窄屏仅收边距与按钮区 */
   #tarot-result-view .result-scroll-container {
-    max-height: 100vh;
-    max-height: 100dvh;
-    padding: max(10px, env(safe-area-inset-top, 0px)) 14px max(12px, env(safe-area-inset-bottom, 0px));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  #tarot-result-view .result-header {
-    margin-bottom: 12px;
-    animation: none;
-  }
-  #tarot-result-view .result-title-tarot {
-    font-size: 16px;
-    letter-spacing: 4px;
-    margin-bottom: 4px;
-  }
-  #tarot-result-view .result-subtitle-tarot {
-    font-size: 8px;
-    letter-spacing: 2px;
-  }
-  #tarot-result-view .result-showcase {
-    margin-bottom: 10px;
-    padding: 10px 0 12px;
-    border-radius: 12px;
-  }
-  #tarot-result-view .showcase-card .showcase-label {
-    font-size: 8px;
-    margin-bottom: 5px;
-    letter-spacing: 2px;
-  }
-  #tarot-result-view .showcase-card .showcase-name {
-    font-size: 11px;
-    margin-top: 6px;
-    letter-spacing: 1px;
-  }
-  #tarot-result-view .result-doc-quote {
-    font-size: 14px;
-    margin: 8px auto 10px;
-  }
-  #tarot-result-view .result-doc-insight {
-    font-size: 13px;
-    line-height: 1.62;
-    margin-bottom: 12px;
-    padding-bottom: 6px;
+    padding: max(8px, env(safe-area-inset-top, 0px)) 10px max(10px, env(safe-area-inset-bottom, 0px));
   }
   #tarot-result-view .result-actions-tarot {
-    margin-bottom: 8px;
-    gap: 10px;
+    margin-bottom: 6px;
+    gap: 8px;
   }
   #tarot-result-view .btn-tarot-save,
   #tarot-result-view .btn-tarot-replay {
     min-height: 42px;
-    padding: 10px 6px;
+    padding: 10px 4px;
     font-size: 12px;
     letter-spacing: 1px;
   }
-  #tarot-result-view .result-upcoming {
-    margin-bottom: 8px;
-    margin-top: 2px;
-  }
   #tarot-result-view .result-upcoming-text {
-    font-size: 8px;
-    line-height: 1.4;
+    font-size: 7.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   #tarot-result-view .result-brand {
-    margin: 12px 0 4px;
-    font-size: 10px;
+    margin: 10px 0 4px;
+    font-size: 9px;
     opacity: 0.35;
     animation: none;
   }
@@ -2009,57 +2018,9 @@ html, body {
   letter-spacing: 0.05em;
 }
 
-/* ── 结果页：文档金句 + 解读（对齐预览 / 小樱字号）── */
-.result-title-tarot {
-  font-size: 18px;
-  font-weight: 300;
-  letter-spacing: 6px;
-  margin-bottom: 6px;
-}
-.result-subtitle-tarot {
-  font-size: 9px;
-  letter-spacing: 3px;
-  opacity: 0.85;
-}
-.result-doc-quote {
-  width: 100%;
-  max-width: var(--result-text-row-max, 484px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-  text-align: center;
-  font-size: clamp(16px, 4.6vw, 18px);
-  font-weight: 900;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  color: rgba(255, 223, 120, 0.98) !important;
-  text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
-  margin: 10px auto 12px;
-  padding: 0;
-  min-height: 1.35em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  animation: resultFadeIn 0.6s ease forwards;
-}
-.result-doc-insight {
-  width: 100%;
-  max-width: var(--result-text-row-max, 484px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-  text-align: left;
-  font-size: clamp(14.5px, 4vw, 16px);
-  line-height: 1.82;
-  color: rgba(255, 255, 255, 0.62);
-  font-weight: 400;
-  padding: 0 0 8px;
-  margin-bottom: 18px;
-  animation: resultFadeIn 0.7s ease forwards;
-}
 .result-actions-tarot {
   width: 100%;
-  max-width: var(--result-text-row-max, 484px);
+  max-width: 360px;
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
@@ -2103,7 +2064,7 @@ html, body {
 }
 .result-upcoming {
   width: 100%;
-  max-width: var(--result-text-row-max, 484px);
+  max-width: 360px;
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
@@ -2157,25 +2118,29 @@ html, body {
   background: radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.06) 0%, transparent 70%);
   pointer-events: none;
 }
-.tarot-share-root .sc-header {
+.tarot-share-root .sc-header,
+#tarot-result-view .result-page-card .sc-header {
   text-align: center;
   margin-bottom: 24px;
   position: relative;
   flex-shrink: 0;
 }
-.tarot-share-root .sc-title {
+.tarot-share-root .sc-title,
+#tarot-result-view .result-page-card .sc-title {
   font-size: 24px;
   font-weight: 300;
   color: #f0ebe3;
   letter-spacing: 3px;
 }
-.tarot-share-root .sc-sub {
+.tarot-share-root .sc-sub,
+#tarot-result-view .result-page-card .sc-sub {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.28);
   letter-spacing: 3px;
   margin-top: 14px;
 }
-.tarot-share-root .sc-cards-row {
+.tarot-share-root .sc-cards-row,
+#tarot-result-view .result-showcase .sc-cards-row {
   display: flex;
   gap: 8px;
   justify-content: center;
@@ -2183,19 +2148,22 @@ html, body {
   margin-bottom: 28px;
   flex-shrink: 0;
 }
-.tarot-share-root .sc-mini {
+.tarot-share-root .sc-mini,
+#tarot-result-view .result-showcase .sc-mini {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 98px;
 }
-.tarot-share-root .sc-mini .lbl {
+.tarot-share-root .sc-mini .lbl,
+#tarot-result-view .result-showcase .sc-mini .lbl {
   font-size: 8px;
   color: rgba(255, 255, 255, 0.32);
   letter-spacing: 2px;
   margin-bottom: 4px;
 }
-.tarot-share-root .sc-mini .imgw {
+.tarot-share-root .sc-mini .imgw,
+#tarot-result-view .result-showcase .sc-mini .imgw {
   width: 92px;
   height: 156px;
   border-radius: 8px;
@@ -2204,13 +2172,15 @@ html, body {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
   background: #1a1530;
 }
-.tarot-share-root .sc-mini .imgw img {
+.tarot-share-root .sc-mini .imgw img,
+#tarot-result-view .result-showcase .sc-mini .imgw img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.tarot-share-root .sc-mini .nm {
+.tarot-share-root .sc-mini .nm,
+#tarot-result-view .result-showcase .sc-mini .nm {
   font-size: 9px;
   color: #f0ebe3;
   margin-top: 4px;
@@ -2218,7 +2188,8 @@ html, body {
   text-align: center;
   line-height: 1.2;
 }
-.tarot-share-root .sc-quote {
+.tarot-share-root .sc-quote,
+#tarot-result-view .result-page-card .sc-quote {
   width: 100%;
   text-align: center;
   font-size: 15px;
@@ -2236,7 +2207,8 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.tarot-share-root .sc-destiny-card {
+.tarot-share-root .sc-destiny-card,
+#tarot-result-view .result-page-card .sc-destiny-card {
   width: 100%;
   height: auto;
   flex: 1 1 auto;
@@ -2251,32 +2223,37 @@ html, body {
   display: flex;
   align-items: flex-start;
 }
-.tarot-share-root .sc-destiny-body {
+.tarot-share-root .sc-destiny-body,
+#tarot-result-view .result-page-card .sc-destiny-body {
   font-size: 13.5px;
   line-height: 1.85;
   color: rgba(255, 255, 255, 0.55);
   font-weight: 400;
   text-align: left;
 }
-.tarot-share-root .sc-footer-block {
+.tarot-share-root .sc-footer-block,
+#tarot-result-view .result-page-card .sc-footer-block {
   width: 100%;
   flex-shrink: 0;
   text-align: center;
   padding-top: 12px;
 }
-.tarot-share-root .sc-divider {
+.tarot-share-root .sc-divider,
+#tarot-result-view .result-page-card .sc-divider {
   width: 40px;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
   margin: 0 auto 6px;
 }
-.tarot-share-root .sc-cta {
+.tarot-share-root .sc-cta,
+#tarot-result-view .result-page-card .sc-cta {
   font-size: 9px;
   color: rgba(255, 255, 255, 0.3);
   letter-spacing: 0.5px;
   margin-bottom: 6px;
 }
-.tarot-share-root .sc-url {
+.tarot-share-root .sc-url,
+#tarot-result-view .result-page-card .sc-url {
   font-size: 9px;
   color: rgba(255, 255, 255, 0.22);
   letter-spacing: 0.4px;
