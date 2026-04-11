@@ -18,9 +18,89 @@
     return /^((?!chrome|android).)*safari/i.test(ua);
   }
 
+  /**
+   * WebKit：离屏 + 外链 PNG 时 html-to-image 首帧常采不到像素；blob: 又易触发 WebKitBlobResource。
+   * 同源 fetch → data URL 内联到 img，克隆/绘制与像素同源，避免「第一次无卡图」。
+   */
+  async function inlineShareImagesDataUrl(containerEl) {
+    var imgs = Array.from(containerEl.querySelectorAll('img'));
+    if (!imgs.length) {
+      return function () {};
+    }
+
+    var cleanups = [];
+
+    await Promise.all(
+      imgs.map(function (img) {
+        return (async function () {
+          var attr = img.getAttribute('src');
+          if (!attr || attr.indexOf('data:') === 0) return;
+
+          var previous = img.currentSrc || img.src;
+          try {
+            var abs = new URL(attr, window.location.href).href;
+            var controller = new AbortController();
+            var timer = setTimeout(function () {
+              controller.abort();
+            }, FETCH_MS);
+            var res = await fetch(abs, {
+              credentials: 'same-origin',
+              mode: 'same-origin',
+              cache: 'force-cache',
+              signal: controller.signal,
+            });
+            clearTimeout(timer);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var blob = await res.blob();
+            var dataUrl = await new Promise(function (resolve, reject) {
+              var fr = new FileReader();
+              fr.onload = function () {
+                resolve(fr.result);
+              };
+              fr.onerror = reject;
+              fr.readAsDataURL(blob);
+            });
+            img.src = dataUrl;
+            await new Promise(function (resolve) {
+              var n = 0;
+              function tryDone() {
+                if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+                  var p = img.decode && img.decode();
+                  if (p && typeof p.then === 'function') {
+                    return p.then(resolve).catch(resolve);
+                  }
+                  return resolve();
+                }
+                n++;
+                if (n > 400) return resolve();
+                requestAnimationFrame(tryDone);
+              }
+              img.onload = tryDone;
+              img.onerror = resolve;
+              tryDone();
+            });
+            cleanups.push(function () {
+              img.src = previous;
+            });
+          } catch (_) {
+            cleanups.push(function () {});
+          }
+        })();
+      })
+    );
+
+    return function () {
+      cleanups.forEach(function (fn) {
+        try {
+          fn();
+        } catch (_) {}
+      });
+    };
+  }
+
   async function prepareImagesForHtml2Canvas(containerEl) {
     if (skipBlobForCapture()) {
-      return function () {};
+      return inlineShareImagesDataUrl(containerEl);
     }
 
     var imgs = Array.from(containerEl.querySelectorAll('img'));
