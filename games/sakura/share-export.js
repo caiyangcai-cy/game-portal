@@ -202,40 +202,45 @@
       var hti = global.htmlToImage;
       if (!hti || typeof hti.toPng !== 'function') return Promise.reject(new Error('no html-to-image'));
       return runWithCaptureEnv(function () {
-        var extraMs = prefersHtmlToImageFirst() ? 160 : 0;
-        var runPng = function () {
-          var bbox = el.getBoundingClientRect();
-          var outW = Math.max(1, Math.round(bbox.width || el.offsetWidth)) || 360;
-          var outH = Math.max(1, Math.round(bbox.height || el.offsetHeight)) || 640;
-          return Promise.race([
-            hti.toPng(el, {
-            pixelRatio: exportScale,
-            width: outW,
-            height: outH,
-            backgroundColor: '#0a0818',
-            cacheBust: true,
-            skipFonts: true,
-            includeQueryParams: false,
-            imagePlaceholder: IMG_PLACEHOLDER,
-            fetchRequestInit: {
-              credentials: 'same-origin',
-              mode: 'cors',
-              cache: 'force-cache',
-            },
-          }),
-            new Promise(function (_, rej) {
-              setTimeout(function () {
-                rej(new Error('html-to-image 超时'));
-              }, 45000);
-            }),
-          ]);
+        var bbox = el.getBoundingClientRect();
+        var outW = Math.max(1, Math.round(bbox.width || el.offsetWidth)) || 360;
+        var outH = Math.max(1, Math.round(bbox.height || el.offsetHeight)) || 640;
+        var opts = {
+          pixelRatio: exportScale,
+          width: outW,
+          height: outH,
+          backgroundColor: '#0a0818',
+          cacheBust: true,
+          skipFonts: true,
+          includeQueryParams: false,
+          imagePlaceholder: IMG_PLACEHOLDER,
+          fetchRequestInit: {
+            credentials: 'same-origin',
+            mode: 'cors',
+            cache: 'force-cache',
+          },
         };
-        if (extraMs > 0) {
-          return new Promise(function (r) {
-            setTimeout(r, extraMs);
-          }).then(runPng);
+        var timeout = new Promise(function (_, rej) {
+          setTimeout(function () { rej(new Error('html-to-image 超时')); }, 45000);
+        });
+
+        if (prefersHtmlToImageFirst()) {
+          // Safari: 截两次，第一次预热（丢弃），第二次拿真实结果
+          return Promise.race([
+            hti.toPng(el, opts)
+              .then(function () {
+                // 第一次完成，等 200ms 让 WebKit 合成层稳定
+                return new Promise(function (r) { setTimeout(r, 200); });
+              })
+              .then(function () {
+                // 第二次截图：此时图片一定已在合成层
+                return hti.toPng(el, opts);
+              }),
+            timeout,
+          ]);
         }
-        return runPng();
+
+        return Promise.race([hti.toPng(el, opts), timeout]);
       });
     }
 
