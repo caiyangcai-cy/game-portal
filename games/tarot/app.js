@@ -12,20 +12,28 @@
    ======================================== */
 
 /**
- * 父页面预请求摄像头协议：
+ * 父页面预请求摄像头协议（与 games/sakura/app-sakura-tarot.js 保持一致）：
  * play.js 在用户点全屏时发送 cygame-request-camera，
  * iframe 在非全屏状态下弹出 getUserMedia 权限窗，
  * 成功后缓存 stream 并回复 cygame-camera-granted，
  * 后续 _initCamera 检测到缓存 stream 直接复用，不再弹窗。
  */
 var __preCameraStream = null;
+/** 与小樱塔罗相同的轻量约束，利于移动端起流 */
+var CYGAME_TAROT_VIDEO = {
+  facingMode: 'user',
+  width: { ideal: 320, max: 480 },
+  height: { ideal: 240, max: 360 },
+  frameRate: { ideal: 20, max: 24 },
+};
+
 window.addEventListener('message', function (ev) {
   var d = ev && ev.data;
   if (!d || typeof d !== 'object') return;
   if (d.type === 'cygame-request-camera' && !__preCameraStream) {
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: false
+      video: CYGAME_TAROT_VIDEO,
+      audio: false,
     }).then(function (stream) {
       __preCameraStream = stream;
       try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
@@ -67,22 +75,19 @@ class App {
     this._bindUI();
     this._initPlatform();
 
-    // 【关键】先隐藏 loading、显示提问面板，不等摄像头和手势模型
+    // 与小樱一致：先 await 摄像头 + 手势，再进入主界面（避免 boot 末尾 fire-and-forget 丢掉用户手势）
+    await this._initCameraAndGesture();
+
     this._hideLoading();
 
-    // 创建旋转木马
     this.carousel = new CardCarousel();
     this.carousel.create();
 
-    // 滑动停下后自动跳过已收集的牌
     this.carousel.onSnap = () => {
       if (this.state === STATE.SUMMONED && this.collectedCards.length > 0) {
         this._skipCollected();
       }
     };
-
-    // 异步初始化摄像头和手势（在后台进行，不阻塞提问面板）
-    this._initCameraAndGesture();
   }
 
   /**
@@ -104,7 +109,10 @@ class App {
   }
 
   _showGlobalError(msg) {
+    var old = document.getElementById('cygame-tarot-global-error');
+    if (old) old.remove();
     const errDiv = document.createElement('div');
+    errDiv.id = 'cygame-tarot-global-error';
     errDiv.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(255,50,50,0.8);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;pointer-events:none;';
     errDiv.innerHTML = '⚠️ <strong>占卜仪式异常</strong><br>' + msg;
     document.body.appendChild(errDiv);
@@ -129,13 +137,63 @@ class App {
     // 同时在页面顶部加一个带重试按钮的提示条
     const bar = document.createElement('div');
     bar.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:14px 20px;background:rgba(180,40,40,0.92);color:white;z-index:10000;text-align:center;font-size:14px;display:flex;align-items:center;justify-content:center;gap:16px;';
-    bar.innerHTML = '<span>📷 摄像头未开启：' + detail + '</span>';
+    bar.id = 'cygame-tarot-camera-error-bar';
+    const span = document.createElement('span');
+    span.textContent = '📷 摄像头未开启：' + detail;
+    bar.appendChild(span);
     const btn = document.createElement('button');
-    btn.textContent = '🔄 刷新重试';
+    btn.type = 'button';
+    btn.textContent = '🔄 刷新页面';
     btn.style.cssText = 'padding:8px 18px;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.15);color:white;border-radius:6px;cursor:pointer;font-size:13px;';
     btn.onclick = () => location.reload();
     bar.appendChild(btn);
+    const grantBtn = document.createElement('button');
+    grantBtn.type = 'button';
+    grantBtn.textContent = '点此申请摄像头';
+    grantBtn.style.cssText =
+      'padding:8px 18px;border:1px solid rgba(255,215,0,0.65);background:rgba(255,215,0,0.2);color:#ffd700;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;';
+    var self = this;
+    grantBtn.onclick = function () {
+      void self._retryOpenCameraAfterUserTap();
+    };
+    bar.appendChild(grantBtn);
     document.body.appendChild(bar);
+  }
+
+  /**
+   * 在用户点击回调内重新 getUserMedia（Chrome/Android 丢激活后唯一可靠路径）
+   */
+  async _retryOpenCameraAfterUserTap() {
+    try {
+      var stream = await navigator.mediaDevices.getUserMedia({
+        video: CYGAME_TAROT_VIDEO,
+        audio: false,
+      });
+      this.els.camera.srcObject = stream;
+      await new Promise((resolve) => {
+        this.els.camera.onloadedmetadata = resolve;
+      });
+      await this.els.camera.play();
+      var bar = document.getElementById('cygame-tarot-camera-error-bar');
+      if (bar) bar.remove();
+      var gerr = document.getElementById('cygame-tarot-global-error');
+      if (gerr) gerr.remove();
+      var hint = this.els.gestureHint;
+      if (hint) {
+        hint.innerHTML = '';
+        hint.classList.add('hidden');
+      }
+      try {
+        window.parent.postMessage({ type: 'cygame-camera-granted' }, '*');
+      } catch (_) {}
+      if (this.gestureEngine && !this.gestureEngine.running) {
+        this.gestureEngine.start();
+      }
+    } catch (e) {
+      console.error(e);
+      var msg = (e && e.message) || String(e);
+      window.alert('仍无法打开摄像头：' + msg + '\n请检查系统设置中的相机权限，或关闭其他占用摄像头的应用。');
+    }
   }
 
   _cacheDom() {
@@ -255,16 +313,15 @@ class App {
   async _initCamera() {
     this._setLoading('正在开启灵视之眼…');
     try {
-      // 优先使用父页面预请求时缓存的 stream（避免 Safari 全屏下二次弹窗）
       var stream;
       var cameraFromPrecache = false;
       if (typeof __preCameraStream !== 'undefined' && __preCameraStream) {
         stream = __preCameraStream;
-        __preCameraStream = null; // 用完清空
+        __preCameraStream = null;
         cameraFromPrecache = true;
       } else {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: CYGAME_TAROT_VIDEO,
           audio: false,
         });
       }
@@ -286,6 +343,8 @@ class App {
         detail = '当前不是安全来源，请用本地服务器打开（如 http://127.0.0.1:8765），勿用 file://';
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         detail = '未检测到摄像头设备';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        detail = '摄像头可能被占用或暂时无法启动，请关闭其他使用摄像头的应用后，点下方「点此申请摄像头」重试';
       }
       this._showCameraError(detail);
       throw err; // 向上抛出，阻止手势引擎在无摄像头时初始化

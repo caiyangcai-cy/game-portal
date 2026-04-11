@@ -46,6 +46,76 @@
   var wantsFullscreen = false;
   var cameraPreGranted = false;
   var pendingFullscreen = false; // 正在等 iframe 回复中
+  /** iOS Safari 等对非 video 的 requestFullscreen 常无效，用 CSS 隐藏本站顶栏/侧栏作「沉浸全屏」 */
+  var playImmersiveActive = false;
+  var immersiveScheduleGen = 0;
+
+  function isIosTouchDevice() {
+    var ua = (navigator && navigator.userAgent) || "";
+    if (/(iPhone|iPod|iPad)/i.test(ua)) return true;
+    try {
+      if (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  function applyPlayImmersive() {
+    if (!wantsFullscreen) return;
+    if (playImmersiveActive) return;
+    if (isDocumentFullscreen()) return;
+    if (!isIosTouchDevice()) return;
+    playImmersiveActive = true;
+    setSheetOpen(false);
+    document.body.classList.add("play-body--immersive");
+    var btn = document.getElementById("play-exit-immersive");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.id = "play-exit-immersive";
+      btn.type = "button";
+      btn.className = "play-exit-immersive";
+      btn.textContent = "退出全屏";
+      btn.setAttribute("aria-label", "退出全屏");
+      btn.addEventListener("click", function () {
+        wantsFullscreen = false;
+        clearPlayImmersive();
+        try {
+          if (document.exitFullscreen) document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        } catch (e) {}
+      });
+      document.body.appendChild(btn);
+    }
+    btn.hidden = false;
+    btn.style.display = "";
+  }
+
+  function clearPlayImmersive() {
+    if (!playImmersiveActive) return;
+    playImmersiveActive = false;
+    document.body.classList.remove("play-body--immersive");
+    var btn = document.getElementById("play-exit-immersive");
+    if (btn) {
+      btn.hidden = true;
+      btn.style.display = "none";
+    }
+  }
+
+  function scheduleImmersiveFallbackIfNeeded() {
+    if (!wantsFullscreen) return;
+    var g = ++immersiveScheduleGen;
+    var delays = [0, 140, 420, 900];
+    for (var i = 0; i < delays.length; i++) {
+      (function (ms) {
+        setTimeout(function () {
+          if (!wantsFullscreen) return;
+          if (g !== immersiveScheduleGen) return;
+          if (isDocumentFullscreen()) return;
+          if (!isIosTouchDevice()) return;
+          applyPlayImmersive();
+        }, ms);
+      })(delays[i]);
+    }
+  }
 
   function isDocumentFullscreen() {
     return !!(
@@ -85,6 +155,9 @@
         setTimeout(function () {
           if (!isDocumentFullscreen() && wantsFullscreen) requestFs();
         }, 280);
+        setTimeout(function () {
+          scheduleImmersiveFallbackIfNeeded();
+        }, 340);
       });
     });
   }
@@ -95,6 +168,7 @@
     // 如果摄像头已经授权过（iframe 之前已通知），直接全屏
     if (cameraPreGranted) {
       requestFs();
+      scheduleImmersiveFallbackIfNeeded();
       return;
     }
 
@@ -102,6 +176,7 @@
     var needsCamera = !!(game && !game.comingSoon && game.entry);
     if (!needsCamera) {
       requestFs();
+      scheduleImmersiveFallbackIfNeeded();
       return;
     }
 
@@ -117,11 +192,13 @@
         if (pendingFullscreen) {
           pendingFullscreen = false;
           requestFs();
+          scheduleImmersiveFallbackIfNeeded();
         }
       }, 8000);
     } else {
       // iframe 还没准备好，直接全屏
       requestFs();
+      scheduleImmersiveFallbackIfNeeded();
     }
   }
 
@@ -220,6 +297,15 @@
       toggleSheet();
     });
   }
+
+  function onPlayFullscreenChange() {
+    if (isDocumentFullscreen()) {
+      clearPlayImmersive();
+    }
+  }
+  document.addEventListener("fullscreenchange", onPlayFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", onPlayFullscreenChange);
+  document.addEventListener("MSFullscreenChange", onPlayFullscreenChange);
 
   window.addEventListener("message", function (ev) {
     var d = ev && ev.data;

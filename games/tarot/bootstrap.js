@@ -17,6 +17,9 @@ const statusEl = document.getElementById('loading-status');
 
 function setStatus(text) {
   if (statusEl) statusEl.textContent = text;
+  // 欢迎页阶段 loading-screen 未显示，把进度同步到欢迎文案（与小樱「先加载再点开始」一致）
+  const wh = document.querySelector('.welcome-hint');
+  if (wh && text) wh.textContent = text;
 }
 
 /**
@@ -95,43 +98,37 @@ async function loadMediaPipe() {
   throw new Error('所有 CDN 源均加载失败，请检查网络连接');
 }
 
-// 主流程
+// 主流程（对齐 games/sakura/bootstrap-sakura-tarot.js：先加载 MediaPipe，再允许点击；点击后立即 boot，摄像头在用户手势链内）
 (async () => {
   try {
     if (blockInsecureDocumentOrigin()) {
       return;
     }
 
-    // ====== 第一阶段：显示欢迎页，等待用户点击 ======
     const welcomeScreen = document.getElementById('welcome-screen');
     const startBtn = document.getElementById('btn-start-ritual');
 
-    // 在后台预加载 MediaPipe（不请求摄像头）
-    let mediaPipeLoaded = false;
-    const preloadPromise = (async () => {
-      try {
-        const { FilesetResolver, HandLandmarker } = await loadMediaPipe();
-        window.FilesetResolver = FilesetResolver;
-        window.HandLandmarker = HandLandmarker;
-        mediaPipeLoaded = true;
-      } catch (mpErr) {
-        console.warn('MediaPipe 预加载失败，将在点击后重试:', mpErr);
-      }
-    })();
+    // ====== 与小樱一致：先加载 MediaPipe，再点亮「开启占卜仪式」（避免点击后再长时间 await 丢掉 Chrome/Android 用户激活）======
+    if (!startBtn) throw new Error('找不到开始按钮 #btn-start-ritual');
+    startBtn.disabled = true;
+    startBtn.style.opacity = '0.55';
+    setStatus('正在加载手势模型（首次约数 MB）…');
+    const { FilesetResolver, HandLandmarker } = await loadMediaPipe();
+    window.FilesetResolver = FilesetResolver;
+    window.HandLandmarker = HandLandmarker;
+    const wh = document.querySelector('.welcome-hint');
+    if (wh) wh.textContent = '点击后将请求摄像头权限以识别手势';
+    if (startBtn) {
+      startBtn.disabled = false;
+      startBtn.style.opacity = '1';
+    }
 
-    // 等待用户点击「开启占卜仪式」
-    await new Promise(resolve => {
-      const handler = (e) => {
-        e.preventDefault();
-        startBtn.removeEventListener('click', handler);
-        startBtn.removeEventListener('touchend', handler);
-        resolve();
-      };
-      startBtn.addEventListener('click', handler);
-      startBtn.addEventListener('touchend', handler);
+    // ====== 等待用户点击（仅 click，与小樱 start 按钮一致）======
+    await new Promise((resolve) => {
+      startBtn.addEventListener('click', resolve, { once: true });
     });
 
-    // ====== 第二阶段：淡出欢迎页，显示加载画面 ======
+    // ====== 淡出欢迎页，显示加载画面，再启动 App（_initCamera 紧接在点击后的微任务链中）======
     welcomeScreen.classList.add('fading-out');
 
     const loadingScreen = document.getElementById('loading-screen');
@@ -142,28 +139,16 @@ async function loadMediaPipe() {
       welcomeScreen.style.display = 'none';
     }, 800);
 
-    // 确保 MediaPipe 已加载
-    if (!mediaPipeLoaded) {
-      setStatus('正在连接灵能核心…');
-      try {
-        const { FilesetResolver, HandLandmarker } = await loadMediaPipe();
-        window.FilesetResolver = FilesetResolver;
-        window.HandLandmarker = HandLandmarker;
-      } catch (mpErr) {
-        console.error('MediaPipe 加载失败:', mpErr);
-        setStatus('⚠️ 模型加载失败，尝试继续…');
-      }
-    } else {
-      // 预加载已完成，等它彻底 resolve
-      await preloadPromise;
-    }
-
-    // ====== 第三阶段：启动应用 + 请求摄像头 ======
     const app = new App();
     await app.boot();
   } catch (err) {
     console.error('启动失败:', err);
     setStatus('⚠️ 启动失败: ' + err.message);
+    const rsb = document.getElementById('btn-start-ritual');
+    if (rsb) {
+      rsb.disabled = false;
+      rsb.style.opacity = '1';
+    }
 
     // 隐藏欢迎页和加载页
     const welcomeScreen = document.getElementById('welcome-screen');

@@ -451,3 +451,51 @@
     display: none;
   }
 }
+
+/* ── iOS Safari 等：系统级「真全屏」常不可用，用沉浸布局隐藏本站顶栏/抽屉 ── */
+.play-body.play-body--immersive {
+  overflow: hidden;
+}
+
+.play-body.play-body--immersive .play-header {
+  display: none;
+}
+
+.play-body.play-body--immersive .play-split {
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+.play-body.play-body--immersive .play-preview {
+  border: none;
+  filter: none !important;
+}
+
+.play-body.play-body--immersive .play-sidebar {
+  display: none;
+}
+
+.play-body.play-body--immersive .play-frame-wrap,
+.play-body.play-body--immersive .play-frame {
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+}
+
+.play-exit-immersive {
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  transform: translateX(-50%);
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  background: rgba(12, 12, 14, 0.9);
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  -webkit-tap-highlight-color: transparent;
+}

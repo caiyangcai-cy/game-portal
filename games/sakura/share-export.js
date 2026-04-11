@@ -298,20 +298,23 @@
 
   function ensureAlbumOverlayStyles() {
     var doc = global.document;
-    if (doc.getElementById('sakura-share-album-style')) return;
+    if (doc.getElementById('sakura-share-album-style-v2')) return;
     var s = doc.createElement('style');
-    s.id = 'sakura-share-album-style';
+    s.id = 'sakura-share-album-style-v2';
     s.textContent =
       '.sakura-share-album-overlay{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;' +
       'padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));' +
-      'box-sizing:border-box;}' +
-      '.sakura-share-album-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.92);}' +
-      '.sakura-share-album-panel{position:relative;z-index:1;max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;}' +
+      'box-sizing:border-box;touch-action:auto!important;-webkit-user-select:auto!important;user-select:auto!important;}' +
+      '.sakura-share-album-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.92);touch-action:none;}' +
+      '.sakura-share-album-panel{position:relative;z-index:1;max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;' +
+      'touch-action:auto!important;-webkit-user-select:auto!important;user-select:auto!important;}' +
       '.sakura-share-album-img{max-width:100%;max-height:min(56vh,640px);width:auto;height:auto;border-radius:12px;' +
-      'box-shadow:0 12px 48px rgba(0,0,0,.55);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;' +
-      'pointer-events:auto;touch-action:manipulation;}' +
+      'box-shadow:0 12px 48px rgba(0,0,0,.55);-webkit-touch-callout:default!important;' +
+      '-webkit-user-select:auto!important;user-select:auto!important;pointer-events:auto!important;touch-action:auto!important;}' +
       '.sakura-share-album-hint{color:#f0ebe3;font-size:15px;font-weight:600;text-align:center;line-height:1.55;padding:0 10px;margin:0;}' +
       '.sakura-share-album-sub{color:rgba(255,255,255,.48);font-size:12px;text-align:center;margin:0;line-height:1.45;}' +
+      '.sakura-share-album-android-save{width:min(92vw,320px);margin-top:4px;padding:13px 20px;border-radius:14px;border:2px solid rgba(255,215,0,.65);' +
+      'background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(255,138,80,.12));color:#ffd700;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}' +
       '.sakura-share-album-close{padding:11px 26px;border-radius:40px;border:1px solid rgba(255,215,0,.5);' +
       'background:rgba(255,215,0,.1);color:#ffd700;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}' +
       '.sakura-share-album-dl{color:rgba(255,255,255,.5);font-size:13px;text-decoration:underline;margin-top:4px;}';
@@ -341,8 +344,8 @@
     }
 
     return new Promise(function (resolve) {
-      var objectUrl = URL.createObjectURL(blob);
       var doc = global.document;
+      var isAndroid = /Android/i.test(navigator.userAgent || '');
       var root = doc.createElement('div');
       root.className = 'sakura-share-album-overlay';
       root.setAttribute('role', 'dialog');
@@ -356,32 +359,45 @@
 
       var img = doc.createElement('img');
       img.className = 'sakura-share-album-img';
-      img.src = objectUrl;
-      img.alt = '分享图，长按可保存到相册';
+      // Android Chrome 对 blob: 预览常不出「保存图片」菜单；用 data: 长按更可靠
+      img.src = dataUrl;
+      img.alt = '分享图';
 
       var hint = doc.createElement('p');
       hint.className = 'sakura-share-album-hint';
-      hint.textContent = '长按图片，选择「存储到照片」或「存储图像」';
+      hint.textContent = isAndroid
+        ? '安卓上若长按无菜单：请点下方黄色按钮保存到「下载」，再在相册里打开或移动。'
+        : '长按图片，选择「存储到照片」或「存储图像」';
 
       var hint2 = doc.createElement('p');
       hint2.className = 'sakura-share-album-sub';
-      hint2.textContent = '部分机型也可在分享面板里选「存储到相册」';
+      hint2.textContent = isAndroid
+        ? '也可尝试长按上图（部分浏览器会出「保存图片」）。'
+        : '部分机型也可在分享面板里选「存储到相册」';
 
       var closeBtn = doc.createElement('button');
       closeBtn.type = 'button';
       closeBtn.className = 'sakura-share-album-close';
       closeBtn.textContent = '关闭';
 
+      function triggerDownload() {
+        try {
+          var xa = doc.createElement('a');
+          xa.href = dataUrl;
+          xa.download = name;
+          doc.body.appendChild(xa);
+          xa.click();
+          xa.remove();
+        } catch (_) {}
+      }
+
       var dl = doc.createElement('a');
       dl.className = 'sakura-share-album-dl';
       dl.href = dataUrl;
       dl.download = name;
-      dl.textContent = '仅下载到文件（备用）';
+      dl.textContent = isAndroid ? '备用：文字链下载' : '仅下载到文件（备用）';
 
       function cleanup() {
-        try {
-          URL.revokeObjectURL(objectUrl);
-        } catch (_) {}
         if (root.parentNode) root.parentNode.removeChild(root);
       }
 
@@ -396,6 +412,16 @@
       panel.appendChild(img);
       panel.appendChild(hint);
       panel.appendChild(hint2);
+      if (isAndroid) {
+        var saveBtn = doc.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'sakura-share-album-android-save';
+        saveBtn.textContent = '保存图片到手机（下载）';
+        saveBtn.addEventListener('click', function () {
+          triggerDownload();
+        });
+        panel.appendChild(saveBtn);
+      }
       panel.appendChild(closeBtn);
       panel.appendChild(dl);
 
