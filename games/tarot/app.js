@@ -380,7 +380,9 @@ class App {
     await this.gestureEngine.init(this.els.camera, {
       onStatus: (msg) => this._setLoading(msg),
       numHands: 1,
-      inferStride: android ? 3 : 2,
+      // 与小樱塔罗一致：安卓 stride=4；略拉长 poll 间隔减轻主线程压力
+      inferStride: android ? 4 : 2,
+      pollIntervalMs: android ? 26 : 16,
     });
     this.gestureEngine.onGesture = (gesture, landmarks) => {
       this._handleGesture(gesture, landmarks);

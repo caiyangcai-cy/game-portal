@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>百变小樱 · 塔罗手势版</title>
   <!-- 不使用 Google Fonts：html-to-image / 截图库在 Safari 下无法读取跨域 stylesheet，会导致分享图生成失败 -->
   <style>
@@ -380,17 +380,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 }
 
 #gesture-hint{
-  position:fixed;top:20px;left:50%;transform:translateX(-50%);
-  display:flex;align-items:center;gap:6px;
-  padding:6px 16px;border-radius:20px;
-  background:rgba(12,10,28,0.7);border:1px solid var(--glass-border);
-  box-shadow:0 4px 12px rgba(0,0,0,0.3);
-  z-index:100;transition:opacity 0.3s;
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:max(48px,calc(env(safe-area-inset-bottom,0px)+36px));
+  display:flex;align-items:center;gap:8px;
+  max-width:calc(100vw - 24px);
+  padding:10px 20px;border-radius:40px;
+  background:rgba(12,10,28,0.82);border:1px solid var(--glass-border);
+  box-shadow:0 4px 24px rgba(0,0,0,0.4);
+  z-index:120;transition:opacity 0.3s;
 }
-#gesture-hint .hint-text{font-size:12px;color:var(--text-secondary);white-space:nowrap;font-weight:400;letter-spacing:0.5px}
+#gesture-hint .hint-text{font-size:13px;color:var(--text-secondary);white-space:nowrap;font-weight:400;letter-spacing:0.5px;overflow:hidden;text-overflow:ellipsis}
 
 #state-badge{
-  position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  position:fixed;top:max(14px,calc(env(safe-area-inset-top,0px)+10px));left:50%;transform:translateX(-50%);
   padding:2px 0;font-size:10px;font-weight:400;letter-spacing:2px;
   background:none;border:none;color:var(--text-muted);z-index:100;
   transition:opacity 0.3s;
@@ -794,6 +796,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   #magic-glow{width:min(100vw,540px);height:min(100vw,540px)}
   .spell-overlay .spell-name{font-size:28px}
   .selected-card-wrapper{width:210px;height:462px}
+  #gesture-hint{bottom:max(40px,calc(env(safe-area-inset-bottom,0px)+28px));padding:8px 16px}
+  #gesture-hint .hint-text{font-size:12px}
 }
 @media(min-width:481px) and (max-width:768px){
   .card{width:82px;height:180px;margin-left:-41px;margin-top:-90px}
@@ -1345,6 +1349,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <script src="vendor/html-to-image.min.js?v=20260416"></script>
   <script src="share-export.js?v=20260412c"></script>
   <script src="app-sakura-tarot.js?v=20260412a"></script>
-  <script type="module" src="bootstrap-sakura-tarot.js?v=20260416"></script>
+  <script type="module" src="bootstrap-sakura-tarot.js?v=20260411a"></script>
 </body>
 </html>

@@ -89,6 +89,8 @@ class GestureEngine {
     /** 每 N 次调度才跑一次 detectForVideo（与小樱 gestures-tarot 一致，显著降 Android CPU） */
     this._inferStride = 2;
     this._inferTick = 0;
+    /** 调度间隔（ms）；安卓可略增大以降低与主线程/合成抢占 */
+    this._pollMs = 16;
 
     // 回调
     this.onGesture = null;
@@ -141,6 +143,10 @@ class GestureEngine {
     if (options.inferStride != null) {
       const n = Math.floor(Number(options.inferStride));
       this._inferStride = n >= 1 && n <= 4 ? n : 2;
+    }
+    if (options.pollIntervalMs != null) {
+      const m = Math.floor(Number(options.pollIntervalMs));
+      this._pollMs = m >= 12 && m <= 48 ? m : 16;
     }
 
     const { HandLandmarker, FilesetResolver } = window;
@@ -213,7 +219,7 @@ class GestureEngine {
     this._inferTick += 1;
 
     if (!doInfer || this.video.readyState < 2) {
-      setTimeout(() => this._detect(), 16);
+      setTimeout(() => this._detect(), this._pollMs);
       return;
     }
 
@@ -263,7 +269,7 @@ class GestureEngine {
       this.onHandUpdate(results);
     }
 
-    setTimeout(() => this._detect(), 16);
+    setTimeout(() => this._detect(), this._pollMs);
   }
 
   _analyzeGesture(hand, now) {

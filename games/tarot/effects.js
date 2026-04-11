@@ -29,7 +29,8 @@ class Starfield {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const mobile = w < 768;
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+    const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (android ? 1.2 : 1.5) : 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -47,8 +48,9 @@ class Starfield {
     const w = this._w;
     const h = this._h;
     const mobile = w < 768;
-    const density = mobile ? 9000 : 4000;
-    const cap = mobile ? 180 : 500;
+    const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+    const density = mobile ? (android ? 13000 : 9000) : 4000;
+    const cap = mobile ? (android ? 95 : 180) : 500;
     const count = Math.min(Math.floor((w * h) / density), cap);
     this.stars = [];
 
@@ -217,8 +219,9 @@ class ParticleSystem {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const mobile = w < 768;
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
-    this._MAX_PARTICLES = mobile ? 110 : 300;
+    const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (android ? 1.2 : 1.5) : 2);
+    this._MAX_PARTICLES = mobile ? (android ? 72 : 110) : 300;
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
