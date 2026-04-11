@@ -620,36 +620,33 @@ class App {
     this.els.selectedCardName.textContent = `${card.name} · ${card.nameEn}`;
     // 不再用卡牌颜色设置名字，使用 CSS 默认淡白色
 
-    this.particles.emitSummon(card.color, 40);
+    var flipLite = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-flip-lite');
+    this.particles.emitSummon(card.color, flipLite ? 18 : 40);
 
-    // 延迟翻转 — 先看背面0.5s，然后翻到正面 + 特效爆发
+    // 延迟翻转 — 手机端缩短等待、减粒子与法术层，降低与手势推理抢 GPU
+    var preFlipMs = flipLite ? 220 : 500;
+    var nameDelayMs = flipLite ? 420 : 800;
     setTimeout(() => {
       this.els.selectedFlipper.classList.add('flipped');
 
-      // 触发翻转光芒爆发
       if (flipBurst) {
         flipBurst.style.background = `radial-gradient(circle, ${card.color}60 0%, ${card.color}20 40%, transparent 70%)`;
         flipBurst.classList.add('active');
       }
-      // 触发光环扩散
       if (flipRing) {
         flipRing.style.borderColor = card.color;
         flipRing.style.boxShadow = `0 0 30px ${card.color}80`;
         flipRing.classList.add('active');
       }
 
-      // 爆发粒子特效
-      this.particles.emitSpellBurst(card.color, 60);
+      this.particles.emitSpellBurst(card.color, flipLite ? 16 : 60);
+      this.spellEffect.play(card, flipLite ? 2200 : 4000);
 
-      // 根据卡牌元素类型播放全屏魔法特效（3-5秒）
-      this.spellEffect.play(card, 4000);
-
-      // 翻转完成后显示名字和释放提示
       setTimeout(() => {
         this.els.selectedCardName.classList.add('show');
         this.els.releaseHint.style.display = 'block';
-      }, 800);
-    }, 500);
+      }, nameDelayMs);
+    }, preFlipMs);
 
     this._updateHint('🤏→🖐️', '松开手指释放卡牌');
     this._updateBadge('揭示真相');

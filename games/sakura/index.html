@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <script>(function(){var u=navigator.userAgent||'';if(/Mobi|Android|iPhone|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(u))document.documentElement.classList.add('perf-flip-lite');})();</script>
   <title>百变小樱 · 塔罗手势版</title>
   <!-- 不使用 Google Fonts：html-to-image / 截图库在 Safari 下无法读取跨域 stylesheet，会导致分享图生成失败 -->
   <style>
@@ -1076,6 +1077,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .sr-share-card .sc-brand .wm-games{color:rgba(168,168,173,0.8);font-weight:800;font-size:0.72em;margin-left:0.12em}
 .sr-share-card .sc-brand .wm-site{color:rgba(168,168,173,0.4);font-weight:400;font-size:0.62em;margin-left:0.5em}
 .sr-share-card .sc-author{display:none!important}
+
+/* ========== 手机翻牌轻量模式 html.perf-flip-lite（去 blur/filter 动画、缩短 3D、隐藏光柱/光环等）========== */
+html.perf-flip-lite #card-selected-view.sv-entry{
+  animation:none!important;opacity:1!important;filter:none!important;transform:none!important;
+}
+html.perf-flip-lite .selected-card-wrapper.seal-phase{animation:none!important;filter:none!important}
+html.perf-flip-lite .selected-card-flipper.seal-breaking{animation:none!important}
+html.perf-flip-lite .selected-card-flipper.flip-active{
+  transition:transform 0.45s cubic-bezier(0.25,0.82,0.25,1)!important;
+}
+html.perf-flip-lite .flip-burst,html.perf-flip-lite .flip-ring,
+html.perf-flip-lite .flip-light-pillar,html.perf-flip-lite .flip-halo-ring{display:none!important}
+html.perf-flip-lite .seal-magic-circle{display:none!important}
+html.perf-flip-lite .selected-magic-circle,html.perf-flip-lite .selected-glow{animation:none!important}
+html.perf-flip-lite .orbit-sparkles{display:none!important}
+html.perf-flip-lite .selected-card-wrapper.card-revealed::before,
+html.perf-flip-lite .selected-card-wrapper.card-revealed::after{animation:none!important;opacity:0!important}
+html.perf-flip-lite .selected-card-wrapper.card-revealed .selected-card-front img{animation:none!important;filter:none!important}
+html.perf-flip-lite .card.emerge-spread .card-inner{
+  animation:none!important;filter:none!important;
+  transform:rotateY(180deg) scale(1)!important;
+}
+html.perf-flip-lite .card-inner{transition:transform 0.38s cubic-bezier(0.25,0.82,0.25,1)!important}
+html.perf-flip-lite .card.focused-card .face{animation:none!important}
   </style>
 </head>
 <body>
@@ -1348,7 +1373,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <script src="vendor/html2canvas.min.js?v=20260416"></script>
   <script src="vendor/html-to-image.min.js?v=20260416"></script>
   <script src="share-export.js?v=20260412c"></script>
-  <script src="app-sakura-tarot.js?v=20260412a"></script>
+  <script src="app-sakura-tarot.js?v=20260411b"></script>
   <script type="module" src="bootstrap-sakura-tarot.js?v=20260411a"></script>
 </body>
 </html>

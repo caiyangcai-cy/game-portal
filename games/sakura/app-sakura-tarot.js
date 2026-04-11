@@ -1152,6 +1152,7 @@ class SakuraTarotApp {
 
   _holdCard() {
     const card = this._focusedCard || this.ring.getCurrentCard();
+    const flipLite = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-flip-lite');
     this.state = STATE.HOLDING;
     this._holdingCard = card;
     this._focusedCard = null;
@@ -1169,7 +1170,7 @@ class SakuraTarotApp {
     this.els.selectedFlipper.classList.remove('flipped', 'seal-breaking', 'flip-active');
     this.els.selectedView.classList.remove('hidden');
     this.els.selectedView.classList.add('sv-entry');
-    setTimeout(() => this.els.selectedView.classList.remove('sv-entry'), 900);
+    setTimeout(() => this.els.selectedView.classList.remove('sv-entry'), flipLite ? 80 : 900);
 
     this.els.selectedCardName.textContent = '';
     this.els.selectedCardName.classList.remove('show');
@@ -1199,75 +1200,72 @@ class SakuraTarotApp {
       <img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:7px;">`;
     this.els.selectedGlow.style.background = `radial-gradient(ellipse, ${card.color}20 0%, transparent 60%)`;
 
-    this.particles.emitSummon(card.color, 12);
-    if (this.sd) this.sd.fullBurst(10);
+    this.particles.emitSummon(card.color, flipLite ? 6 : 12);
+    if (this.sd) this.sd.fullBurst(flipLite ? 4 : 10);
 
-    /* ====== 魔法少女樱风格翻牌动画时间线 ====== */
+    /* ====== 魔法少女樱风格翻牌动画时间线（手机 perf-flip-lite 缩短、跳过高成本层）====== */
+    const tSealMc = flipLite ? 0 : 400;
+    const tFlip = flipLite ? 100 : 800;
+    const tBurst = flipLite ? 200 : 1050;
+    const tPetals = flipLite ? 260 : 1250;
+    const tResult = flipLite ? 2400 : 4500;
 
-    // Phase 1 (0ms): 封印摇晃（背面朝前展示）
     requestAnimationFrame(() => {
-      if (wrap) wrap.classList.add('seal-phase');
-      this.els.selectedFlipper.classList.add('seal-breaking');
+      if (!flipLite) {
+        if (wrap) wrap.classList.add('seal-phase');
+        this.els.selectedFlipper.classList.add('seal-breaking');
+      }
     });
 
-    // Phase 2 (400ms): 封印魔法阵旋转出现（背面继续展示中）
     setTimeout(() => {
-      if (sealMc) sealMc.classList.add('active');
-    }, 400);
+      if (!flipLite && sealMc) sealMc.classList.add('active');
+    }, tSealMc);
 
-    // Phase 3 (800ms): 光柱射出 + 翻转开始（背面已展示约0.8秒）
     setTimeout(() => {
-      if (lightPillar) lightPillar.classList.add('active');
-      if (haloRing) haloRing.classList.add('active');
-
-      // 先移除封印摇晃动画，确保不与transition冲突
+      if (!flipLite) {
+        if (lightPillar) lightPillar.classList.add('active');
+        if (haloRing) haloRing.classList.add('active');
+      }
       this.els.selectedFlipper.classList.remove('seal-breaking');
       if (wrap) wrap.classList.remove('seal-phase');
-
-      // 强制浏览器reflow，确保animation移除后再启用transition
       void this.els.selectedFlipper.offsetWidth;
-
-      // 启用transition，然后触发翻转
       this.els.selectedFlipper.classList.add('flip-active');
       requestAnimationFrame(() => {
         this.els.selectedFlipper.classList.add('flipped');
         if (wrap) wrap.classList.add('card-revealed');
       });
-
-      // 翻转后让圆形背景魔法阵完全隐藏，不再穿透卡牌
       const selMc = document.querySelector('.selected-magic-circle');
       if (selMc) {
         selMc.style.transition = 'opacity 0.6s';
         selMc.style.opacity = '0';
       }
-    }, 800);
+    }, tFlip);
 
-    // Phase 4 (1050ms): 光爆 + 粒子
     setTimeout(() => {
-      if (flipBurst) {
-        flipBurst.style.background = `radial-gradient(circle, ${card.color}60 0%, ${card.color}20 40%, transparent 70%)`;
-        flipBurst.classList.add('active');
+      if (!flipLite) {
+        if (flipBurst) {
+          flipBurst.style.background = `radial-gradient(circle, ${card.color}60 0%, ${card.color}20 40%, transparent 70%)`;
+          flipBurst.classList.add('active');
+        }
+        if (flipRing) {
+          flipRing.style.borderColor = card.color;
+          flipRing.style.boxShadow = `0 0 30px ${card.color}80`;
+          flipRing.classList.add('active');
+        }
       }
-      if (flipRing) {
-        flipRing.style.borderColor = card.color;
-        flipRing.style.boxShadow = `0 0 30px ${card.color}80`;
-        flipRing.classList.add('active');
-      }
-      this.particles.emitSpellBurst(card.color, 20);
-      if (this.sd) this.sd.fullBurst(8);
-    }, 1050);
+      this.particles.emitSpellBurst(card.color, flipLite ? 8 : 20);
+      if (this.sd) this.sd.fullBurst(flipLite ? 3 : 8);
+    }, tBurst);
 
-    // Phase 5 (1250ms): 樱花花瓣飘散
     setTimeout(() => {
-      this._spawnSakuraPetals(petalsContainer, 6);
-      this._spawnMagicSparkles(sparklesContainer, card.color, 5);
-      this.spellEffect.play(card, 3000);
-    }, 1250);
+      this._spawnSakuraPetals(petalsContainer, flipLite ? 0 : 6);
+      this._spawnMagicSparkles(sparklesContainer, card.color, flipLite ? 2 : 5);
+      this.spellEffect.play(card, flipLite ? 2000 : 3000);
+    }, tPetals);
 
-    // Phase 6 (4500ms): 特效结束后自动展示结果页
     setTimeout(() => {
       this._showResult(card);
-    }, 4500);
+    }, tResult);
 
     this._updateHint('');
     this._updateBadge('魔法释放中');

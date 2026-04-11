@@ -1953,3 +1953,56 @@ html, body {
   margin-left: 0.6em;
   letter-spacing: 0.05em;
 }
+
+/* ========================================================================
+   手机端轻量翻牌（html.perf-flip-lite）：减少 filter/blur/多层 box-shadow 动画与时长
+   ======================================================================== */
+html.perf-flip-lite .carousel-card,
+html.perf-flip-lite #carousel {
+  will-change: auto;
+}
+
+html.perf-flip-lite .carousel-card .card-flipper {
+  transition: transform 0.38s cubic-bezier(0.25, 0.82, 0.25, 1) !important;
+}
+
+html.perf-flip-lite .selected-card-flipper {
+  transition: transform 0.45s cubic-bezier(0.25, 0.82, 0.25, 1) !important;
+}
+
+html.perf-flip-lite .selected-card-wrapper .flip-burst,
+html.perf-flip-lite .selected-card-wrapper .flip-ring,
+html.perf-flip-lite .selected-card-wrapper .flip-sparkle {
+  display: none !important;
+}
+
+html.perf-flip-lite .selected-card-back {
+  animation: none !important;
+  opacity: 1;
+  transform: none !important;
+}
+
+html.perf-flip-lite .selected-magic-circle,
+html.perf-flip-lite .selected-glow {
+  animation: none !important;
+}
+
+html.perf-flip-lite .selected-card-name {
+  transition: opacity 0.35s 0.35s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selected-card-flipper {
+    transition: transform 0.35s ease !important;
+  }
+
+  .carousel-card .card-flipper {
+    transition: transform 0.3s ease !important;
+  }
+
+  .selected-card-wrapper .flip-burst,
+  .selected-card-wrapper .flip-ring,
+  .selected-card-wrapper .flip-sparkle {
+    display: none !important;
+  }
+}
