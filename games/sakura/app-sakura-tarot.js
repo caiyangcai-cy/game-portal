@@ -826,10 +826,10 @@ class SakuraTarotApp {
       loading.style.opacity = '0';
       setTimeout(() => {
         loading.style.display = 'none';
-        this.els.app?.classList.remove('hidden');
+        this._showGameShell();
       }, 500);
     } else {
-      this.els.app?.classList.remove('hidden');
+      this._showGameShell();
     }
     this._updateHint('✊ 握拳召唤 → 🖐️ 张手展开牌阵');
     this._updateBadge('小樱·魔法阵');
@@ -903,10 +903,17 @@ class SakuraTarotApp {
     if (this.els.loadingStatus) this.els.loadingStatus.textContent = text;
   }
 
+  /** 与塔罗一致：指引条在视口底部 fixed；须与 #app 同步显示（二者 DOM 已分离） */
+  _showGameShell() {
+    this.els.app?.classList.remove('hidden');
+    this.els.gestureHint?.classList.remove('hidden');
+    this.els.stateBadge?.classList.remove('hidden');
+  }
+
   _hideLoading() {
     const loading = this.els.loading;
     if (!loading) {
-      this.els.app?.classList.remove('hidden');
+      this._showGameShell();
       return;
     }
     // 改为"点击开始"，确保用户交互后才播放音乐
@@ -923,7 +930,7 @@ class SakuraTarotApp {
       loading.style.opacity = '0';
       setTimeout(() => {
         loading.style.display = 'none';
-        this.els.app?.classList.remove('hidden');
+        this._showGameShell();
       }, 500);
       this._tryPlayBGM();
     };

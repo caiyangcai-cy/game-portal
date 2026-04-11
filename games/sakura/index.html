@@ -381,7 +381,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 }
 
 #gesture-hint{
-  position:fixed;left:50%;transform:translateX(-50%);
+  position:fixed;left:50%;right:auto;top:auto!important;transform:translateX(-50%);
   bottom:max(48px,calc(env(safe-area-inset-bottom,0px)+36px));
   display:flex;align-items:center;gap:8px;
   max-width:calc(100vw - 24px);
@@ -1263,10 +1263,6 @@ html.perf-flip-lite .card.focused-card .face{animation:none!important}
     <!-- 背景音乐 -->
     <audio id="bgm" src="bgm-60s.mp3" loop preload="none"></audio>
 
-    <div id="gesture-hint">
-      <div class="hint-text">加载中…</div>
-    </div>
-    <div id="state-badge">初始化</div>
     <div id="title">✦ 百变小樱 · 塔罗手势版 ✦</div>
 
     <div id="debug-panel" class="hidden">
@@ -1289,6 +1285,12 @@ html.perf-flip-lite .card.focused-card .face{animation:none!important}
       <button type="button" id="btn-mirror" title="镜像">🪞</button>
     </div>
   </div>
+
+  <!-- 指引与状态条放在 #app 外，避免环内 3D transform 影响 position:fixed 的参照系 -->
+  <div id="gesture-hint" class="hidden">
+    <div class="hint-text">加载中…</div>
+  </div>
+  <div id="state-badge" class="hidden">初始化</div>
 
   <!-- ✦ 魔法揭示结果页（翻牌特效结束后展示）✦ -->
   <div id="sakura-result-view" style="display:none">
@@ -1373,7 +1375,7 @@ html.perf-flip-lite .card.focused-card .face{animation:none!important}
   <script src="vendor/html2canvas.min.js?v=20260416"></script>
   <script src="vendor/html-to-image.min.js?v=20260416"></script>
   <script src="share-export.js?v=20260412c"></script>
-  <script src="app-sakura-tarot.js?v=20260411b"></script>
+  <script src="app-sakura-tarot.js?v=20260411c"></script>
   <script type="module" src="bootstrap-sakura-tarot.js?v=20260411a"></script>
 </body>
 </html>
