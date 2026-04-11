@@ -87,15 +87,18 @@
       flex-direction: column;
       align-items: center;
       padding: 36px 20px 24px;
+      --pv-card-w: 70px;
+      --pv-row-gap: 8px;
+      --pv-row-max: calc(3 * var(--pv-card-w) + 2 * var(--pv-row-gap));
     }
     .tr-header { text-align: center; margin-bottom: 22px; width: 100%; }
     .tr-title { font-size: 18px; font-weight: 300; letter-spacing: 6px; color: #f0ebe3; }
     .tr-sub { font-size: 9px; color: rgba(255, 255, 255, 0.25); letter-spacing: 3px; margin-top: 4px; }
-    .tr-cards { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
+    .tr-cards { display: flex; gap: var(--pv-row-gap, 8px); justify-content: center; margin-bottom: 12px; }
     .tr-card { display: flex; flex-direction: column; align-items: center; }
     .tr-card .label { font-size: 8px; color: rgba(255, 255, 255, 0.35); letter-spacing: 3px; margin-bottom: 5px; }
     .tr-card .card-img {
-      width: 70px;
+      width: var(--pv-card-w, 70px);
       height: 119px;
       border-radius: 8px;
       overflow: hidden;
@@ -107,8 +110,10 @@
     .tr-card .name { font-size: 9px; color: #f0ebe3; letter-spacing: 2px; margin-top: 5px; text-align: center; }
     /* 金句：独立一行金色，与解读区分（不显示「金句」小标题） */
     .tr-quote {
-      align-self: stretch;
+      align-self: center;
       width: 100%;
+      max-width: var(--pv-row-max, 226px);
+      box-sizing: border-box;
       text-align: center;
       margin-top: 12px;
       margin-bottom: 12px;
@@ -125,9 +130,11 @@
       text-overflow: ellipsis;
     }
     .tr-insight {
-      align-self: stretch;
+      align-self: center;
       width: 100%;
-      padding: 0 2px;
+      max-width: var(--pv-row-max, 226px);
+      box-sizing: border-box;
+      padding: 0;
       margin-bottom: 16px;
       font-size: 15px;
       line-height: 1.82;
@@ -140,7 +147,8 @@
       flex-direction: row;
       gap: 10px;
       width: 100%;
-      max-width: 100%;
+      max-width: var(--pv-row-max, 226px);
+      box-sizing: border-box;
       margin-bottom: 10px;
     }
     .tr-btn-mock {
@@ -169,11 +177,13 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .tr-upcoming {
-      align-self: stretch;
+      align-self: center;
       width: 100%;
+      max-width: var(--pv-row-max, 226px);
+      box-sizing: border-box;
       text-align: center;
       margin-bottom: 12px;
-      padding: 0 2px;
+      padding: 0;
     }
     .tr-upcoming-text {
       font-size: 9px;
@@ -402,7 +412,7 @@
             <button type="button" class="tr-btn-mock primary" disabled>保存分享</button>
           </div>
           <div class="tr-upcoming">
-            <div class="tr-upcoming-text">新版本将支持输入你的问题<br />获得专属个性化解读<br />敬请期待 ✦</div>
+            <div class="tr-upcoming-text">✦ 敬请期待 ✦ 新版本将支持输入你的困惑，生成属于你的专属解读</div>
           </div>
           <div class="tr-brand"><span class="cy">CYou</span><span class="gm">Games</span></div>
         </div>
