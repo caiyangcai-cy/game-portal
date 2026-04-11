@@ -130,7 +130,7 @@ class CardCarousel {
     this.targetAngle = 0;
     this.totalCards = CARDS.length;
     this.ringSize = 10;
-    this.anglePerCard = 360 / this.ringSize;
+    this.anglePerCard = 36;
     this.radius = 320;
     this.cards = [];
     this._animFrame = null;
@@ -142,7 +142,16 @@ class CardCarousel {
     this._bindResize();
   }
 
-  /** 按视口宽度收缩环半径，避免窄屏右侧牌被裁切（html/body 为 overflow:hidden） */
+  /** 窄屏减少环上物理牌数，增大夹角，牌与牌之间留出「缝」 */
+  _syncRingSize() {
+    const vw = typeof window !== 'undefined' ? window.innerWidth || 600 : 600;
+    if (vw < 500) this.ringSize = 7;
+    else if (vw < 780) this.ringSize = 8;
+    else this.ringSize = 10;
+    this.anglePerCard = 360 / this.ringSize;
+  }
+
+  /** 按视口与牌宽计算半径：使相邻牌弧长间距接近牌宽（略重叠或留缝） */
   _syncRadiusFromViewport() {
     const vw = typeof window !== 'undefined' ? window.innerWidth || 400 : 400;
     let cardW = 140;
@@ -150,11 +159,61 @@ class CardCarousel {
       const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-w'));
       if (!Number.isNaN(v) && v > 0) cardW = v;
     }
-    const margin = 28;
-    const half = Math.max(60, vw / 2 - margin);
-    // 环上最远点约 translateZ(radius)；留边后略保守
-    const r = Math.floor(Math.min(320, Math.max(100, half - cardW * 0.55)));
+    const sinHalf = Math.sin(Math.PI / this.ringSize);
+    const gapRatio = vw < 520 ? 1.16 : vw < 900 ? 1.06 : 1.02;
+    const rChord = (gapRatio * cardW) / (2 * sinHalf);
+    const margin = 22;
+    const half = Math.max(70, vw / 2 - margin);
+    const rCap = Math.min(400, half * 1.12 + cardW * 0.25);
+    let r = Math.floor(Math.min(rCap, Math.max(118, rChord)));
+    if (vw >= 960) r = Math.floor(Math.max(r, 268));
     this.radius = r;
+  }
+
+  /**
+   * 食指指尖（屏幕坐标）命中哪张环位上的牌（0..ringSize-1）
+   */
+  hitTestScreen(clientX, clientY) {
+    if (!this.cards || !this.cards.length) return -1;
+    let best = -1;
+    let bestD = Infinity;
+    for (let i = 0; i < this.cards.length; i++) {
+      const el = this.cards[i];
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 4 || rect.height < 4) continue;
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      const d2 = dx * dx + dy * dy;
+      const diag = Math.sqrt(rect.width * rect.width + rect.height * rect.height);
+      const thresh = diag * 1.55;
+      if (d2 < thresh * thresh && d2 < bestD) {
+        bestD = d2;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  /** 将指定环位转到正对用户（与小樱「指谁谁到中间」一致） */
+  snapToRingSlot(ringIndex) {
+    if (ringIndex < 0 || ringIndex >= this.ringSize || this._isStacked) return;
+    let target = -ringIndex * this.anglePerCard;
+    const cur = this.currentAngle;
+    let delta = target - cur;
+    while (delta > 180) delta -= 360;
+    while (delta < -180) delta += 360;
+    this.currentAngle = cur + delta;
+    this._velocity = 0;
+    this._isAnimating = false;
+    if (this._animFrame) {
+      cancelAnimationFrame(this._animFrame);
+      this._animFrame = null;
+    }
+    this._updateData();
+    this._applyRotation();
+    this._updateFrontCard();
   }
 
   _bindResize() {
@@ -192,6 +251,7 @@ class CardCarousel {
     this.container.innerHTML = '';
     this.cards = [];
     this._isStacked = true;
+    this._syncRingSize();
     this._syncRadiusFromViewport();
 
     const shuffledBacks = [...CARD_BACK_IMAGES].sort(() => Math.random() - 0.5);
@@ -367,6 +427,15 @@ class CardCarousel {
     const frontRingIndex = ((idx % this.ringSize) + this.ringSize) % this.ringSize;
 
     this.cards.forEach(card => card.classList.remove('focused-card'));
+
+    if (!this._isStacked) {
+      this.cards.forEach((card, i) => {
+        const angle = this.anglePerCard * i;
+        const bump = focused && i === frontRingIndex ? 38 : 0;
+        const sc = focused && i === frontRingIndex ? 1.09 : 1;
+        card.style.transform = `rotateY(${angle}deg) translateZ(${this.radius + bump}px) scale(${sc})`;
+      });
+    }
 
     if (focused) {
       this.cards[frontRingIndex].classList.add('focused-card');

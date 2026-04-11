@@ -52,7 +52,7 @@ html, body {
   :root {
     --card-w: 118px;
     --card-h: 200px;
-    --carousel-scale: 0.92;
+    --carousel-scale: 0.96;
   }
 }
 
@@ -60,7 +60,7 @@ html, body {
   :root {
     --card-w: 108px;
     --card-h: 184px;
-    --carousel-scale: 0.88;
+    --carousel-scale: 0.94;
   }
 }
 
@@ -546,15 +546,16 @@ html, body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* ===== 摄像头 — 完全隐藏 ===== */
+/* ===== 摄像头：全屏不可见（保证指尖坐标与画面一致，供食指点选牌）===== */
 #camera {
   position: fixed;
-  top: -9999px;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   opacity: 0;
   pointer-events: none;
+  z-index: 0;
 }
 
 #camera-overlay {
@@ -992,6 +993,12 @@ html, body {
   transform-origin: 50% 48%;
 }
 
+@media (max-width: 520px) {
+  #carousel-wrapper {
+    perspective: 1180px;
+  }
+}
+
 #carousel {
   position: relative;
   width: var(--card-w);
@@ -1068,11 +1075,14 @@ html, body {
   filter: brightness(1.1);
 }
 
-/* 食指选中高亮 — 粉色光，位置不变 */
+/* 食指选中高亮 — 与小樱类似：更亮 + 略向前突出（具体位移由 JS transform 叠加） */
 .carousel-card.focused-card {
-  z-index: 20;
-  box-shadow: 0 0 30px var(--accent-rose), 0 0 60px rgba(232, 180, 184, 0.4);
-  filter: brightness(1.15);
+  z-index: 30;
+  box-shadow:
+    0 0 28px var(--accent-rose),
+    0 0 56px rgba(232, 180, 184, 0.55),
+    0 0 90px rgba(212, 175, 55, 0.2);
+  filter: brightness(1.22) saturate(1.08);
 }
 
 /* 粉色发光边框 — 覆盖在整张卡牌上方 */

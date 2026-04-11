@@ -43,6 +43,29 @@ window.addEventListener('message', function (ev) {
   }
 });
 
+/** 将 MediaPipe 归一化坐标映射到 object-fit:cover 下的屏幕像素（与小樱点选一致） */
+function tarotVideoPointToClient(videoEl, nx, ny, mirrored) {
+  if (!videoEl) return { x: 0, y: 0 };
+  const rect = videoEl.getBoundingClientRect();
+  const vw = videoEl.videoWidth || 1;
+  const vh = videoEl.videoHeight || 1;
+  const xN = mirrored ? 1 - nx : nx;
+  const px = xN * vw;
+  const py = ny * vh;
+  const vAr = vw / vh;
+  const rAr = rect.width / Math.max(1, rect.height);
+  if (rAr > vAr) {
+    const scale = rect.width / vw;
+    const dispH = vh * scale;
+    const y0 = rect.top + (rect.height - dispH) / 2;
+    return { x: rect.left + px * scale, y: y0 + py * scale };
+  }
+  const scale = rect.height / vh;
+  const dispW = vw * scale;
+  const x0 = rect.left + (rect.width - dispW) / 2;
+  return { x: x0 + px * scale, y: rect.top + py * scale };
+}
+
 const STATE = {
   IDLE: 'idle',
   SUMMONED: 'summoned',
@@ -393,6 +416,14 @@ class App {
     }, 500);
   }
 
+  /** 食指指尖落在屏幕上的位置 → 命中环上第几张牌（-1 表示未命中） */
+  _pickRingFromLandmarks(hand) {
+    if (!hand || !hand[8] || !this.els.camera) return -1;
+    const p = hand[8];
+    const pt = tarotVideoPointToClient(this.els.camera, p.x, p.y, this.gestureEngine.mirrored);
+    return this.carousel.hitTestScreen(pt.x, pt.y);
+  }
+
   // ===== 核心状态机 =====
 
   _handleGesture(gesture, landmarks) {
@@ -414,8 +445,11 @@ class App {
           // 张开手掌展开牌阵
           this._spreadCards();
         } else if (gesture === GESTURE.POINT && this._cardsSpread) {
-          // 食指指向 — 选中当前牌（进入 FOCUSED）
-          this._focusCard();
+          const ring = this._pickRingFromLandmarks(landmarks);
+          if (ring >= 0) {
+            this.carousel.snapToRingSlot(ring);
+            this._focusCard();
+          }
         }
         break;
 
@@ -430,6 +464,13 @@ class App {
           if (gesture === GESTURE.SWIPE_CONTINUOUS) {
             const delta2 = this.gestureEngine.getSwipeDelta();
             this.carousel.addVelocity(delta2 * 50);
+          }
+        } else if (gesture === GESTURE.POINT && this._cardsSpread) {
+          const ring = this._pickRingFromLandmarks(landmarks);
+          if (ring >= 0) {
+            this.carousel.snapToRingSlot(ring);
+            this._focusedCard = this.carousel.getCurrentCard();
+            this.carousel.setFocused(true);
           }
         }
         break;
