@@ -465,14 +465,8 @@ class App {
             const delta2 = this.gestureEngine.getSwipeDelta();
             this.carousel.addVelocity(delta2 * 50);
           }
-        } else if (gesture === GESTURE.POINT && this._cardsSpread) {
-          const ring = this._pickRingFromLandmarks(landmarks);
-          if (ring >= 0) {
-            this.carousel.snapToRingSlot(ring);
-            this._focusedCard = this.carousel.getCurrentCard();
-            this.carousel.setFocused(true);
-          }
         }
+        // 锁定期间不再响应 POINT：每帧指尖抖动会让 hitTest 在相邻环位间跳变，导致 snap + 当前牌不断切换
         break;
 
       case STATE.HOLDING:
