@@ -257,9 +257,11 @@ class App {
     try {
       // 优先使用父页面预请求时缓存的 stream（避免 Safari 全屏下二次弹窗）
       var stream;
+      var cameraFromPrecache = false;
       if (typeof __preCameraStream !== 'undefined' && __preCameraStream) {
         stream = __preCameraStream;
         __preCameraStream = null; // 用完清空
+        cameraFromPrecache = true;
       } else {
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -270,8 +272,9 @@ class App {
       await new Promise(resolve => { this.els.camera.onloadedmetadata = resolve; });
       await this.els.camera.play();
       this._setLoading('塔罗牌灵已就绪');
-      // 通知父页面（play.html）摄像头已授权，以便恢复全屏
-      try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
+      if (!cameraFromPrecache) {
+        try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
+      }
     } catch (err) {
       console.error('摄像头初始化失败:', err);
       let detail = err.message || String(err);

@@ -983,9 +983,11 @@ class SakuraTarotApp {
     try {
       // 优先使用父页面预请求时缓存的 stream（避免 Safari 全屏下二次弹窗）
       var stream;
+      var cameraFromPrecache = false;
       if (typeof __preCameraStream !== 'undefined' && __preCameraStream) {
         stream = __preCameraStream;
         __preCameraStream = null; // 用完清空
+        cameraFromPrecache = true;
       } else {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -1004,8 +1006,10 @@ class SakuraTarotApp {
       await this.els.camera.play();
       this._setLoading('摄像头已就绪');
       this._tryPlayBGM(); // 摄像头授权后再次尝试播放BGM
-      // 通知父页面（play.html）摄像头已授权，以便恢复全屏
-      try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
+      // 仅在本页自行 getUserMedia 时通知父页；预请求已发过 granted，再发会导致 play 重复弹出「进入全屏」层
+      if (!cameraFromPrecache) {
+        try { window.parent.postMessage({ type: 'cygame-camera-granted' }, '*'); } catch (_) {}
+      }
     } catch (err) {
       console.error(err);
       let detail = err.message || String(err);
@@ -1425,7 +1429,7 @@ class SakuraTarotApp {
       if (saveBtn) {
         saveBtn.disabled = false;
         saveBtn.style.opacity = '';
-        saveBtn.textContent = isMobile ? '长按保存' : '保存分享';
+        saveBtn.textContent = '保存分享';
       }
     };
 
@@ -1545,7 +1549,7 @@ class SakuraTarotApp {
     const card = this._lastResultCard;
     const btn = document.getElementById('sr-btn-save');
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const btnDefault = () => isMobile ? '长按保存' : '保存分享';
+    const btnDefault = () => '保存分享';
 
     if (!card) return;
 

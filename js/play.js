@@ -64,6 +64,12 @@
 
   /** 创建全屏恢复覆盖层（后备：万一 requestFs 因非用户手势被拒绝） */
   function showRestoreOverlay() {
+    var isFs = !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement
+    );
+    if (isFs) return;
     if (restoreOverlay) {
       restoreOverlay.style.display = "flex";
       return;
@@ -238,6 +244,7 @@
       // 摄像头被拒绝 — 如果正在等预请求结果，直接进全屏（游戏内自行处理）
       if (pendingFullscreen) {
         pendingFullscreen = false;
+        hideRestoreOverlay();
         requestFs();
         // requestFs 可能因非用户手势被拒，400ms 后检查
         setTimeout(function () {
@@ -260,6 +267,7 @@
       // 如果正在等 iframe 预请求结果 → 摄像头搞定了，现在进全屏
       if (pendingFullscreen) {
         pendingFullscreen = false;
+        hideRestoreOverlay();
         requestFs();
         // requestFs 可能因非用户手势被拒，400ms 后检查
         setTimeout(function () {
@@ -278,15 +286,17 @@
       if (!wantsFullscreen) return;
 
       // 非预请求场景（比如用户没点全屏就直接玩游戏触发了摄像头）
-      var isFs = !!(
+      var isFs2 = !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.msFullscreenElement
       );
-      if (!isFs) {
-        // 不在全屏（可能是旧的 Safari 降级路径）→ 显示恢复覆盖层
-        showRestoreOverlay();
+      if (isFs2) {
+        hideRestoreOverlay();
+        return;
       }
+      // 不在全屏（可能是旧的 Safari 降级路径）→ 显示恢复覆盖层
+      showRestoreOverlay();
       return;
     }
   });
