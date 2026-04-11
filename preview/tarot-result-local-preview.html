@@ -95,8 +95,8 @@
     .tr-card { display: flex; flex-direction: column; align-items: center; }
     .tr-card .label { font-size: 8px; color: rgba(255, 255, 255, 0.35); letter-spacing: 3px; margin-bottom: 5px; }
     .tr-card .card-img {
-      width: 76px;
-      height: 129px;
+      width: 70px;
+      height: 119px;
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -105,28 +105,18 @@
     }
     .tr-card .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tr-card .name { font-size: 9px; color: #f0ebe3; letter-spacing: 2px; margin-top: 5px; text-align: center; }
-    .tr-quote-label {
-      align-self: stretch;
-      width: 100%;
-      text-align: center;
-      font-size: 9px;
-      letter-spacing: 0.35em;
-      color: rgba(184, 169, 201, 0.55);
-      margin-top: 6px;
-      margin-bottom: 6px;
-    }
-    /* 金句：独立一行金色，与解读区分 */
+    /* 金句：独立一行金色，与解读区分（不显示「金句」小标题） */
     .tr-quote {
       align-self: stretch;
       width: 100%;
       text-align: center;
-      margin-top: 0;
+      margin-top: 12px;
       margin-bottom: 12px;
       padding: 0 2px;
       min-height: 1.35em;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 900;
-      line-height: 1.35;
+      line-height: 1.4;
       letter-spacing: 0.02em;
       color: rgba(255, 223, 120, 0.98);
       text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
@@ -139,9 +129,9 @@
       width: 100%;
       padding: 0 2px;
       margin-bottom: 16px;
-      font-size: 13.5px;
-      line-height: 1.85;
-      color: rgba(255, 255, 255, 0.55);
+      font-size: 15px;
+      line-height: 1.82;
+      color: rgba(255, 255, 255, 0.62);
       font-weight: 400;
       text-align: left;
     }
@@ -249,11 +239,14 @@
     }
     .sc-header { text-align: center; margin-bottom: 24px; position: relative; flex-shrink: 0; }
     .sc-title { font-size: 24px; font-weight: 300; color: #f0ebe3; letter-spacing: 3px; }
-    .sc-sub { font-size: 12px; color: rgba(255, 255, 255, 0.28); letter-spacing: 3px; margin-top: 6px; }
+    /* 副标题「心灵塔罗牌 · RIDER-WAITE TAROT」相对主标题再下移 8px */
+    .sc-sub { font-size: 12px; color: rgba(255, 255, 255, 0.28); letter-spacing: 3px; margin-top: 14px; }
+    /* 三列卡牌区再下移 10px；金句与解读在文档流中随之一起下移 */
     .sc-cards-row {
       display: flex;
       gap: 8px;
       justify-content: center;
+      margin-top: 10px;
       margin-bottom: 28px;
       flex-shrink: 0;
     }
@@ -284,7 +277,7 @@
       letter-spacing: 0.02em;
       color: rgba(255, 223, 120, 0.98);
       text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
-      margin-top: 8px;
+      margin-top: 13px;
       margin-bottom: 14px;
       padding: 0 6px;
       box-sizing: border-box;
@@ -298,7 +291,7 @@
       height: auto;
       flex: 1 1 auto;
       min-height: 0;
-      margin-top: 8px;
+      margin-top: 13px;
       padding: 0 10px;
       border-radius: 0;
       background: none;
@@ -402,7 +395,6 @@
             <div class="tr-sub">TAROT READING</div>
           </div>
           <div class="tr-cards" id="demo-tr-cards"></div>
-          <div class="tr-quote-label">金 句</div>
           <div class="tr-quote" id="demo-quote"></div>
           <div class="tr-insight" id="demo-insight"></div>
           <div class="tr-actions-mock">
