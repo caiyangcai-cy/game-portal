@@ -376,11 +376,11 @@ class App {
 
   async _initGesture() {
     this._setLoading('正在加载手势模型…（首次约 8MB，请稍候）');
-    var narrow = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    var android = /Android/i.test(navigator.userAgent || '');
     await this.gestureEngine.init(this.els.camera, {
       onStatus: (msg) => this._setLoading(msg),
-      numHands: narrow ? 1 : 2,
-      detectIntervalMs: narrow ? 56 : 33,
+      numHands: 1,
+      inferStride: android ? 3 : 2,
     });
     this.gestureEngine.onGesture = (gesture, landmarks) => {
       this._handleGesture(gesture, landmarks);
@@ -552,7 +552,7 @@ class App {
     this.particles.emitSummon(card.color || '#d4af37', 20);
 
     const round = this.collectedCards.length + 1;
-    this._updateHint('🤏', `已锁定 · 捏合确认翻牌 (第${round}/3张)`);
+    this._updateHint('', `已锁定 · 🤏捏合确认翻牌 (第${round}/3张)`);
     this._updateBadge('已选中');
   }
 
@@ -873,7 +873,8 @@ class App {
   // ===== UI =====
 
   _updateHint(icon, text) {
-    this.els.hintIcon.textContent = icon;
+    this.els.hintIcon.textContent = icon || '';
+    this.els.hintIcon.style.display = icon ? '' : 'none';
     this.els.hintText.textContent = text;
   }
 

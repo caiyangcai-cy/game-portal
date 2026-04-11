@@ -480,22 +480,3 @@
   min-height: 100dvh !important;
   height: 100dvh !important;
 }
-
-.play-exit-immersive {
-  position: fixed;
-  z-index: 80;
-  left: 50%;
-  bottom: max(14px, env(safe-area-inset-bottom, 14px));
-  transform: translateX(-50%);
-  padding: 10px 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 215, 0, 0.45);
-  background: rgba(12, 12, 14, 0.9);
-  color: #ffd700;
-  font-weight: 700;
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  -webkit-tap-highlight-color: transparent;
-}

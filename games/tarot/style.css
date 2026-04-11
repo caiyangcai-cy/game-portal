@@ -565,7 +565,7 @@ html, body {
 /* ===== 手势提示 — 毛玻璃胶囊（降低blur提升Safari性能） ===== */
 #gesture-hint {
   position: fixed;
-  bottom: 48px;
+  bottom: max(48px, calc(env(safe-area-inset-bottom, 0px) + 36px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -603,8 +603,8 @@ html, body {
 /* ===== 状态标签 — 简约标签 移到左上角避免遮挡 ===== */
 #state-badge {
   position: fixed;
-  top: 16px;
-  left: 16px;
+  top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px));
+  left: max(16px, env(safe-area-inset-left, 0px));
   padding: 5px 14px;
   border-radius: 20px;
   font-size: 11px;
@@ -622,7 +622,7 @@ html, body {
 /* ===== 占卜收集区域 — 顶部居中 ===== */
 #tarot-collection {
   position: fixed;
-  top: 36px;
+  top: max(44px, calc(env(safe-area-inset-top, 0px) + 32px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1797,16 +1797,20 @@ html, body {
     --card-w: 100px;
     --card-h: 170px;
   }
+  #state-badge {
+    top: max(12px, calc(env(safe-area-inset-top, 0px) + 8px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+  }
   #tarot-collection {
     gap: 10px;
-    top: 28px;
+    top: max(40px, calc(env(safe-area-inset-top, 0px) + 24px));
   }
   .collection-slot {
     width: 42px;
     height: 64px;
   }
   #gesture-hint {
-    bottom: 36px;
+    bottom: max(36px, calc(env(safe-area-inset-bottom, 0px) + 28px));
     padding: 8px 16px;
   }
   #gesture-hint .hint-text {

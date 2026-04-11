@@ -86,7 +86,9 @@ class GestureEngine {
     this.video = null;
     this.running = false;
     this.mirrored = true;
-    this._detectMinMs = 33;
+    /** 每 N 次调度才跑一次 detectForVideo（与小樱 gestures-tarot 一致，显著降 Android CPU） */
+    this._inferStride = 2;
+    this._inferTick = 0;
 
     // 回调
     this.onGesture = null;
@@ -135,9 +137,11 @@ class GestureEngine {
   async init(videoElement, options = {}) {
     this.video = videoElement;
     const onStatus = typeof options.onStatus === 'function' ? options.onStatus : null;
-    const numHands = typeof options.numHands === 'number' ? options.numHands : 2;
-    this._detectMinMs =
-      typeof options.detectIntervalMs === 'number' ? options.detectIntervalMs : 33;
+    const numHands = typeof options.numHands === 'number' ? options.numHands : 1;
+    if (options.inferStride != null) {
+      const n = Math.floor(Number(options.inferStride));
+      this._inferStride = n >= 1 && n <= 4 ? n : 2;
+    }
 
     const { HandLandmarker, FilesetResolver } = window;
     if (!HandLandmarker || !FilesetResolver) {
@@ -167,9 +171,9 @@ class GestureEngine {
       },
       runningMode: 'VIDEO',
       numHands,
-      minHandDetectionConfidence: 0.6,
-      minHandPresenceConfidence: 0.6,
-      minTrackingConfidence: 0.6,
+      minHandDetectionConfidence: 0.55,
+      minHandPresenceConfidence: 0.55,
+      minTrackingConfidence: 0.55,
     });
 
     let lastError = null;
@@ -192,6 +196,7 @@ class GestureEngine {
 
   start() {
     this.running = true;
+    this._inferTick = 0;
     this.lastFpsTime = performance.now();
     this._detect();
   }
@@ -204,15 +209,16 @@ class GestureEngine {
     if (!this.running) return;
 
     const now = performance.now();
+    const doInfer = this._inferTick % this._inferStride === 0;
+    this._inferTick += 1;
 
-    // 限制检测频率（移动端默认更疏，减轻 CPU/GPU 与主线程抢占）
-    if (now - (this._lastDetectTime || 0) < this._detectMinMs) {
-      requestAnimationFrame(() => this._detect());
+    if (!doInfer || this.video.readyState < 2) {
+      setTimeout(() => this._detect(), 16);
       return;
     }
-    this._lastDetectTime = now;
 
-    // FPS
+    const results = this.handLandmarker.detectForVideo(this.video, now);
+
     this.frameCount++;
     if (now - this.lastFpsTime >= 1000) {
       this.fps = this.frameCount;
@@ -220,51 +226,44 @@ class GestureEngine {
       this.lastFpsTime = now;
     }
 
-    if (this.video.readyState >= 2) {
-      const results = this.handLandmarker.detectForVideo(this.video, now);
+    this.debugData.handsCount = results.landmarks?.length || 0;
+    this.debugData.landmarks = results.landmarks;
 
-      this.debugData.handsCount = results.landmarks?.length || 0;
-      this.debugData.landmarks = results.landmarks;
+    if (results.landmarks && results.landmarks.length > 0) {
+      const hand = results.landmarks[0];
+      const handedness = results.handednesses?.[0]?.[0];
+      this.debugData.confidence = handedness ? (handedness.score * 100).toFixed(0) : 0;
 
-      if (results.landmarks && results.landmarks.length > 0) {
-        const hand = results.landmarks[0];
-        const handedness = results.handednesses?.[0]?.[0];
-        this.debugData.confidence = handedness ? (handedness.score * 100).toFixed(0) : 0;
+      const gesture = this._analyzeGesture(hand, now);
+      this.debugData.gesture = gesture;
 
-        const gesture = this._analyzeGesture(hand, now);
-        this.debugData.gesture = gesture;
-
-        if (gesture !== GESTURE.NONE && this.onGesture) {
-          // PINCH_RELEASE 和 SWIPE_CONTINUOUS 不走冷却
-          if (gesture === GESTURE.PINCH_RELEASE || gesture === GESTURE.SWIPE_CONTINUOUS) {
-            this.onGesture(gesture, hand);
-          } else if (this._checkCooldown(gesture, now)) {
-            this.onGesture(gesture, hand);
-          }
+      if (gesture !== GESTURE.NONE && this.onGesture) {
+        if (gesture === GESTURE.PINCH_RELEASE || gesture === GESTURE.SWIPE_CONTINUOUS) {
+          this.onGesture(gesture, hand);
+        } else if (this._checkCooldown(gesture, now)) {
+          this.onGesture(gesture, hand);
         }
-      } else {
-        // 手消失了
-        if (this._pinchConfirmed) {
-          // 手消失也视为松手
-          this._pinchConfirmed = false;
-          this.isPinching = false;
-          if (this.onGesture) {
-            this.onGesture(GESTURE.PINCH_RELEASE, null);
-          }
+      }
+    } else {
+      if (this._pinchConfirmed) {
+        this._pinchConfirmed = false;
+        this.isPinching = false;
+        if (this.onGesture) {
+          this.onGesture(GESTURE.PINCH_RELEASE, null);
         }
-        this.debugData.gesture = GESTURE.NONE;
-        this.debugData.confidence = 0;
-        this.palmHistory = [];
-        this.pinchStartTime = 0;
-        this.lastPalmX = null;
       }
-
-      if (this.onHandUpdate) {
-        this.onHandUpdate(results);
-      }
+      this.debugData.gesture = GESTURE.NONE;
+      this.debugData.confidence = 0;
+      this.palmHistory = [];
+      this.pinchStartTime = 0;
+      this.lastPalmX = null;
     }
 
-    requestAnimationFrame(() => this._detect());
+    if (this.onHandUpdate && results) {
+      this.onHandUpdate(results);
+    }
+
+    setTimeout(() => this._detect(), 16);
   }
 
   _analyzeGesture(hand, now) {

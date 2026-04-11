@@ -67,26 +67,9 @@
     playImmersiveActive = true;
     setSheetOpen(false);
     document.body.classList.add("play-body--immersive");
-    var btn = document.getElementById("play-exit-immersive");
-    if (!btn) {
-      btn = document.createElement("button");
-      btn.id = "play-exit-immersive";
-      btn.type = "button";
-      btn.className = "play-exit-immersive";
-      btn.textContent = "退出全屏";
-      btn.setAttribute("aria-label", "退出全屏");
-      btn.addEventListener("click", function () {
-        wantsFullscreen = false;
-        clearPlayImmersive();
-        try {
-          if (document.exitFullscreen) document.exitFullscreen();
-          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        } catch (e) {}
-      });
-      document.body.appendChild(btn);
-    }
-    btn.hidden = false;
-    btn.style.display = "";
+    // 不再插入「退出全屏」浮动按钮：在 Safari 上会挡住 iframe 内底部指引；用户可通过刷新页面或返回游戏库退出沉浸
+    var oldBtn = document.getElementById("play-exit-immersive");
+    if (oldBtn && oldBtn.parentNode) oldBtn.parentNode.removeChild(oldBtn);
   }
 
   function clearPlayImmersive() {
@@ -94,10 +77,7 @@
     playImmersiveActive = false;
     document.body.classList.remove("play-body--immersive");
     var btn = document.getElementById("play-exit-immersive");
-    if (btn) {
-      btn.hidden = true;
-      btn.style.display = "none";
-    }
+    if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
   }
 
   function scheduleImmersiveFallbackIfNeeded() {
