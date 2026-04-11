@@ -1,7 +1,6 @@
 /**
  * 分享卡 DOM → PNG data URL
- * - WebKit（Safari / iOS / iOS Chrome）：优先 html-to-image，html2canvas 易长时间不返回
- * - 其他浏览器：先 html2canvas，再 html-to-image
+ * - 统一先 html2canvas 再 html-to-image（与 Chrome 行为一致；Safari 上 html-to-image 首帧易丢卡图）
  * 依赖：sakuraShareCapture、window.html2canvas、window.htmlToImage
  */
 (function (global) {
@@ -10,14 +9,6 @@
   /** 1×1 透明 PNG，避免某张图加载失败导致 html-to-image 整段失败 */
   var IMG_PLACEHOLDER =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-
-  /** WebKit（桌面 Safari / iOS / iOS Chrome）：html2canvas 常长时间不返回，优先 html-to-image */
-  function prefersHtmlToImageFirst() {
-    var ua = navigator.userAgent || '';
-    if (/iPhone|iPad|iPod|CriOS/i.test(ua)) return true;
-    if (/Chrome|Chromium|Edg|Firefox/i.test(ua)) return false;
-    return /^((?!chrome|android).)*safari/i.test(ua);
-  }
 
   async function exportShareCardToDataUrl(el) {
     if (!el) throw new Error('缺少分享卡节点');
@@ -90,8 +81,8 @@
     function settleBeforeCapture() {
       var ua = navigator.userAgent || '';
       var ms = 90;
-      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 280;
-      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 220;
+      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 340;
+      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 320;
       return new Promise(function (r) {
         setTimeout(r, ms);
       });
@@ -109,16 +100,17 @@
             } catch (_) {}
           });
           if (cap) {
-            rw = cap.styleShareWrapperForCapture(wrapper);
+            // 必须先内联/准备图片，再移动离屏 wrapper；否则 WebKit 在错误布局下内联，首截仍无卡图
             return Promise.race([
               cap.prepareImagesForHtml2Canvas(el),
               new Promise(function (r) {
                 setTimeout(function () {
                   r(function () {});
-                }, 10000);
+                }, 15000);
               }),
             ]).then(function (cleanup) {
-              ri = cleanup;
+              ri = typeof cleanup === 'function' ? cleanup : function () {};
+              rw = cap.styleShareWrapperForCapture(wrapper);
             });
           }
           if (wrapper) {
@@ -228,9 +220,7 @@
       });
     }
 
-    var order = prefersHtmlToImageFirst()
-      ? [tryHtmlToImage, tryHtml2Canvas]
-      : [tryHtml2Canvas, tryHtmlToImage];
+    var order = [tryHtml2Canvas, tryHtmlToImage];
     var lastErr;
     for (var i = 0; i < order.length; i++) {
       try {
