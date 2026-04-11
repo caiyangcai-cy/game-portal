@@ -30,7 +30,8 @@ class Starfield {
     const h = window.innerHeight;
     const mobile = w < 768;
     const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (android ? 1.2 : 1.5) : 2);
+    const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (vivo ? 1 : (android ? 1.2 : 1.5)) : 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -49,8 +50,9 @@ class Starfield {
     const h = this._h;
     const mobile = w < 768;
     const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
-    const density = mobile ? (android ? 13000 : 9000) : 4000;
-    const cap = mobile ? (android ? 95 : 180) : 500;
+    const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
+    const density = mobile ? (vivo ? 20000 : (android ? 13000 : 9000)) : 4000;
+    const cap = mobile ? (vivo ? 55 : (android ? 95 : 180)) : 500;
     const count = Math.min(Math.floor((w * h) / density), cap);
     this.stars = [];
 
@@ -220,8 +222,9 @@ class ParticleSystem {
     const h = window.innerHeight;
     const mobile = w < 768;
     const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (android ? 1.2 : 1.5) : 2);
-    this._MAX_PARTICLES = mobile ? (android ? 72 : 110) : 300;
+    const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (vivo ? 1.05 : (android ? 1.2 : 1.5)) : 2);
+    this._MAX_PARTICLES = mobile ? (vivo ? 48 : (android ? 72 : 110)) : 300;
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -393,7 +396,8 @@ class SpellEffect {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const mobile = w < 768;
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+    const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (vivo ? 1.05 : 1.5) : 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -417,6 +421,9 @@ class SpellEffect {
       const h = this._h;
       const cx = w / 2;
       const cy = h / 2;
+      const vivoLite =
+        typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
+      const effDuration = vivoLite ? Math.min(duration, 1300) : duration;
 
       const animate = (now) => {
         if (!this.running) {
@@ -426,7 +433,7 @@ class SpellEffect {
         }
 
         const elapsed = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        const progress = Math.min(elapsed / effDuration, 1);
 
         this.ctx.clearRect(0, 0, w, h);
 
@@ -439,11 +446,10 @@ class SpellEffect {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, w, h);
 
-        // 魔法阵
-        this._drawMagicCircle(cx, cy, 80 + progress * 120, cardData.color, elapsed);
-
-        // 元素特效
-        this._drawElementEffect(cardData.element, cx, cy, elapsed, progress);
+        if (!vivoLite) {
+          this._drawMagicCircle(cx, cy, 80 + progress * 120, cardData.color, elapsed);
+          this._drawElementEffect(cardData.element, cx, cy, elapsed, progress);
+        }
 
         if (progress < 1) {
           requestAnimationFrame(animate);

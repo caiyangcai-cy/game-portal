@@ -2006,3 +2006,14 @@ html.perf-flip-lite .selected-card-name {
     display: none !important;
   }
 }
+
+/* Vivo/国产内置浏览器：关星空画布 + 去掉毛玻璃（合成更省） */
+html.perf-tarot-vivo #starfield-canvas {
+  display: none !important;
+  pointer-events: none;
+}
+
+html.perf-tarot-vivo #gesture-hint {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

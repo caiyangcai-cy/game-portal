@@ -19,20 +19,36 @@
  * 后续 _initCamera 检测到缓存 stream 直接复用，不再弹窗。
  */
 var __preCameraStream = null;
-/** 与小樱塔罗相同的轻量约束，利于移动端起流 */
-var CYGAME_TAROT_VIDEO = {
-  facingMode: 'user',
-  width: { ideal: 320, max: 480 },
-  height: { ideal: 240, max: 360 },
-  frameRate: { ideal: 20, max: 24 },
-};
+
+/** Vivo/OPPO/小米等内置浏览器：推理与画布叠在一起易掉帧，摄像头与特效再降一档 */
+function cygameTarotIsVivoStyleBrowser() {
+  return typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
+}
+
+/** 与小樱塔罗相同的轻量约束；Vivo 系再压低分辨率与帧率减轻 MediaPipe 压力 */
+function cygameTarotVideoConstraints() {
+  if (cygameTarotIsVivoStyleBrowser()) {
+    return {
+      facingMode: 'user',
+      width: { ideal: 240, max: 320 },
+      height: { ideal: 180, max: 240 },
+      frameRate: { ideal: 14, max: 18 },
+    };
+  }
+  return {
+    facingMode: 'user',
+    width: { ideal: 320, max: 480 },
+    height: { ideal: 240, max: 360 },
+    frameRate: { ideal: 20, max: 24 },
+  };
+}
 
 window.addEventListener('message', function (ev) {
   var d = ev && ev.data;
   if (!d || typeof d !== 'object') return;
   if (d.type === 'cygame-request-camera' && !__preCameraStream) {
     navigator.mediaDevices.getUserMedia({
-      video: CYGAME_TAROT_VIDEO,
+      video: cygameTarotVideoConstraints(),
       audio: false,
     }).then(function (stream) {
       __preCameraStream = stream;
@@ -189,7 +205,7 @@ class App {
   async _retryOpenCameraAfterUserTap() {
     try {
       var stream = await navigator.mediaDevices.getUserMedia({
-        video: CYGAME_TAROT_VIDEO,
+        video: cygameTarotVideoConstraints(),
         audio: false,
       });
       this.els.camera.srcObject = stream;
@@ -263,6 +279,7 @@ class App {
   }
 
   _initStarfield() {
+    if (cygameTarotIsVivoStyleBrowser()) return;
     if (this.els.starfieldCanvas) {
       this.starfield = new Starfield(this.els.starfieldCanvas);
     }
@@ -344,7 +361,7 @@ class App {
         cameraFromPrecache = true;
       } else {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: CYGAME_TAROT_VIDEO,
+          video: cygameTarotVideoConstraints(),
           audio: false,
         });
       }
@@ -376,13 +393,15 @@ class App {
 
   async _initGesture() {
     this._setLoading('正在加载手势模型…（首次约 8MB，请稍候）');
-    var android = /Android/i.test(navigator.userAgent || '');
+    var ua = navigator.userAgent || '';
+    var android = /Android/i.test(ua);
+    var vivoStyle = cygameTarotIsVivoStyleBrowser();
     await this.gestureEngine.init(this.els.camera, {
       onStatus: (msg) => this._setLoading(msg),
       numHands: 1,
-      // 与小樱塔罗一致：安卓 stride=4；略拉长 poll 间隔减轻主线程压力
-      inferStride: android ? 4 : 2,
-      pollIntervalMs: android ? 26 : 16,
+      // Vivo/内置浏览器：推理更疏 + 轮询更慢，优先保证环转动跟手
+      inferStride: vivoStyle ? 5 : (android ? 4 : 2),
+      pollIntervalMs: vivoStyle ? 36 : (android ? 26 : 16),
     });
     this.gestureEngine.onGesture = (gesture, landmarks) => {
       this._handleGesture(gesture, landmarks);
@@ -621,11 +640,12 @@ class App {
     // 不再用卡牌颜色设置名字，使用 CSS 默认淡白色
 
     var flipLite = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-flip-lite');
-    this.particles.emitSummon(card.color, flipLite ? 18 : 40);
+    var vivoStyle = cygameTarotIsVivoStyleBrowser();
+    this.particles.emitSummon(card.color, vivoStyle ? 12 : (flipLite ? 18 : 40));
 
-    // 延迟翻转 — 手机端缩短等待、减粒子与法术层，降低与手势推理抢 GPU
-    var preFlipMs = flipLite ? 220 : 500;
-    var nameDelayMs = flipLite ? 420 : 800;
+    // 延迟翻转 — 手机端缩短等待、减粒子与法术层；Vivo 系内置浏览器再收紧
+    var preFlipMs = vivoStyle ? 180 : (flipLite ? 220 : 500);
+    var nameDelayMs = vivoStyle ? 380 : (flipLite ? 420 : 800);
     setTimeout(() => {
       this.els.selectedFlipper.classList.add('flipped');
 
@@ -639,8 +659,8 @@ class App {
         flipRing.classList.add('active');
       }
 
-      this.particles.emitSpellBurst(card.color, flipLite ? 16 : 60);
-      this.spellEffect.play(card, flipLite ? 2200 : 4000);
+      this.particles.emitSpellBurst(card.color, vivoStyle ? 8 : (flipLite ? 16 : 60));
+      this.spellEffect.play(card, vivoStyle ? 1400 : (flipLite ? 2200 : 4000));
 
       setTimeout(() => {
         this.els.selectedCardName.classList.add('show');

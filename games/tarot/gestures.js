@@ -142,11 +142,11 @@ class GestureEngine {
     const numHands = typeof options.numHands === 'number' ? options.numHands : 1;
     if (options.inferStride != null) {
       const n = Math.floor(Number(options.inferStride));
-      this._inferStride = n >= 1 && n <= 4 ? n : 2;
+      this._inferStride = n >= 1 && n <= 6 ? n : 2;
     }
     if (options.pollIntervalMs != null) {
       const m = Math.floor(Number(options.pollIntervalMs));
-      this._pollMs = m >= 12 && m <= 48 ? m : 16;
+      this._pollMs = m >= 12 && m <= 56 ? m : 16;
     }
 
     const { HandLandmarker, FilesetResolver } = window;

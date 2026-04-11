@@ -148,6 +148,9 @@ class CardCarousel {
     if (vw < 500) this.ringSize = 7;
     else if (vw < 780) this.ringSize = 8;
     else this.ringSize = 10;
+    if (typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo')) {
+      this.ringSize = Math.min(this.ringSize, 6);
+    }
     this.anglePerCard = 360 / this.ringSize;
   }
 
