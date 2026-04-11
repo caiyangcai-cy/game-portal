@@ -91,7 +91,7 @@
     .tr-header { text-align: center; margin-bottom: 22px; width: 100%; }
     .tr-title { font-size: 18px; font-weight: 300; letter-spacing: 6px; color: #f0ebe3; }
     .tr-sub { font-size: 9px; color: rgba(255, 255, 255, 0.25); letter-spacing: 3px; margin-top: 4px; }
-    .tr-cards { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; }
+    .tr-cards { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
     .tr-card { display: flex; flex-direction: column; align-items: center; }
     .tr-card .label { font-size: 8px; color: rgba(255, 255, 255, 0.35); letter-spacing: 3px; margin-bottom: 5px; }
     .tr-card .card-img {
@@ -105,13 +105,25 @@
     }
     .tr-card .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tr-card .name { font-size: 9px; color: #f0ebe3; letter-spacing: 2px; margin-top: 5px; text-align: center; }
-    /* 金句 + 正文：与小樱 result.html 分享区同款字号/行距，左对齐 */
+    .tr-quote-label {
+      align-self: stretch;
+      width: 100%;
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      color: rgba(184, 169, 201, 0.55);
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    /* 金句：独立一行金色，与解读区分 */
     .tr-quote {
       align-self: stretch;
       width: 100%;
       text-align: center;
-      margin-bottom: 14px;
+      margin-top: 0;
+      margin-bottom: 12px;
       padding: 0 2px;
+      min-height: 1.35em;
       font-size: 15px;
       font-weight: 900;
       line-height: 1.35;
@@ -135,29 +147,35 @@
     }
     .tr-actions-mock {
       display: flex;
-      gap: 8px;
+      flex-direction: row;
+      gap: 10px;
       width: 100%;
+      max-width: 100%;
       margin-bottom: 10px;
     }
     .tr-btn-mock {
-      flex: 1;
-      padding: 9px 0;
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 44px;
+      padding: 12px 6px;
       border-radius: 40px;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       border: none;
       cursor: default;
       opacity: 0.55;
+      box-sizing: border-box;
     }
     .tr-btn-mock.primary {
       background: rgba(20, 15, 5, 0.55);
       color: #ffd700;
-      border: 1px solid rgba(255, 215, 0, 0.45);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.12), inset 0 0 8px rgba(255, 215, 0, 0.08);
     }
     .tr-btn-mock.ghost {
       background: transparent;
-      color: rgba(255, 255, 255, 0.45);
+      color: rgba(255, 255, 255, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .tr-upcoming {
@@ -266,6 +284,7 @@
       letter-spacing: 0.02em;
       color: rgba(255, 223, 120, 0.98);
       text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
+      margin-top: 8px;
       margin-bottom: 14px;
       padding: 0 6px;
       box-sizing: border-box;
@@ -279,6 +298,7 @@
       height: auto;
       flex: 1 1 auto;
       min-height: 0;
+      margin-top: 8px;
       padding: 0 10px;
       border-radius: 0;
       background: none;
@@ -322,11 +342,14 @@
     .actions {
       width: 360px;
       display: flex;
+      flex-direction: row;
       gap: 10px;
     }
     .btn {
-      flex: 1;
-      padding: 12px 0;
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 44px;
+      padding: 12px 8px;
       border-radius: 40px;
       border: none;
       font-size: 13px;
@@ -336,6 +359,7 @@
       font-family: inherit;
       -webkit-tap-highlight-color: transparent;
       transition: all 0.3s;
+      box-sizing: border-box;
     }
     .btn:active { transform: scale(0.98); opacity: 0.92; }
     .btn-save {
@@ -353,13 +377,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    .hint {
-      width: 360px;
-      text-align: center;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.3);
-      line-height: 1.6;
     }
   </style>
 </head>
@@ -385,6 +402,7 @@
             <div class="tr-sub">TAROT READING</div>
           </div>
           <div class="tr-cards" id="demo-tr-cards"></div>
+          <div class="tr-quote-label">金 句</div>
           <div class="tr-quote" id="demo-quote"></div>
           <div class="tr-insight" id="demo-insight"></div>
           <div class="tr-actions-mock">
@@ -421,10 +439,9 @@
       </div>
 
       <div class="actions">
-        <button type="button" class="btn btn-save" id="btn-save">保存分享</button>
         <a class="btn btn-play" id="btn-play" href="../games/tarot/index.html">重新占卜</a>
+        <button type="button" class="btn btn-save" id="btn-save">保存分享</button>
       </div>
-      <div class="hint">提示：手机浏览器点「保存分享」后，可用系统分享或长按大图存到相册。</div>
     </div>
   </div>
 
@@ -440,6 +457,8 @@
         M01: { name: '魔术师', img: '../games/tarot/塔罗牌完整/大牌/大牌01.jpg' },
         M02: { name: '女祭司', img: '../games/tarot/塔罗牌完整/大牌/大牌02.jpg' },
         M03: { name: '女皇', img: '../games/tarot/塔罗牌完整/大牌/大牌03.jpg' },
+        M07: { name: '战车', img: '../games/tarot/塔罗牌完整/大牌/大牌07.jpg' },
+        M09: { name: '隐士', img: '../games/tarot/塔罗牌完整/大牌/大牌09.jpg' },
         M17: { name: '星星', img: '../games/tarot/塔罗牌完整/大牌/大牌17.jpg' },
         M18: { name: '月亮', img: '../games/tarot/塔罗牌完整/大牌/大牌18.jpg' },
         M19: { name: '太阳', img: '../games/tarot/塔罗牌完整/大牌/大牌19.jpg' },
