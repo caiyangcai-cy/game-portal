@@ -39,11 +39,21 @@
    *
    * 如果 iframe 还没加载完或不支持预请求：8s 超时后直接全屏（降级到旧行为）。
    * 如果摄像头权限已获取过（cygame-camera-granted 已收到）：直接全屏。
+   *
+   * 不在中间再弹「摄像头已就绪 / 进入全屏」页：Safari 在系统「允许」后同一消息链路里
+   * 多次尝试 requestFullscreen，多数可直达全屏；若仍失败用户可再点一次「全屏体验」。
    */
   var wantsFullscreen = false;
   var cameraPreGranted = false;
-  var restoreOverlay = null;
   var pendingFullscreen = false; // 正在等 iframe 回复中
+
+  function isDocumentFullscreen() {
+    return !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement
+    );
+  }
 
   function requestFs() {
     var root = frameWrap || document.querySelector(".play-frame-wrap");
@@ -62,46 +72,21 @@
     }
   }
 
-  /** 创建全屏恢复覆盖层（后备：万一 requestFs 因非用户手势被拒绝） */
-  function showRestoreOverlay() {
-    var isFs = !!(
-      document.fullscreenElement ||
-      document.webkitFullscreenElement ||
-      document.msFullscreenElement
-    );
-    if (isFs) return;
-    if (restoreOverlay) {
-      restoreOverlay.style.display = "flex";
-      return;
-    }
-    restoreOverlay = document.createElement("div");
-    restoreOverlay.id = "fullscreen-restore-overlay";
-    restoreOverlay.innerHTML =
-      '<div style="text-align:center;max-width:320px;padding:0 20px;">' +
-        '<div style="font-size:48px;margin-bottom:16px;">📷</div>' +
-        '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">摄像头已就绪</div>' +
-        '<div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:1.5;">权限已获取，点击下方按钮进入全屏</div>' +
-        '<button type="button" id="btn-restore-fs" style="' +
-          "padding:14px 36px;border-radius:999px;border:none;" +
-          "background:linear-gradient(135deg,#ff6fa7,#ff8a50);color:#fff;" +
-          "font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;" +
-          "box-shadow:0 4px 20px rgba(255,111,167,0.4);" +
-        '">进入全屏</button>' +
-      '</div>';
-    restoreOverlay.style.cssText =
-      "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;" +
-      "justify-content:center;background:rgba(0,0,0,0.75);" +
-      "backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);";
-    document.body.appendChild(restoreOverlay);
-
-    restoreOverlay.querySelector("#btn-restore-fs").addEventListener("click", function () {
-      restoreOverlay.style.display = "none";
-      requestFs();
+  /** 在 postMessage / 权限回调等紧接时刻多次尝试全屏（避免再插一层手动按钮） */
+  function requestFsAggressive() {
+    requestFs();
+    requestAnimationFrame(function () {
+      if (!isDocumentFullscreen() && wantsFullscreen) requestFs();
+      requestAnimationFrame(function () {
+        if (!isDocumentFullscreen() && wantsFullscreen) requestFs();
+        setTimeout(function () {
+          if (!isDocumentFullscreen() && wantsFullscreen) requestFs();
+        }, 60);
+        setTimeout(function () {
+          if (!isDocumentFullscreen() && wantsFullscreen) requestFs();
+        }, 280);
+      });
     });
-  }
-
-  function hideRestoreOverlay() {
-    if (restoreOverlay) restoreOverlay.style.display = "none";
   }
 
   function enterFullscreen() {
@@ -244,19 +229,7 @@
       // 摄像头被拒绝 — 如果正在等预请求结果，直接进全屏（游戏内自行处理）
       if (pendingFullscreen) {
         pendingFullscreen = false;
-        hideRestoreOverlay();
-        requestFs();
-        // requestFs 可能因非用户手势被拒，400ms 后检查
-        setTimeout(function () {
-          var isFs = !!(
-            document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.msFullscreenElement
-          );
-          if (!isFs && wantsFullscreen) {
-            showRestoreOverlay();
-          }
-        }, 400);
+        requestFsAggressive();
       }
       return;
     }
@@ -267,36 +240,15 @@
       // 如果正在等 iframe 预请求结果 → 摄像头搞定了，现在进全屏
       if (pendingFullscreen) {
         pendingFullscreen = false;
-        hideRestoreOverlay();
-        requestFs();
-        // requestFs 可能因非用户手势被拒，400ms 后检查
-        setTimeout(function () {
-          var isFs = !!(
-            document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.msFullscreenElement
-          );
-          if (!isFs && wantsFullscreen) {
-            showRestoreOverlay();
-          }
-        }, 400);
+        requestFsAggressive();
         return;
       }
 
       if (!wantsFullscreen) return;
 
-      // 非预请求场景（比如用户没点全屏就直接玩游戏触发了摄像头）
-      var isFs2 = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.msFullscreenElement
-      );
-      if (isFs2) {
-        hideRestoreOverlay();
-        return;
-      }
-      // 不在全屏（可能是旧的 Safari 降级路径）→ 显示恢复覆盖层
-      showRestoreOverlay();
+      // 非预请求场景（例如 iframe 晚到的 granted）：尽量帮用户进全屏，不弹中间页
+      if (isDocumentFullscreen()) return;
+      requestFsAggressive();
       return;
     }
   });
