@@ -776,22 +776,16 @@ class App {
       this.els.resultShowcase.innerHTML += `<div class="showcase-question">「${this.userQuestion}」</div>`;
     }
     const showcaseRow = document.createElement('div');
-    showcaseRow.className = 'sc-cards-row';
-    var posLabels = ['过 去', '现 在', '未 来'];
+    showcaseRow.className = 'showcase-row';
+    const posLabels = ['过去', '现在', '未来'];
     this.collectedCards.forEach((card, i) => {
-      showcaseRow.innerHTML +=
-        '<div class="sc-mini" style="animation-delay: ' +
-        i * 0.2 +
-        's">' +
-        '<div class="lbl">' +
-        posLabels[i] +
-        '</div><div class="imgw"><img src="' +
-        card.image +
-        '" alt="' +
-        (card.name || '') +
-        '" loading="eager" decoding="async" /></div><div class="nm">' +
-        (card.name || '') +
-        '</div></div>';
+      showcaseRow.innerHTML += `
+        <div class="showcase-card" style="animation-delay: ${i * 0.2}s">
+          <div class="showcase-label">${posLabels[i]}</div>
+          <img src="${card.image}" alt="${card.name}">
+          <div class="showcase-name">${card.name}</div>
+        </div>
+      `;
     });
     this.els.resultShowcase.appendChild(showcaseRow);
 
