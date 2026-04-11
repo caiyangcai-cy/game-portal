@@ -1433,20 +1433,38 @@ class SakuraTarotApp {
       shareImg.style.border = 'none';
       shareImg.style.boxShadow = 'none';
       if (card.image) {
-        shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" loading="eager" style="width:100%;height:100%;object-fit:contain;display:block">`;
-        const imgEl = shareImg.querySelector('img');
-        if (imgEl) {
-          if (imgEl.decode) {
-            imgEl.decode().then(enableSave).catch(() => setTimeout(enableSave, 800));
-          } else {
-            imgEl.onload = () => setTimeout(enableSave, 500);
-            if (imgEl.complete) setTimeout(enableSave, 500);
+        // Safari 下 html-to-image 截图时 <img> 可能还没光栅化
+        // 解决方案：先把图片画到一个临时 canvas 转成 base64 dataURL
+        // 再用 background-image: url(data:...) 设置，这样截图引擎一定能拿到像素
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          try {
+            const cvs = document.createElement('canvas');
+            cvs.width = tempImg.naturalWidth;
+            cvs.height = tempImg.naturalHeight;
+            const ctx = cvs.getContext('2d');
+            ctx.drawImage(tempImg, 0, 0);
+            const dataUrl = cvs.toDataURL('image/png');
+            // 用 background-image 设置 base64 图片
+            shareImg.innerHTML = '';
+            shareImg.style.backgroundImage = `url(${dataUrl})`;
+            shareImg.style.backgroundSize = 'contain';
+            shareImg.style.backgroundRepeat = 'no-repeat';
+            shareImg.style.backgroundPosition = 'center';
+            enableSave();
+          } catch (e) {
+            // canvas 失败时回退到普通 img
+            shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
+            setTimeout(enableSave, 1000);
           }
-          // 兜底：最多等 3 秒
-          setTimeout(() => { if (!this._shareImageReady) enableSave(); }, 3000);
-        } else {
-          setTimeout(enableSave, 500);
-        }
+        };
+        tempImg.onerror = () => {
+          shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
+          setTimeout(enableSave, 1000);
+        };
+        tempImg.src = card.image;
+        // 兜底：最多等 5 秒
+        setTimeout(() => { if (!this._shareImageReady) enableSave(); }, 5000);
       } else {
         shareImg.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;color:${card.color};text-shadow:0 0 18px ${card.color}55">${card.symbol || '✦'}</div>`;
         enableSave();
