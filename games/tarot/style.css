@@ -1954,6 +1954,273 @@ html, body {
   letter-spacing: 0.05em;
 }
 
+/* ── 结果页：文档金句 + 解读（对齐预览 / 小樱字号）── */
+.result-title-tarot {
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 6px;
+  margin-bottom: 6px;
+}
+.result-subtitle-tarot {
+  font-size: 9px;
+  letter-spacing: 3px;
+  opacity: 0.85;
+}
+.result-doc-quote {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: rgba(255, 223, 120, 0.98);
+  text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
+  margin: 8px 0 14px;
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: resultFadeIn 0.6s ease forwards;
+}
+.result-doc-insight {
+  width: 100%;
+  max-width: 360px;
+  text-align: left;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+  padding: 0 8px 8px;
+  margin-bottom: 18px;
+  animation: resultFadeIn 0.7s ease forwards;
+}
+.result-actions-tarot {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  animation: resultFadeIn 0.85s ease forwards;
+}
+.btn-tarot-save,
+.btn-tarot-replay {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.3s;
+}
+.btn-tarot-save:active,
+.btn-tarot-replay:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+.btn-tarot-save {
+  background: rgba(20, 15, 5, 0.6);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.12), inset 0 0 8px rgba(255, 215, 0, 0.08);
+}
+.btn-tarot-replay {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.result-save-hint {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1.6;
+  margin-bottom: 14px;
+  animation: resultFadeIn 0.9s ease forwards;
+}
+.result-upcoming {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  margin-bottom: 10px;
+  padding: 0 8px;
+  animation: resultFadeIn 1s ease forwards;
+}
+.result-upcoming-text {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.28);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+}
+
+/* ── 离屏分享卡 360×640（games/sakura/result.html #share-card 同款度量）── */
+.tarot-share-root {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 360px;
+  height: 640px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+.tarot-share-root .share-card {
+  width: 360px;
+  height: 640px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #08061a 0%, #0f0b28 50%, #0a0818 100%);
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 42px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  position: relative;
+  box-sizing: border-box;
+}
+.tarot-share-root .share-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.tarot-share-root .sc-header {
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
+  flex-shrink: 0;
+}
+.tarot-share-root .sc-title {
+  font-size: 24px;
+  font-weight: 300;
+  color: #f0ebe3;
+  letter-spacing: 3px;
+}
+.tarot-share-root .sc-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 3px;
+  margin-top: 6px;
+}
+.tarot-share-root .sc-cards-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+.tarot-share-root .sc-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 98px;
+}
+.tarot-share-root .sc-mini .lbl {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.32);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.tarot-share-root .sc-mini .imgw {
+  width: 92px;
+  height: 156px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  background: #1a1530;
+}
+.tarot-share-root .sc-mini .imgw img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tarot-share-root .sc-mini .nm {
+  font-size: 9px;
+  color: #f0ebe3;
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.2;
+}
+.tarot-share-root .sc-quote {
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: rgba(255, 223, 120, 0.98);
+  text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
+  margin-bottom: 14px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tarot-share-root .sc-destiny-card {
+  width: 100%;
+  height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 10px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  box-sizing: border-box;
+  overflow: visible;
+  display: flex;
+  align-items: flex-start;
+}
+.tarot-share-root .sc-destiny-body {
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+  text-align: left;
+}
+.tarot-share-root .sc-footer-block {
+  width: 100%;
+  flex-shrink: 0;
+  text-align: center;
+  padding-top: 12px;
+}
+.tarot-share-root .sc-divider {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+  margin: 0 auto 6px;
+}
+.tarot-share-root .sc-cta {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.tarot-share-root .sc-url {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.4px;
+  margin-top: 7px;
+  line-height: 1.25;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
 /* ========================================================================
    手机端轻量翻牌（html.perf-flip-lite）：减少 filter/blur/多层 box-shadow 动画与时长
    ======================================================================== */

@@ -105,6 +105,9 @@ class App {
     // DOM
     this.els = {};
     this._questionReady = false; // 是否已完成提问
+    /** 分享文件名用：文档能量组合 key（如 ABE） */
+    this._lastTypesKey = '---';
+    this._tarotShareSaveBound = false;
   }
 
   async boot() {
@@ -305,6 +308,7 @@ class App {
     document.getElementById('btn-restart-reading').addEventListener('click', () => {
       this._resetAll();
     });
+    this._bindTarotSaveShare();
 
     // 提问面板 — 默念开始按钮（click + touchend 双保险）
     const silentBtn = document.getElementById('btn-silent-start');
@@ -735,7 +739,7 @@ class App {
   }
 
   /**
-   * 显示占卜结果
+   * 显示占卜结果（金句+解读：文档能量表；保存分享 DOM 同步更新）
    */
   _showResult() {
     this.state = STATE.RESULT;
@@ -749,10 +753,24 @@ class App {
     this.els.tarotCollection.style.pointerEvents = 'none';
     this.els.stateBadge.style.opacity = '0';
 
-    // 使用解读引擎生成完整解读
-    const reading = generateReading(this.collectedCards);
+    var doc =
+      typeof getTarotDocQuoteAndReading === 'function'
+        ? getTarotDocQuoteAndReading(this.collectedCards)
+        : null;
+    this._lastTypesKey = doc && doc.typesKey ? doc.typesKey : '---';
+    var quoteText =
+      doc && doc.quote ? doc.quote : '「解读数据未加载，请刷新页面重试。」';
+    var readingText = doc && doc.reading ? doc.reading : '';
 
-    // 渲染三张牌居中大图（方便截图）
+    var qIn = document.getElementById('result-doc-quote');
+    var insightIn = document.getElementById('result-doc-insight');
+    if (qIn) {
+      qIn.textContent = quoteText;
+      qIn.setAttribute('title', quoteText);
+    }
+    if (insightIn) insightIn.textContent = readingText;
+
+    // 三张牌居中大图
     this.els.resultShowcase.innerHTML = '';
     if (this.userQuestion) {
       this.els.resultShowcase.innerHTML += `<div class="showcase-question">「${this.userQuestion}」</div>`;
@@ -771,30 +789,137 @@ class App {
     });
     this.els.resultShowcase.appendChild(showcaseRow);
 
-    // 渲染三张牌 + 单牌解读
-    // 隐藏掉原本的解读项与建议赋值逻辑，不再渲染
-    // this.els.resultCards.innerHTML = '';
-    // reading.cardReadings.forEach((cr, i) => {...});
-
-    // 综合解读（合并了整体流动 + 元素共鸣）
-    const insightEl = document.getElementById('result-insight-text');
-    // insight 包含两段，用 \n\n 分隔，转为 <p> 标签
-    insightEl.innerHTML = reading.insight.split('\n\n').map(p => `<p>${p}</p>`).join('');
-
-    // 行动建议
-    const adviceList = document.getElementById('result-advice-list');
-    adviceList.innerHTML = '';
-    reading.actionAdvice.forEach(advice => {
-      adviceList.innerHTML += `<div class="advice-item"><span class="advice-bullet">·</span>${advice}</div>`;
-    });
-
-    // 智慧提示
-    document.getElementById('result-wisdom-text').textContent = reading.wisdom;
+    this._fillTarotShareDom(this.collectedCards, quoteText, readingText);
 
     this.els.resultView.classList.remove('hidden');
 
-    // 大粒子特效
     this.particles.emitSpellBurst('#d4af37', 150);
+  }
+
+  /**
+   * 离屏 #share-card：与小樱 result.html 结构一致，供 sakuraExportShareToDataUrl 截图
+   */
+  _fillTarotShareDom(cards, quoteText, readingText) {
+    var row = document.getElementById('tarot-share-cards-row');
+    if (!row) return;
+    var labs = ['过 去', '现 在', '未 来'];
+    row.innerHTML = '';
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      var d = document.createElement('div');
+      d.className = 'sc-mini';
+      d.innerHTML =
+        '<div class="lbl">' +
+        labs[i] +
+        '</div><div class="imgw"><img src="' +
+        c.image +
+        '" alt="" loading="eager" decoding="async" /></div><div class="nm">' +
+        c.name +
+        '</div>';
+      row.appendChild(d);
+    }
+    var qEl = document.getElementById('tarot-share-sc-quote');
+    var bEl = document.getElementById('tarot-share-sc-body');
+    if (qEl) {
+      qEl.textContent = quoteText;
+      qEl.setAttribute('title', quoteText);
+    }
+    if (bEl) bEl.textContent = readingText;
+  }
+
+  _bindTarotSaveShare() {
+    if (this._tarotShareSaveBound) return;
+    var btn = document.getElementById('btn-tarot-save-share');
+    if (!btn) return;
+    this._tarotShareSaveBound = true;
+    var self = this;
+    btn.addEventListener('click', function () {
+      void self._onTarotSaveShareClick();
+    });
+  }
+
+  _tarotIsMobileShareDevice() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPod|Android/i.test(ua)) return true;
+    if (/iPad/i.test(ua)) return true;
+    if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+    return false;
+  }
+
+  /**
+   * 保存分享：流程对齐 games/sakura/result.html（已线上验证）
+   */
+  async _onTarotSaveShareClick() {
+    var btn = document.getElementById('btn-tarot-save-share');
+    if (!btn) return;
+    if (!window.sakuraExportShareToDataUrl) {
+      alert('分享组件未加载，请刷新重试');
+      return;
+    }
+    if (!window.html2canvas && !(window.htmlToImage && window.htmlToImage.toPng)) {
+      alert('未加载 html2canvas / html-to-image');
+      return;
+    }
+    var shareEl = document.getElementById('share-card');
+    if (!shareEl) return;
+
+    var old = '保存分享';
+    btn.disabled = true;
+    btn.textContent = '生成中…';
+    try {
+      var url = await window.sakuraExportShareToDataUrl(shareEl);
+      var ids = this.collectedCards.map(function (c) {
+        return c.id;
+      }).join('-');
+      var fileName = 'tarot-' + ids + '-' + (this._lastTypesKey || 'XXX') + '-share.png';
+
+      if (this._tarotIsMobileShareDevice() && typeof window.sakuraPresentShareImageForAlbum === 'function') {
+        var mob = await window.sakuraPresentShareImageForAlbum(url, fileName);
+        if (!mob.ok) {
+          btn.textContent = mob.method === 'aborted' ? '已取消' : '保存失败';
+          setTimeout(function () {
+            btn.textContent = old;
+          }, mob.method === 'aborted' ? 1200 : 1800);
+          return;
+        }
+        btn.textContent = mob.method === 'share' ? '请在分享里选「存储图像」' : '长按图片存相册';
+        setTimeout(function () {
+          btn.textContent = old;
+        }, 2200);
+        return;
+      }
+
+      var save = { ok: true, method: 'download' };
+      if (typeof window.sakuraSaveShareDataUrl === 'function') {
+        save = await window.sakuraSaveShareDataUrl(url, fileName);
+      } else {
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      if (!save.ok) {
+        btn.textContent = save.method === 'aborted' ? '已取消' : '保存失败';
+        setTimeout(function () {
+          btn.textContent = old;
+        }, save.method === 'aborted' ? 1200 : 1800);
+        return;
+      }
+      btn.textContent = save.method === 'picker' ? '已保存' : '已保存到下载';
+      setTimeout(function () {
+        btn.textContent = old;
+      }, 1400);
+    } catch (e) {
+      console.error(e);
+      btn.textContent = '失败，建议截图';
+      setTimeout(function () {
+        btn.textContent = old;
+      }, 1600);
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   /**
@@ -859,6 +984,24 @@ class App {
     this.els.carouselStage.classList.add('hidden');
     this.els.resultView.classList.add('hidden');
     this.els.selectedView.classList.add('hidden');
+
+    var rq = document.getElementById('result-doc-quote');
+    var ri = document.getElementById('result-doc-insight');
+    if (rq) {
+      rq.textContent = '';
+      rq.removeAttribute('title');
+    }
+    if (ri) ri.textContent = '';
+    var row = document.getElementById('tarot-share-cards-row');
+    if (row) row.innerHTML = '';
+    var sq = document.getElementById('tarot-share-sc-quote');
+    var sb = document.getElementById('tarot-share-sc-body');
+    if (sq) {
+      sq.textContent = '';
+      sq.removeAttribute('title');
+    }
+    if (sb) sb.textContent = '';
+    this._lastTypesKey = '---';
 
     // 恢复所有 UI 元素显示
     this.els.gestureHint.style.opacity = '1';

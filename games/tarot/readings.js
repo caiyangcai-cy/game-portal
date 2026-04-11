@@ -350,3 +350,22 @@ function _getRandomWisdom() {
   ];
   return wisdoms[Math.floor(Math.random() * wisdoms.length)];
 }
+
+/**
+ * 文档规则：三张牌英文名 → 能量 A–F，排序后查 TAROT_READINGS_DOC（与 preview 一致）
+ * @param {{ nameEn: string }[]} cards 长度为 3
+ * @returns {{ quote: string, reading: string, typesKey: string } | null}
+ */
+function getTarotDocQuoteAndReading(cards) {
+  if (!cards || cards.length !== 3) return null;
+  var map = typeof window !== 'undefined' && window.TAROT_CARD_ENERGY_MAP ? window.TAROT_CARD_ENERGY_MAP : null;
+  var readings = typeof window !== 'undefined' && window.TAROT_READINGS_DOC ? window.TAROT_READINGS_DOC : null;
+  if (!map || !readings) return null;
+  var t0 = map[cards[0].nameEn];
+  var t1 = map[cards[1].nameEn];
+  var t2 = map[cards[2].nameEn];
+  var types = [t0 || 'D', t1 || 'D', t2 || 'D'].sort().join('');
+  var row = readings[types] || readings.DEFAULT;
+  if (!row) return null;
+  return { quote: row.quote, reading: row.reading, typesKey: types };
+}
