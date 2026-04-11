@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>心灵塔罗牌 · 结果页/分享页本地预览</title>
+  <!-- 与小樱 result.html 一致：不引 Google Fonts，避免截图管线跨域样式问题 -->
+  <style>
+    :root {
+      --bg: #070616;
+      --text: #f0ebe3;
+      --muted: rgba(255, 255, 255, 0.55);
+      --gold: #d4af37;
+      --lav: #b8a9c9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.06) 0%, transparent 55%),
+        linear-gradient(180deg, #06061a 0%, #0c0a22 40%, #080818 100%);
+      color: var(--text);
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      padding: 20px 14px 32px;
+      line-height: 1.5;
+    }
+    .page-head {
+      max-width: 520px;
+      margin: 0 auto 20px;
+      text-align: center;
+    }
+    .page-head h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+    }
+    .page-head .sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 1px;
+    }
+    .page-head .tip {
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(255, 215, 0, 0.45);
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px dashed rgba(255, 215, 0, 0.25);
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .page-head code { font-size: 10px; color: rgba(255, 255, 255, 0.5); }
+
+    .pv-section {
+      max-width: 400px;
+      margin: 28px auto 0;
+    }
+    .pv-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--lav);
+      letter-spacing: 0.2em;
+      margin-bottom: 12px;
+    }
+
+    /* ── 游戏内结果页（示意，对齐 tarot-result-mockup）── */
+    .phone-shell {
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      border-radius: 28px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+      background: #06061a;
+    }
+    .phone-scroll {
+      max-height: 560px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tarot-result {
+      min-height: 100%;
+      background: linear-gradient(180deg, #06061a 0%, #0c0a22 40%, #080818 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 16px 24px;
+    }
+    .tr-header { text-align: center; margin-bottom: 22px; }
+    .tr-title { font-size: 18px; font-weight: 300; letter-spacing: 6px; color: #f0ebe3; }
+    .tr-sub { font-size: 9px; color: rgba(255, 255, 255, 0.25); letter-spacing: 3px; margin-top: 4px; }
+    .tr-cards { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; }
+    .tr-card { display: flex; flex-direction: column; align-items: center; }
+    .tr-card .label { font-size: 8px; color: rgba(255, 255, 255, 0.35); letter-spacing: 3px; margin-bottom: 5px; }
+    .tr-card .card-img {
+      width: 76px;
+      height: 129px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+      background: #1a1530;
+    }
+    .tr-card .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tr-card .name { font-size: 9px; color: #f0ebe3; letter-spacing: 2px; margin-top: 5px; text-align: center; }
+    .tr-quote {
+      text-align: center;
+      margin-bottom: 14px;
+      padding: 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255, 223, 120, 0.95);
+      letter-spacing: 0.5px;
+      line-height: 1.45;
+      text-shadow: 0 0 14px rgba(255, 215, 0, 0.28);
+    }
+    .tr-reading {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .tr-reading .rd-icon { text-align: center; font-size: 12px; color: var(--lav); margin-bottom: 4px; opacity: 0.75; }
+    .tr-reading .rd-title { text-align: center; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; color: #f0ebe3; }
+    .tr-reading .rd-text { font-size: 11px; color: rgba(255, 255, 255, 0.5); line-height: 1.85; text-align: center; font-weight: 300; }
+    .tr-wisdom {
+      width: 100%;
+      text-align: center;
+      padding: 12px 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 12px;
+    }
+    .tr-wisdom-text { font-size: 10px; color: rgba(255, 255, 255, 0.28); font-style: italic; line-height: 1.65; }
+    .tr-actions-mock {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .tr-btn-mock {
+      flex: 1;
+      padding: 9px 0;
+      border-radius: 40px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border: none;
+      cursor: default;
+      opacity: 0.55;
+    }
+    .tr-btn-mock.primary {
+      background: rgba(20, 15, 5, 0.55);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.45);
+    }
+    .tr-btn-mock.ghost {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .tr-upcoming {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px dashed rgba(184, 169, 201, 0.22);
+    }
+    .tr-upcoming-text { font-size: 9px; color: rgba(184, 169, 201, 0.42); line-height: 1.65; }
+    .tr-brand {
+      font-size: 10px;
+      font-weight: 700;
+      opacity: 0.38;
+      display: flex;
+      align-items: baseline;
+      gap: 0.06em;
+    }
+    .tr-brand .cy {
+      background: linear-gradient(135deg, #e0bfb8, #b76e79);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .tr-brand .gm { color: rgba(168, 168, 173, 0.85); font-weight: 800; font-size: 0.72em; margin-left: 0.12em; }
+
+    /* ── 分享卡（与小樱 result.html 同宽 360 + 同款按钮）── */
+    .share-outer {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .share-card {
+      width: 360px;
+      height: 640px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #08061a 0%, #0f0b28 50%, #0a0818 100%);
+      box-shadow: 0 12px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 38px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .share-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 110px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(184, 169, 201, 0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .sc-header { text-align: center; margin-bottom: 18px; position: relative; flex-shrink: 0; }
+    .sc-title { font-size: 22px; font-weight: 300; color: #f0ebe3; letter-spacing: 3px; }
+    .sc-sub { font-size: 11px; color: rgba(255, 255, 255, 0.28); letter-spacing: 3px; margin-top: 5px; }
+    .sc-cards-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .sc-mini {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 98px;
+    }
+    .sc-mini .lbl { font-size: 8px; color: rgba(255, 255, 255, 0.32); letter-spacing: 2px; margin-bottom: 4px; }
+    .sc-mini .imgw {
+      width: 92px;
+      height: 156px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      background: #1a1530;
+    }
+    .sc-mini .imgw img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .sc-mini .nm { font-size: 9px; color: #f0ebe3; margin-top: 4px; letter-spacing: 1px; text-align: center; line-height: 1.2; }
+    .sc-quote {
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      color: rgba(255, 223, 120, 0.98);
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.35), 0 2px 0 rgba(0, 0, 0, 0.35);
+      margin-bottom: 12px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .sc-destiny-card {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 0 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-start;
+    }
+    .sc-destiny-body {
+      font-size: 13px;
+      line-height: 1.82;
+      color: rgba(255, 255, 255, 0.54);
+      font-weight: 400;
+      text-align: left;
+    }
+    .sc-footer-block {
+      width: 100%;
+      flex-shrink: 0;
+      text-align: center;
+      padding-top: 10px;
+    }
+    .sc-divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.35), transparent);
+      margin: 0 auto 6px;
+    }
+    .sc-cta { font-size: 9px; color: rgba(255, 255, 255, 0.3); letter-spacing: 0.5px; margin-bottom: 4px; }
+    .sc-url {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.28);
+      letter-spacing: 0.4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    }
+
+    /* 小樱同款操作区 */
+    .actions {
+      width: 360px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px 0;
+      border-radius: 40px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.3s;
+    }
+    .btn:active { transform: scale(0.98); opacity: 0.92; }
+    .btn-save {
+      background: rgba(20, 15, 5, 0.6);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.12), inset 0 0 8px rgba(255, 215, 0, 0.08);
+    }
+    .btn-save:active { background: rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.8); }
+    .btn-play {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hint {
+      width: 360px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>✦ 心灵塔罗牌 · 结果 / 分享预览 ✦</h1>
+    <p class="sub">对齐 <code>preview/tarot-result-mockup.html</code> 布局 + 小樱 <code>games/sakura/result.html</code> 按钮逻辑</p>
+    <p class="tip">
+      URL 可换三张牌（牌面 id，对应 <code>games/tarot/cards.js</code>）：<br />
+      <code>?past=M02&amp;present=M17&amp;future=M19</code><br />
+      需本地服务打开：<code>python3 -m http.server 8765 --bind 127.0.0.1</code> → 本页路径见地址栏。
+    </p>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-label">— 游戏内结果页（示意）—</div>
+    <div class="phone-shell">
+      <div class="phone-scroll">
+        <div class="tarot-result" id="demo-in-game">
+          <div class="tr-header">
+            <div class="tr-title">✦ 命运揭示 ✦</div>
+            <div class="tr-sub">TAROT READING</div>
+          </div>
+          <div class="tr-cards" id="demo-tr-cards"></div>
+          <div class="tr-quote" id="demo-quote"></div>
+          <div class="tr-reading">
+            <div class="rd-icon">✦</div>
+            <div class="rd-title">命运解读</div>
+            <div class="rd-text" id="demo-insight"></div>
+          </div>
+          <div class="tr-wisdom">
+            <div class="tr-wisdom-text" id="demo-wisdom"></div>
+          </div>
+          <div class="tr-actions-mock">
+            <button type="button" class="tr-btn-mock ghost" disabled>重新占卜</button>
+            <button type="button" class="tr-btn-mock primary" disabled>保存分享</button>
+          </div>
+          <div class="tr-upcoming">
+            <div class="tr-upcoming-text">新版本将支持输入你的问题<br />获得专属个性化解读<br />敬请期待 ✦</div>
+          </div>
+          <div class="tr-brand"><span class="cy">CYou</span><span class="gm">Games</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-label">— 分享图（360×640，与小樱导出 DOM 同级）—</div>
+    <div class="share-outer">
+      <div class="share-card" id="share-card">
+        <div class="sc-header">
+          <div class="sc-title">✦ 命运揭示 ✦</div>
+          <div class="sc-sub">心灵塔罗牌 · RIDER-WAITE TAROT</div>
+        </div>
+        <div class="sc-cards-row" id="share-cards-row"></div>
+        <div class="sc-quote" id="share-quote"></div>
+        <div class="sc-destiny-card">
+          <div class="sc-destiny-body" id="share-insight"></div>
+        </div>
+        <div class="sc-footer-block">
+          <div class="sc-divider"></div>
+          <div class="sc-cta">隔空手势 · 三张牌阵占卜 →</div>
+          <div class="sc-url">https://cyougames.site</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-save" id="btn-save">保存分享</button>
+        <a class="btn btn-play" id="btn-play" href="../games/tarot/index.html">重新占卜</a>
+      </div>
+      <div class="hint">提示：手机浏览器点「保存分享」后，可用系统分享或长按大图存到相册。</div>
+    </div>
+  </div>
+
+  <script src="../games/sakura/share-capture.js?v=20260411d"></script>
+  <script src="../games/sakura/vendor/html2canvas.min.js?v=20260416"></script>
+  <script src="../games/sakura/vendor/html-to-image.min.js?v=20260416"></script>
+  <script src="../games/sakura/share-export.js?v=20260412c"></script>
+  <script>
+    (function () {
+      var DECK = {
+        M00: { name: '愚者', img: '../games/tarot/塔罗牌完整/大牌/大牌00.jpg' },
+        M01: { name: '魔术师', img: '../games/tarot/塔罗牌完整/大牌/大牌01.jpg' },
+        M02: { name: '女祭司', img: '../games/tarot/塔罗牌完整/大牌/大牌02.jpg' },
+        M03: { name: '女皇', img: '../games/tarot/塔罗牌完整/大牌/大牌03.jpg' },
+        M17: { name: '星星', img: '../games/tarot/塔罗牌完整/大牌/大牌17.jpg' },
+        M18: { name: '月亮', img: '../games/tarot/塔罗牌完整/大牌/大牌18.jpg' },
+        M19: { name: '太阳', img: '../games/tarot/塔罗牌完整/大牌/大牌19.jpg' },
+      };
+
+      function pick(id) {
+        id = (id || 'M02').toUpperCase();
+        return DECK[id] || DECK.M02;
+      }
+
+      function qp(name, def) {
+        try {
+          var u = new URL(location.href);
+          return (u.searchParams.get(name) || def || '').trim();
+        } catch (e) {
+          return def;
+        }
+      }
+
+      var past = pick(qp('past', 'M02'));
+      var present = pick(qp('present', 'M17'));
+      var future = pick(qp('future', 'M19'));
+
+      var quote =
+        qp('quote', '') ||
+        '「你走过的暗夜，终将化作照亮前路的星光。」';
+
+      var insight =
+        qp('insight', '') ||
+        '从「' +
+          past.name +
+          '」到「' +
+          present.name +
+          '」，你正在经历一次从内心深处向外绽放的蜕变；「' +
+          future.name +
+          '」暗示前路仍有起伏，但光已经在路上。';
+
+      var wisdom =
+        '真正的答案不在牌面，而在你每一次选择里。愿这份解读陪你走过下一程。';
+
+      function cardHtml(c) {
+        return (
+          '<div class="tr-card">' +
+          '<div class="label"></div>' +
+          '<div class="card-img"><img src="' +
+          c.img +
+          '" alt="" loading="eager" decoding="async" /></div>' +
+          '<div class="name">' +
+          c.name +
+          '</div></div>'
+        );
+      }
+
+      var labels = ['过 去', '现 在', '未 来'];
+      var demoRow = document.getElementById('demo-tr-cards');
+      [past, present, future].forEach(function (c, i) {
+        var wrap = document.createElement('div');
+        wrap.innerHTML = cardHtml(c);
+        wrap.firstChild.querySelector('.label').textContent = labels[i];
+        demoRow.appendChild(wrap.firstChild);
+      });
+
+      document.getElementById('demo-quote').textContent = quote.indexOf('「') === 0 ? quote : '「' + quote + '」';
+      document.getElementById('demo-insight').textContent = insight;
+      document.getElementById('demo-wisdom').textContent = wisdom;
+
+      function miniSlot(c, lab) {
+        return (
+          '<div class="sc-mini">' +
+          '<div class="lbl">' +
+          lab +
+          '</div>' +
+          '<div class="imgw"><img src="' +
+          c.img +
+          '" alt="" loading="eager" decoding="async" /></div>' +
+          '<div class="nm">' +
+          c.name +
+          '</div></div>'
+        );
+      }
+      document.getElementById('share-cards-row').innerHTML =
+        miniSlot(past, '过 去') + miniSlot(present, '现 在') + miniSlot(future, '未 来');
+
+      var sq = document.getElementById('share-quote');
+      sq.textContent = quote.indexOf('「') === 0 ? quote : '「' + quote + '」';
+      document.getElementById('share-insight').textContent = insight;
+
+      function isMobileShareDevice() {
+        var ua = navigator.userAgent || '';
+        if (/iPhone|iPod|Android/i.test(ua)) return true;
+        if (/iPad/i.test(ua)) return true;
+        if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+        return false;
+      }
+
+      document.getElementById('btn-save').addEventListener('click', async function () {
+        var btn = document.getElementById('btn-save');
+        if (!window.sakuraExportShareToDataUrl) {
+          alert('未加载 share 脚本，请用 http://127.0.0.1:8765 打开本页');
+          return;
+        }
+        if (!window.html2canvas && !(window.htmlToImage && window.htmlToImage.toPng)) {
+          alert('未加载 html2canvas / html-to-image');
+          return;
+        }
+        var old = '保存分享';
+        btn.disabled = true;
+        btn.textContent = '生成中…';
+        try {
+          var url = await window.sakuraExportShareToDataUrl(document.getElementById('share-card'));
+          var fileName = 'tarot-' + qp('past', 'M02') + '-' + qp('present', 'M17') + '-' + qp('future', 'M19') + '-share.png';
+
+          if (isMobileShareDevice() && typeof window.sakuraPresentShareImageForAlbum === 'function') {
+            var mob = await window.sakuraPresentShareImageForAlbum(url, fileName);
+            if (!mob.ok) {
+              btn.textContent = mob.method === 'aborted' ? '已取消' : '保存失败';
+              setTimeout(function () {
+                btn.textContent = old;
+              }, mob.method === 'aborted' ? 1200 : 1800);
+              return;
+            }
+            btn.textContent = mob.method === 'share' ? '请在分享里选「存储图像」' : '长按图片存相册';
+            setTimeout(function () {
+              btn.textContent = old;
+            }, 2200);
+            return;
+          }
+
+          var save = { ok: true, method: 'download' };
+          if (typeof window.sakuraSaveShareDataUrl === 'function') {
+            save = await window.sakuraSaveShareDataUrl(url, fileName);
+          } else {
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          }
+          if (!save.ok) {
+            btn.textContent = save.method === 'aborted' ? '已取消' : '保存失败';
+            setTimeout(function () {
+              btn.textContent = old;
+            }, save.method === 'aborted' ? 1200 : 1800);
+            return;
+          }
+          btn.textContent = save.method === 'picker' ? '已保存' : '已保存到下载';
+          setTimeout(function () {
+            btn.textContent = old;
+          }, 1400);
+        } catch (e) {
+          console.error(e);
+          btn.textContent = '失败，建议截图';
+          setTimeout(function () {
+            btn.textContent = old;
+          }, 1600);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
