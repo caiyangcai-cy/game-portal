@@ -86,11 +86,28 @@
       });
     }
 
+    /** decode 完成后，位图写入 GPU/合成仍可能落后一帧；WebKit 上更明显 → 首存空白卡 */
+    function settleBeforeCapture() {
+      var ua = navigator.userAgent || '';
+      var ms = 90;
+      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 280;
+      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 220;
+      return new Promise(function (r) {
+        setTimeout(r, ms);
+      });
+    }
+
     function runWithCaptureEnv(captureFn) {
       var rw = function () {};
       var ri = function () {};
       return Promise.resolve()
         .then(function () {
+          Array.prototype.forEach.call(el.querySelectorAll('img'), function (im) {
+            try {
+              im.setAttribute('loading', 'eager');
+              im.setAttribute('decoding', 'sync');
+            } catch (_) {}
+          });
           if (cap) {
             rw = cap.styleShareWrapperForCapture(wrapper);
             return Promise.race([
@@ -107,7 +124,7 @@
           if (wrapper) {
             var prev = wrapper.style.cssText;
             wrapper.style.cssText =
-              'position:fixed;left:0;top:0;width:360px;height:640px;transform:translate3d(-120vw,0,0);z-index:2147483646;pointer-events:none;opacity:1;overflow:visible;';
+              'position:fixed;left:0;top:0;width:360px;height:640px;transform:translate3d(0,calc(100vh + 32px),0);z-index:2147483646;pointer-events:none;opacity:1;overflow:visible;';
             rw = function () {
               wrapper.style.cssText = prev;
             };
@@ -122,6 +139,9 @@
         })
         .then(function () {
           return waitImages();
+        })
+        .then(function () {
+          return settleBeforeCapture();
         })
         .then(function () {
           return captureFn();

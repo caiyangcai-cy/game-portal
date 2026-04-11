@@ -84,8 +84,9 @@
   function styleShareWrapperForCapture(wrapperEl) {
     if (!wrapperEl) return function () {};
     var prev = wrapperEl.style.cssText;
+    // 竖直移出视口：部分引擎对 translate(-120vw) 下子图栅格化不完整，首截易空白卡
     wrapperEl.style.cssText =
-      'position:fixed;left:0;top:0;width:360px;height:640px;transform:translate3d(-120vw,0,0);' +
+      'position:fixed;left:0;top:0;width:360px;height:640px;transform:translate3d(0,calc(100vh + 32px),0);' +
       'z-index:2147483646;pointer-events:none;opacity:1;visibility:visible;overflow:visible;';
     return function () {
       wrapperEl.style.cssText = prev;

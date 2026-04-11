@@ -1412,7 +1412,7 @@ class SakuraTarotApp {
       shareImg.style.border = 'none';
       shareImg.style.boxShadow = 'none';
       if (card.image) {
-        shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width:100%;height:100%;object-fit:contain;display:block">`;
+        shareImg.innerHTML = `<img src="${card.image}" alt="${card.name}" loading="eager" decoding="sync" style="width:100%;height:100%;object-fit:contain;display:block">`;
         const subImg = shareImg.querySelector('img');
         if (subImg && subImg.decode) subImg.decode().catch(function () {});
       } else {
