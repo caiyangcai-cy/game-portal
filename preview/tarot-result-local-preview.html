@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>心灵塔罗牌 · 结果页/分享页本地预览</title>
+  <title>心灵塔罗牌 · 结果/分享本地体验版</title>
   <!-- 与小樱 result.html 一致：不引 Google Fonts，避免截图管线跨域样式问题 -->
   <style>
     :root {
@@ -86,9 +86,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 36px 16px 24px;
+      padding: 36px 20px 24px;
     }
-    .tr-header { text-align: center; margin-bottom: 22px; }
+    .tr-header { text-align: center; margin-bottom: 22px; width: 100%; }
     .tr-title { font-size: 18px; font-weight: 300; letter-spacing: 6px; color: #f0ebe3; }
     .tr-sub { font-size: 9px; color: rgba(255, 255, 255, 0.25); letter-spacing: 3px; margin-top: 4px; }
     .tr-cards { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; }
@@ -105,37 +105,31 @@
     }
     .tr-card .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tr-card .name { font-size: 9px; color: #f0ebe3; letter-spacing: 2px; margin-top: 5px; text-align: center; }
+    /* 金句 + 正文：与小樱 result.html 分享区同款字号/行距，左对齐 */
     .tr-quote {
-      text-align: center;
+      align-self: stretch;
+      width: 100%;
+      text-align: left;
       margin-bottom: 14px;
-      padding: 0 6px;
-      font-size: 13px;
-      font-weight: 700;
-      color: rgba(255, 223, 120, 0.95);
-      letter-spacing: 0.5px;
-      line-height: 1.45;
-      text-shadow: 0 0 14px rgba(255, 215, 0, 0.28);
+      padding: 0 2px;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      color: rgba(255, 223, 120, 0.98);
+      text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
     }
-    .tr-reading {
+    .tr-insight {
+      align-self: stretch;
       width: 100%;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      margin-bottom: 12px;
+      padding: 0 2px;
+      margin-bottom: 16px;
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: rgba(255, 255, 255, 0.55);
+      font-weight: 400;
+      text-align: left;
     }
-    .tr-reading .rd-icon { text-align: center; font-size: 12px; color: var(--lav); margin-bottom: 4px; opacity: 0.75; }
-    .tr-reading .rd-title { text-align: center; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; color: #f0ebe3; }
-    .tr-reading .rd-text { font-size: 11px; color: rgba(255, 255, 255, 0.5); line-height: 1.85; text-align: center; font-weight: 300; }
-    .tr-wisdom {
-      width: 100%;
-      text-align: center;
-      padding: 12px 8px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      margin-bottom: 12px;
-    }
-    .tr-wisdom-text { font-size: 10px; color: rgba(255, 255, 255, 0.28); font-style: italic; line-height: 1.65; }
     .tr-actions-mock {
       display: flex;
       gap: 8px;
@@ -164,14 +158,18 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .tr-upcoming {
+      align-self: stretch;
       width: 100%;
-      text-align: center;
+      text-align: left;
       margin-bottom: 12px;
-      padding: 8px;
-      border-radius: 10px;
-      border: 1px dashed rgba(184, 169, 201, 0.22);
+      padding: 0 2px;
     }
-    .tr-upcoming-text { font-size: 9px; color: rgba(184, 169, 201, 0.42); line-height: 1.65; }
+    .tr-upcoming-text {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.28);
+      line-height: 1.65;
+      letter-spacing: 0.02em;
+    }
     .tr-brand {
       font-size: 10px;
       font-weight: 700;
@@ -198,6 +196,7 @@
       align-items: center;
       gap: 14px;
     }
+    /* 与 games/sakura/result.html #share-card 一致（塔罗为三列牌面，其余字号/行距同小樱） */
     .share-card {
       width: 360px;
       height: 640px;
@@ -206,11 +205,12 @@
       background: linear-gradient(180deg, #08061a 0%, #0f0b28 50%, #0a0818 100%);
       box-shadow: 0 12px 60px rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 38px 16px 14px;
+      padding: 42px 20px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
+      gap: 0;
       position: relative;
       box-sizing: border-box;
     }
@@ -220,18 +220,18 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 110px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(184, 169, 201, 0.07) 0%, transparent 70%);
+      height: 120px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.06) 0%, transparent 70%);
       pointer-events: none;
     }
-    .sc-header { text-align: center; margin-bottom: 18px; position: relative; flex-shrink: 0; }
-    .sc-title { font-size: 22px; font-weight: 300; color: #f0ebe3; letter-spacing: 3px; }
-    .sc-sub { font-size: 11px; color: rgba(255, 255, 255, 0.28); letter-spacing: 3px; margin-top: 5px; }
+    .sc-header { text-align: center; margin-bottom: 24px; position: relative; flex-shrink: 0; }
+    .sc-title { font-size: 24px; font-weight: 300; color: #f0ebe3; letter-spacing: 3px; }
+    .sc-sub { font-size: 12px; color: rgba(255, 255, 255, 0.28); letter-spacing: 3px; margin-top: 6px; }
     .sc-cards-row {
       display: flex;
       gap: 8px;
       justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 28px;
       flex-shrink: 0;
     }
     .sc-mini {
@@ -255,29 +255,36 @@
     .sc-quote {
       width: 100%;
       text-align: center;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 900;
       line-height: 1.35;
       letter-spacing: 0.02em;
       color: rgba(255, 223, 120, 0.98);
-      text-shadow: 0 0 20px rgba(255, 215, 0, 0.35), 0 2px 0 rgba(0, 0, 0, 0.35);
-      margin-bottom: 12px;
-      padding: 0 4px;
+      text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
+      margin-bottom: 14px;
+      padding: 0 6px;
+      box-sizing: border-box;
       flex-shrink: 0;
+      white-space: normal;
     }
     .sc-destiny-card {
       width: 100%;
+      height: auto;
       flex: 1 1 auto;
       min-height: 0;
-      padding: 0 8px;
-      overflow: hidden;
+      padding: 0 10px;
+      border-radius: 0;
+      background: none;
+      border: none;
+      box-sizing: border-box;
+      overflow: visible;
       display: flex;
       align-items: flex-start;
     }
     .sc-destiny-body {
-      font-size: 13px;
-      line-height: 1.82;
-      color: rgba(255, 255, 255, 0.54);
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: rgba(255, 255, 255, 0.55);
       font-weight: 400;
       text-align: left;
     }
@@ -285,19 +292,22 @@
       width: 100%;
       flex-shrink: 0;
       text-align: center;
-      padding-top: 10px;
+      padding-top: 12px;
     }
     .sc-divider {
       width: 40px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
       margin: 0 auto 6px;
     }
-    .sc-cta { font-size: 9px; color: rgba(255, 255, 255, 0.3); letter-spacing: 0.5px; margin-bottom: 4px; }
+    .sc-cta { font-size: 9px; color: rgba(255, 255, 255, 0.3); letter-spacing: 0.5px; margin-bottom: 6px; }
     .sc-url {
       font-size: 9px;
-      color: rgba(255, 255, 255, 0.28);
+      color: rgba(255, 255, 255, 0.22);
       letter-spacing: 0.4px;
+      margin-top: 7px;
+      line-height: 1.25;
+      text-align: center;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
     }
 
@@ -348,8 +358,8 @@
 </head>
 <body>
   <div class="page-head">
-    <h1>✦ 心灵塔罗牌 · 结果 / 分享预览 ✦</h1>
-    <p class="sub">对齐 <code>preview/tarot-result-mockup.html</code> 布局 + 小樱 <code>games/sakura/result.html</code> 按钮逻辑</p>
+    <h1>✦ 心灵塔罗牌 · 结果 / 分享本地体验版 ✦</h1>
+    <p class="sub">结果页文案左对齐（无「命运解读」标题与边框）；分享图字号/行距对齐 <code>games/sakura/result.html</code>；按钮逻辑同小樱</p>
     <p class="tip">
       URL 可换三张牌（牌面 id，对应 <code>games/tarot/cards.js</code>）：<br />
       <code>?past=M02&amp;present=M17&amp;future=M19</code><br />
@@ -368,14 +378,7 @@
           </div>
           <div class="tr-cards" id="demo-tr-cards"></div>
           <div class="tr-quote" id="demo-quote"></div>
-          <div class="tr-reading">
-            <div class="rd-icon">✦</div>
-            <div class="rd-title">命运解读</div>
-            <div class="rd-text" id="demo-insight"></div>
-          </div>
-          <div class="tr-wisdom">
-            <div class="tr-wisdom-text" id="demo-wisdom"></div>
-          </div>
+          <div class="tr-insight" id="demo-insight"></div>
           <div class="tr-actions-mock">
             <button type="button" class="tr-btn-mock ghost" disabled>重新占卜</button>
             <button type="button" class="tr-btn-mock primary" disabled>保存分享</button>
@@ -465,9 +468,6 @@
           future.name +
           '」暗示前路仍有起伏，但光已经在路上。';
 
-      var wisdom =
-        '真正的答案不在牌面，而在你每一次选择里。愿这份解读陪你走过下一程。';
-
       function cardHtml(c) {
         return (
           '<div class="tr-card">' +
@@ -492,7 +492,6 @@
 
       document.getElementById('demo-quote').textContent = quote.indexOf('「') === 0 ? quote : '「' + quote + '」';
       document.getElementById('demo-insight').textContent = insight;
-      document.getElementById('demo-wisdom').textContent = wisdom;
 
       function miniSlot(c, lab) {
         return (
