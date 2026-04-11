@@ -109,7 +109,7 @@
     .tr-quote {
       align-self: stretch;
       width: 100%;
-      text-align: left;
+      text-align: center;
       margin-bottom: 14px;
       padding: 0 2px;
       font-size: 15px;
@@ -118,6 +118,9 @@
       letter-spacing: 0.02em;
       color: rgba(255, 223, 120, 0.98);
       text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .tr-insight {
       align-self: stretch;
@@ -160,7 +163,7 @@
     .tr-upcoming {
       align-self: stretch;
       width: 100%;
-      text-align: left;
+      text-align: center;
       margin-bottom: 12px;
       padding: 0 2px;
     }
@@ -169,6 +172,7 @@
       color: rgba(255, 255, 255, 0.28);
       line-height: 1.65;
       letter-spacing: 0.02em;
+      text-align: center;
     }
     .tr-brand {
       font-size: 10px;
@@ -176,6 +180,7 @@
       opacity: 0.38;
       display: flex;
       align-items: baseline;
+      justify-content: center;
       gap: 0.06em;
     }
     .tr-brand .cy {
@@ -265,7 +270,9 @@
       padding: 0 6px;
       box-sizing: border-box;
       flex-shrink: 0;
-      white-space: normal;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .sc-destiny-card {
       width: 100%;
@@ -359,11 +366,12 @@
 <body>
   <div class="page-head">
     <h1>✦ 心灵塔罗牌 · 结果 / 分享本地体验版 ✦</h1>
-    <p class="sub">结果页文案左对齐（无「命运解读」标题与边框）；分享图字号/行距对齐 <code>games/sakura/result.html</code>；按钮逻辑同小樱</p>
+    <p class="sub">金句单行（过长省略）；解读左对齐；金句+解读数据来自文档规则（见 <code>preview/tarot-readings-doc.inc.js</code>）；分享图对齐小樱 <code>result.html</code>；按钮同小樱</p>
     <p class="tip">
-      URL 可换三张牌（牌面 id，对应 <code>games/tarot/cards.js</code>）：<br />
-      <code>?past=M02&amp;present=M17&amp;future=M19</code><br />
-      需本地服务打开：<code>python3 -m http.server 8765 --bind 127.0.0.1</code> → 本页路径见地址栏。
+      换三张牌：<code>?past=M02&amp;present=M17&amp;future=M19</code><br />
+      换文档「能量组合」金句+解读（A–F 各一张，自动排序成 key）：<code>?types=ABE</code>（默认 <code>ABB</code>）<br />
+      仍可单独覆盖：<code>?quote=…&amp;insight=…</code><br />
+      需 HTTP 打开：<code>python3 -m http.server 8765 --bind 127.0.0.1</code>
     </p>
   </div>
 
@@ -424,6 +432,7 @@
   <script src="../games/sakura/vendor/html2canvas.min.js?v=20260416"></script>
   <script src="../games/sakura/vendor/html-to-image.min.js?v=20260416"></script>
   <script src="../games/sakura/share-export.js?v=20260412c"></script>
+  <script src="tarot-readings-doc.inc.js?v=20260410"></script>
   <script>
     (function () {
       var DECK = {
@@ -454,19 +463,23 @@
       var present = pick(qp('present', 'M17'));
       var future = pick(qp('future', 'M19'));
 
-      var quote =
-        qp('quote', '') ||
-        '「你走过的暗夜，终将化作照亮前路的星光。」';
+      function normalizeTypesKey(raw) {
+        raw = (raw || '').toUpperCase().replace(/[^A-F]/g, '');
+        if (raw.length !== 3) return '';
+        return raw.split('').sort().join('');
+      }
 
-      var insight =
-        qp('insight', '') ||
-        '从「' +
-          past.name +
-          '」到「' +
-          present.name +
-          '」，你正在经历一次从内心深处向外绽放的蜕变；「' +
-          future.name +
-          '」暗示前路仍有起伏，但光已经在路上。';
+      var typesKey = normalizeTypesKey(qp('types', 'ABB')) || 'ABB';
+      var docRow =
+        window.TAROT_READINGS_DOC &&
+        (window.TAROT_READINGS_DOC[typesKey] || window.TAROT_READINGS_DOC.DEFAULT);
+
+      var quote = qp('quote', '');
+      var insight = qp('insight', '');
+      if (!quote && docRow) quote = docRow.quote;
+      if (!insight && docRow) insight = docRow.reading;
+      if (!quote) quote = '「预览：未加载文档数据。」';
+      if (!insight) insight = '请确认已加载 tarot-readings-doc.inc.js 并用 http 打开本页。';
 
       function cardHtml(c) {
         return (
@@ -490,7 +503,11 @@
         demoRow.appendChild(wrap.firstChild);
       });
 
-      document.getElementById('demo-quote').textContent = quote.indexOf('「') === 0 ? quote : '「' + quote + '」';
+      var demoQ = document.getElementById('demo-quote');
+      var shareQ = document.getElementById('share-quote');
+      var quoteShow = quote.indexOf('「') === 0 ? quote : '「' + quote + '」';
+      demoQ.textContent = quoteShow;
+      demoQ.setAttribute('title', quoteShow);
       document.getElementById('demo-insight').textContent = insight;
 
       function miniSlot(c, lab) {
@@ -510,8 +527,8 @@
       document.getElementById('share-cards-row').innerHTML =
         miniSlot(past, '过 去') + miniSlot(present, '现 在') + miniSlot(future, '未 来');
 
-      var sq = document.getElementById('share-quote');
-      sq.textContent = quote.indexOf('「') === 0 ? quote : '「' + quote + '」';
+      shareQ.textContent = quoteShow;
+      shareQ.setAttribute('title', quoteShow);
       document.getElementById('share-insight').textContent = insight;
 
       function isMobileShareDevice() {
@@ -537,7 +554,16 @@
         btn.textContent = '生成中…';
         try {
           var url = await window.sakuraExportShareToDataUrl(document.getElementById('share-card'));
-          var fileName = 'tarot-' + qp('past', 'M02') + '-' + qp('present', 'M17') + '-' + qp('future', 'M19') + '-share.png';
+          var fileName =
+            'tarot-' +
+            qp('past', 'M02') +
+            '-' +
+            qp('present', 'M17') +
+            '-' +
+            qp('future', 'M19') +
+            '-' +
+            typesKey +
+            '-share.png';
 
           if (isMobileShareDevice() && typeof window.sakuraPresentShareImageForAlbum === 'function') {
             var mob = await window.sakuraPresentShareImageForAlbum(url, fileName);
