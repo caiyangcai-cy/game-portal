@@ -1435,6 +1435,10 @@ class SakuraTarotApp {
       rv.style.setProperty('z-index', '9999', 'important');
     }
 
+    // 预渲染 Canvas 分享图（彻底绕开 Safari html2canvas 截图时序问题）
+    this._preRenderedShareDataUrl = null;
+    this._preRenderShareCanvas(card);
+
     this._updateHint('');
     this._updateBadge('');
   }
@@ -1497,19 +1501,10 @@ class SakuraTarotApp {
   async _saveShareImage() {
     const card = this._lastResultCard;
     const btn = document.getElementById('sr-btn-save');
-    const btnDefault = () => '保存分享';
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const btnDefault = () => isMobile ? '长按保存' : '保存分享';
 
     if (!card) return;
-    if (
-      !window.sakuraExportShareToDataUrl ||
-      (!window.html2canvas && !(window.htmlToImage && typeof window.htmlToImage.toPng === 'function'))
-    ) {
-      if (btn) {
-        btn.textContent = '生成失败（缺少组件）';
-        setTimeout(() => (btn.textContent = btnDefault()), 1600);
-      }
-      return;
-    }
 
     try {
       if (btn) {
@@ -1518,47 +1513,41 @@ class SakuraTarotApp {
         btn.style.opacity = '0.75';
       }
 
-      const url = await window.sakuraExportShareToDataUrl(document.getElementById('sr-share-card'));
+      // 优先使用预渲染好的 Canvas 分享图（绕开 Safari 截图问题）
+      let url = this._preRenderedShareDataUrl;
+      if (!url) {
+        // 预渲染还没好，等一下再试
+        await new Promise(r => setTimeout(r, 1000));
+        url = this._preRenderedShareDataUrl;
+      }
+
+      // 如果预渲染还是没有，回退到 html2canvas
+      if (!url && window.sakuraExportShareToDataUrl) {
+        url = await window.sakuraExportShareToDataUrl(document.getElementById('sr-share-card'));
+      }
+
+      if (!url) throw new Error('无法生成分享图');
+
       const fileName = `sakura-${card.element}-result.png`;
 
-      if (sakuraIsMobileShareDevice() && typeof window.sakuraPresentShareImageForAlbum === 'function') {
+      if (isMobile && typeof window.sakuraPresentShareImageForAlbum === 'function') {
         const mob = await window.sakuraPresentShareImageForAlbum(url, fileName);
-        if (!mob.ok) {
-          if (btn) {
-            btn.textContent = mob.method === 'aborted' ? '已取消' : '保存失败';
-            setTimeout(() => (btn.textContent = btnDefault()), mob.method === 'aborted' ? 1200 : 1800);
-          }
-          return;
-        }
         if (btn) {
-          if (mob.method === 'share') btn.textContent = '请在分享里选「存储图像」';
-          else btn.textContent = '长按图片存相册';
-          setTimeout(() => (btn.textContent = btnDefault()), 2200);
+          btn.textContent = mob.ok ? '长按图片存相册' : (mob.method === 'aborted' ? '已取消' : '保存失败');
+          setTimeout(() => (btn.textContent = btnDefault()), 2000);
         }
         return;
       }
 
-      let save = { ok: true, method: 'download' };
-      if (typeof window.sakuraSaveShareDataUrl === 'function') {
-        save = await window.sakuraSaveShareDataUrl(url, fileName);
-      } else {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
-      if (!save.ok) {
-        if (btn) {
-          btn.textContent = save.method === 'aborted' ? '已取消' : '保存失败';
-          setTimeout(() => (btn.textContent = btnDefault()), save.method === 'aborted' ? 1200 : 1800);
-        }
-        return;
-      }
+      // 桌面端直接下载
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       if (btn) {
-        if (save.method === 'picker') btn.textContent = '已保存';
-        else btn.textContent = '已保存到下载';
+        btn.textContent = '已保存到下载';
         setTimeout(() => (btn.textContent = btnDefault()), 1400);
       }
     } catch (e) {
@@ -1568,11 +1557,124 @@ class SakuraTarotApp {
         setTimeout(() => (btn.textContent = btnDefault()), 1800);
       }
     } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.style.opacity = '';
-      }
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     }
+  }
+
+  /** 用 Canvas API 预渲染分享图（不依赖 DOM 截图，彻底解决 Safari 问题） */
+  _preRenderShareCanvas(card) {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const W = 720, H = 1280;
+        const c = document.createElement('canvas');
+        c.width = W; c.height = H;
+        const ctx = c.getContext('2d');
+
+        // 背景渐变
+        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#06061a');
+        bg.addColorStop(0.4, '#0c0a22');
+        bg.addColorStop(1, '#080818');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // 顶部标题
+        ctx.fillStyle = '#f0ebe3';
+        ctx.font = '600 32px "PingFang SC", "Noto Sans SC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✦  魔 法 揭 示  ✦', W / 2, 72);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.font = '300 18px "PingFang SC", sans-serif';
+        ctx.fillText('小樱魔法卡 · CARDCAPTOR SAKURA', W / 2, 108);
+
+        // 卡牌图（居中，圆角裁剪）
+        const cardW = 280, cardH = 480;
+        const cardX = (W - cardW) / 2, cardY = 140;
+        const r = 16;
+
+        // 光晕
+        const glow = ctx.createRadialGradient(W / 2, cardY + cardH / 2, 0, W / 2, cardY + cardH / 2, cardW);
+        glow.addColorStop(0, (card.color || '#ffd700') + '25');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.fillRect(cardX - 60, cardY - 60, cardW + 120, cardH + 120);
+
+        // 圆角裁剪绘制卡牌
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cardX + r, cardY);
+        ctx.lineTo(cardX + cardW - r, cardY);
+        ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r);
+        ctx.lineTo(cardX + cardW, cardY + cardH - r);
+        ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH);
+        ctx.lineTo(cardX + r, cardY + cardH);
+        ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r);
+        ctx.lineTo(cardX, cardY + r);
+        ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, cardX, cardY, cardW, cardH);
+        ctx.restore();
+
+        // 卡牌边框
+        ctx.strokeStyle = (card.color || '#ffd700') + '60';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(cardX, cardY, cardW, cardH, r);
+        ctx.stroke();
+
+        // 引言
+        const quote = CARD_QUOTES[card.element] || '';
+        if (quote) {
+          ctx.fillStyle = '#ffd700';
+          ctx.font = '600 24px "PingFang SC", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('「' + quote + '」', W / 2, cardY + cardH + 60);
+        }
+
+        // 寓意文字（自动换行）
+        const meaning = CARD_MEANINGS[card.element] || '';
+        if (meaning) {
+          ctx.fillStyle = 'rgba(255,255,255,0.55)';
+          ctx.font = '300 20px "PingFang SC", sans-serif';
+          const maxW = W - 120;
+          let y = cardY + cardH + 100;
+          const words = meaning.split('');
+          let line = '';
+          for (let i = 0; i < words.length; i++) {
+            const test = line + words[i];
+            if (ctx.measureText(test).width > maxW && line) {
+              ctx.fillText(line, W / 2, y);
+              line = words[i];
+              y += 32;
+            } else {
+              line = test;
+            }
+          }
+          if (line) ctx.fillText(line, W / 2, y);
+        }
+
+        // 底部引导
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.font = '300 16px "PingFang SC", sans-serif';
+        ctx.fillText('你也来召唤你的命运之牌 →', W / 2, H - 68);
+
+        // 网址
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.font = '300 14px "PingFang SC", sans-serif';
+        ctx.fillText('https://cyougames.site', W / 2, H - 40);
+
+        this._preRenderedShareDataUrl = c.toDataURL('image/png');
+      } catch (e) {
+        console.error('[PreRenderCanvas]', e);
+      }
+    };
+    img.onerror = () => {
+      console.warn('[PreRenderCanvas] 图片加载失败:', card.image);
+    };
+    img.src = card.image;
   }
 
   _recallToIdle() {
