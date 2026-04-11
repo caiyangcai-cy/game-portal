@@ -89,6 +89,12 @@
       })
     );
 
+    await new Promise(function (r) {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(r);
+      });
+    });
+
     return function () {
       cleanups.forEach(function (fn) {
         try {

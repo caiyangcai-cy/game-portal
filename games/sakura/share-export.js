@@ -1,6 +1,7 @@
 /**
  * 分享卡 DOM → PNG data URL
- * - 统一先 html2canvas 再 html-to-image（与 Chrome 行为一致；Safari 上 html-to-image 首帧易丢卡图）
+ * - Chrome/Firefox/Edge：先 html2canvas（快且稳）
+ * - Safari/WebKit：先 html-to-image（html2canvas 常长时间卡住）；失败再短超时回退 html2canvas
  * 依赖：sakuraShareCapture、window.html2canvas、window.htmlToImage
  */
 (function (global) {
@@ -9,6 +10,14 @@
   /** 1×1 透明 PNG，避免某张图加载失败导致 html-to-image 整段失败 */
   var IMG_PLACEHOLDER =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+  /** Safari / iOS / iOS Chrome：html2canvas 易卡死，优先 html-to-image */
+  function prefersHtmlToImageFirst() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod|CriOS/i.test(ua)) return true;
+    if (/Chrome|Chromium|Edg|Firefox/i.test(ua)) return false;
+    return /^((?!chrome|android).)*safari/i.test(ua);
+  }
 
   async function exportShareCardToDataUrl(el) {
     if (!el) throw new Error('缺少分享卡节点');
@@ -81,8 +90,8 @@
     function settleBeforeCapture() {
       var ua = navigator.userAgent || '';
       var ms = 90;
-      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 340;
-      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 320;
+      if (/iPhone|iPad|iPod|CriOS/i.test(ua)) ms = 200;
+      else if (/^((?!chrome|android).)*safari/i.test(ua)) ms = 180;
       return new Promise(function (r) {
         setTimeout(r, ms);
       });
@@ -150,6 +159,7 @@
 
     function tryHtml2Canvas() {
       if (!global.html2canvas) return Promise.reject(new Error('no html2canvas'));
+      var h2cMs = prefersHtmlToImageFirst() ? 18000 : 28000;
       return runWithCaptureEnv(function () {
         return Promise.race([
           global.html2canvas(el, {
@@ -180,7 +190,7 @@
           new Promise(function (_, rej) {
             setTimeout(function () {
               rej(new Error('html2canvas 超时'));
-            }, 55000);
+            }, h2cMs);
           }),
         ]).then(function (canvas) {
           return canvas.toDataURL('image/png');
@@ -192,11 +202,13 @@
       var hti = global.htmlToImage;
       if (!hti || typeof hti.toPng !== 'function') return Promise.reject(new Error('no html-to-image'));
       return runWithCaptureEnv(function () {
-        var bbox = el.getBoundingClientRect();
-        var outW = Math.max(1, Math.round(bbox.width || el.offsetWidth)) || 360;
-        var outH = Math.max(1, Math.round(bbox.height || el.offsetHeight)) || 640;
-        return Promise.race([
-          hti.toPng(el, {
+        var extraMs = prefersHtmlToImageFirst() ? 160 : 0;
+        var runPng = function () {
+          var bbox = el.getBoundingClientRect();
+          var outW = Math.max(1, Math.round(bbox.width || el.offsetWidth)) || 360;
+          var outH = Math.max(1, Math.round(bbox.height || el.offsetHeight)) || 640;
+          return Promise.race([
+            hti.toPng(el, {
             pixelRatio: exportScale,
             width: outW,
             height: outH,
@@ -211,16 +223,25 @@
               cache: 'force-cache',
             },
           }),
-          new Promise(function (_, rej) {
-            setTimeout(function () {
-              rej(new Error('html-to-image 超时'));
-            }, 55000);
-          }),
-        ]);
+            new Promise(function (_, rej) {
+              setTimeout(function () {
+                rej(new Error('html-to-image 超时'));
+              }, 45000);
+            }),
+          ]);
+        };
+        if (extraMs > 0) {
+          return new Promise(function (r) {
+            setTimeout(r, extraMs);
+          }).then(runPng);
+        }
+        return runPng();
       });
     }
 
-    var order = [tryHtml2Canvas, tryHtmlToImage];
+    var order = prefersHtmlToImageFirst()
+      ? [tryHtmlToImage, tryHtml2Canvas]
+      : [tryHtml2Canvas, tryHtmlToImage];
     var lastErr;
     for (var i = 0; i < order.length; i++) {
       try {
