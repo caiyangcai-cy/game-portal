@@ -1348,8 +1348,12 @@ html, body {
   z-index: 250;
   background: linear-gradient(180deg, #06061a 0%, #0c0a22 40%, #080818 100%);
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
   justify-content: center;
+  /* 不再整屏垂直居中：刘海/安全区下再留 36px，内层从顶部起排 */
+  padding-top: calc(36px + env(safe-area-inset-top, 0px));
+  box-sizing: border-box;
   overflow: hidden;
   animation: trSrFadeIn 0.55s ease forwards;
   --result-card-img-w: 92px;
@@ -1370,8 +1374,8 @@ html, body {
   width: 100%;
   max-width: 360px;
   height: auto;
-  max-height: 100vh;
-  max-height: 100dvh;
+  max-height: calc(100vh - 36px - env(safe-area-inset-top, 0px));
+  max-height: calc(100dvh - 36px - env(safe-area-inset-top, 0px));
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
