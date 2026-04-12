@@ -380,26 +380,38 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   display:none!important;
 }
 
+/* 底部 HUD：贴视口底 flex，子项 static，避免 iframe 里 bottom/max/env 失效叠到顶部 */
+.hud-dock{
+  position:fixed;left:0;right:0;bottom:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  gap:8px;
+  padding:0 12px max(12px, env(safe-area-inset-bottom, 0px));
+  z-index:125;
+  pointer-events:none;
+  box-sizing:border-box;
+}
+.hud-dock #gesture-hint,
+.hud-dock #state-badge{
+  position:static!important;
+  left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  transform:none!important;
+  pointer-events:auto;
+}
 #gesture-hint{
-  position:fixed;left:50%;right:auto;top:auto!important;transform:translateX(-50%);
-  bottom:max(48px,calc(env(safe-area-inset-bottom,0px)+36px));
   display:flex;align-items:center;gap:8px;
   max-width:calc(100vw - 24px);
   padding:10px 20px;border-radius:40px;
   background:rgba(12,10,28,0.82);border:1px solid var(--glass-border);
   box-shadow:0 4px 24px rgba(0,0,0,0.4);
-  z-index:120;transition:opacity 0.3s;
+  transition:opacity 0.3s;
 }
 #gesture-hint .hint-text{font-size:13px;color:var(--text-secondary);white-space:nowrap;font-weight:400;letter-spacing:0.5px;overflow:hidden;text-overflow:ellipsis}
 
-/* 与塔罗一致：状态短文案在底部，叠在手势胶囊上方（不再占顶部安全区） */
 #state-badge{
-  position:fixed;top:auto!important;left:50%;right:auto;transform:translateX(-50%);
-  bottom:max(100px,calc(env(safe-area-inset-bottom,0px)+88px));
   padding:5px 14px;font-size:10px;font-weight:500;letter-spacing:2px;
   border-radius:20px;
   background:rgba(12,10,28,0.78);border:1px solid var(--glass-border);
-  color:var(--text-muted);z-index:125;
+  color:var(--text-muted);
   transition:opacity 0.3s;
   text-align:center;
   max-width:calc(100vw - 24px);
@@ -804,9 +816,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   #magic-glow{width:min(100vw,540px);height:min(100vw,540px)}
   .spell-overlay .spell-name{font-size:28px}
   .selected-card-wrapper{width:210px;height:462px}
-  #gesture-hint{bottom:max(40px,calc(env(safe-area-inset-bottom,0px)+28px));padding:8px 16px}
+  #gesture-hint{padding:8px 16px}
   #gesture-hint .hint-text{font-size:12px}
-  #state-badge{bottom:max(92px,calc(env(safe-area-inset-bottom,0px)+80px));padding:4px 12px;font-size:9px}
+  #state-badge{padding:4px 12px;font-size:9px}
 }
 @media(min-width:481px) and (max-width:768px){
   .card{width:82px;height:180px;margin-left:-41px;margin-top:-90px}
@@ -1294,11 +1306,13 @@ html.perf-flip-lite .card.focused-card .face{animation:none!important}
     </div>
   </div>
 
-  <!-- 指引与状态条放在 #app 外，避免环内 3D transform 影响 position:fixed 的参照系 -->
-  <div id="gesture-hint" class="hidden">
-    <div class="hint-text">加载中…</div>
+  <!-- 底部 HUD：整栏 fixed 贴底 + flex，避免单独 bottom/max/env 在 iframe/Safari 下失效导致两条叠在顶部 -->
+  <div id="hud-dock" class="hud-dock">
+    <div id="state-badge" class="hidden">初始化</div>
+    <div id="gesture-hint" class="hidden">
+      <div class="hint-text">加载中…</div>
+    </div>
   </div>
-  <div id="state-badge" class="hidden">初始化</div>
 
   <!-- ✦ 魔法揭示结果页（翻牌特效结束后展示）✦ -->
   <div id="sakura-result-view" style="display:none">
