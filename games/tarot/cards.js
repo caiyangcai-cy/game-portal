@@ -208,6 +208,8 @@ class CardCarousel {
     while (delta > 180) delta -= 360;
     while (delta < -180) delta += 360;
     this.currentAngle = cur + delta;
+    // 与 _snapToNearest 一致：落在格点上，避免取整误差导致「指到 A、getCurrentIndex 却是 B」
+    this.currentAngle = Math.round(this.currentAngle / this.anglePerCard) * this.anglePerCard;
     this._velocity = 0;
     this._isAnimating = false;
     if (this._animFrame) {
@@ -247,6 +249,7 @@ class CardCarousel {
       });
     });
     this._applyRotation();
+    this._updateData();
     this._updateFrontCard();
   }
 
@@ -299,6 +302,7 @@ class CardCarousel {
       this.cards.forEach(el => {
         el.style.transition = 'filter 0.4s, opacity 0.4s';
       });
+      this._updateData();
       this._updateFrontCard();
     }, 1600);
   }
@@ -321,8 +325,50 @@ class CardCarousel {
     return idx;
   }
 
+  /**
+   * 正面环位上 data-logical-index（_updateData 写入）为展示真值，避免仅用角度取整与 DOM 不同步。
+   */
+  getFrontLogicalIndex() {
+    if (this._isStacked || !this.cards || !this.cards.length) {
+      return this.getCurrentIndex();
+    }
+    const idx = this.getCurrentIndex();
+    const frontRing = ((idx % this.ringSize) + this.ringSize) % this.ringSize;
+    const el = this.cards[frontRing];
+    const raw = el && el.dataset ? el.dataset.logicalIndex : '';
+    if (raw === undefined || raw === null || raw === '') return this.getCurrentIndex();
+    const li = parseInt(String(raw), 10);
+    if (!Number.isFinite(li)) return this.getCurrentIndex();
+    return ((li % this.totalCards) + this.totalCards) % this.totalCards;
+  }
+
   getCurrentCard() {
-    return CARDS[this.getCurrentIndex()];
+    return CARDS[this.getFrontLogicalIndex()];
+  }
+
+  /**
+   * 三抽去重：转到下一张未收录牌。
+   * 每次逻辑索引 +ringSize，使「正面环位」不变（食指刚点的槽仍朝前），只换穿过的那张牌。
+   */
+  rotateUntilIdNotIn(idSet) {
+    if (!idSet || !idSet.size) return;
+    let n = 0;
+    while (idSet.has(this.getCurrentCard().id) && n <= this.totalCards) {
+      const L = this.getFrontLogicalIndex();
+      const next = (L + this.ringSize) % this.totalCards;
+      this.rotateTo(next, false);
+      n++;
+    }
+  }
+
+  /** 进入捏合/结果前停掉惯性，避免回到环上时角度已被物理帧悄悄挪走 */
+  stopPhysics() {
+    this._velocity = 0;
+    this._isAnimating = false;
+    if (this._animFrame) {
+      cancelAnimationFrame(this._animFrame);
+      this._animFrame = null;
+    }
   }
 
   addVelocity(v) {
@@ -372,6 +418,7 @@ class CardCarousel {
       this._startPhysics();
     } else {
       this.currentAngle = target;
+      this.currentAngle = Math.round(this.currentAngle / this.anglePerCard) * this.anglePerCard;
       this._velocity = 0;
       this._updateData();
       this._applyRotation();

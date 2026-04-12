@@ -472,6 +472,7 @@ class App {
         } else if (gesture === GESTURE.POINT && this._cardsSpread) {
           const ring = this._pickRingFromLandmarks(landmarks);
           if (ring >= 0) {
+            this.carousel.stopPhysics();
             this.carousel.snapToRingSlot(ring);
             this._focusCard();
           }
@@ -559,7 +560,12 @@ class App {
    * 注意：已收集的牌不会出现在正面位置（由 _skipCollected 保证）
    */
   _focusCard() {
-    const card = this.carousel.getCurrentCard();
+    const taken = new Set(this.collectedCards.map(c => c.id));
+    let card = this.carousel.getCurrentCard();
+    if (taken.has(card.id)) {
+      this.carousel.rotateUntilIdNotIn(taken);
+      card = this.carousel.getCurrentCard();
+    }
 
     this.state = STATE.FOCUSED;
     this._focusedCard = card;
@@ -594,8 +600,25 @@ class App {
    * 捏合确认 — 进入 HOLDING 状态，展示翻转
    */
   _holdCard() {
-    // 使用 FOCUSED 状态锁定的牌
-    const card = this._focusedCard || this.carousel.getCurrentCard();
+    this.carousel.stopPhysics();
+    const taken = new Set(this.collectedCards.map(c => c.id));
+    // 使用 FOCUSED 锁定的牌；以环上 data-logical-index 为准的 getCurrentCard 与画面一致
+    let card = this._focusedCard || this.carousel.getCurrentCard();
+    if (taken.has(card.id)) {
+      this.carousel.rotateUntilIdNotIn(taken);
+      card = this.carousel.getCurrentCard();
+    }
+    if (taken.has(card.id)) {
+      this.state = STATE.SUMMONED;
+      this._holdingCard = null;
+      this._focusedCard = null;
+      this.carousel.setFocused(false);
+      this.els.carouselStage.classList.remove('hidden');
+      const round = this.collectedCards.length + 1;
+      this._updateHint('☝️', `该牌已抽过，请换一张 · 左右滑动 · 食指选定 (第${round}/3张)`);
+      this._updateBadge('请换牌');
+      return;
+    }
 
     this.state = STATE.HOLDING;
     this._holdingCard = card;
@@ -704,6 +727,10 @@ class App {
    * 收入槽位
    */
   _collectCard(card) {
+    if (this.collectedCards.some(c => c.id === card.id)) {
+      console.warn('tarot: blocked duplicate collect', card.id);
+      return;
+    }
     const slotIndex = this.collectedCards.length;
     this.collectedCards.push(card);
 
@@ -942,6 +969,7 @@ class App {
     this.state = STATE.SUMMONED;
     this._cardsSpread = true; // 回来时已展开
     this.els.carouselStage.classList.remove('hidden');
+    this.carousel.stopPhysics();
 
     // 自动跳过已收集的牌，确保正面位置不是已抽过的牌
     this._skipCollected();
@@ -959,16 +987,7 @@ class App {
   _skipCollected() {
     const collectedIds = new Set(this.collectedCards.map(c => c.id));
     if (collectedIds.size === 0) return;
-
-    let card = this.carousel.getCurrentCard();
-    let attempts = 0;
-
-    // 最多尝试总牌数次，避免死循环
-    while (collectedIds.has(card.id) && attempts < CARDS.length) {
-      this.carousel.rotateTo(this.carousel.getCurrentIndex() + 1, false);
-      card = this.carousel.getCurrentCard();
-      attempts++;
-    }
+    this.carousel.rotateUntilIdNotIn(collectedIds);
   }
 
   /**
