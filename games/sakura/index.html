@@ -392,12 +392,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 }
 #gesture-hint .hint-text{font-size:13px;color:var(--text-secondary);white-space:nowrap;font-weight:400;letter-spacing:0.5px;overflow:hidden;text-overflow:ellipsis}
 
+/* 与塔罗一致：状态短文案在底部，叠在手势胶囊上方（不再占顶部安全区） */
 #state-badge{
-  position:fixed;top:max(14px,calc(env(safe-area-inset-top,0px)+10px));left:50%;transform:translateX(-50%);
-  padding:2px 0;font-size:10px;font-weight:400;letter-spacing:2px;
-  background:none;border:none;color:var(--text-muted);z-index:100;
+  position:fixed;top:auto!important;left:50%;right:auto;transform:translateX(-50%);
+  bottom:max(100px,calc(env(safe-area-inset-bottom,0px)+88px));
+  padding:5px 14px;font-size:10px;font-weight:500;letter-spacing:2px;
+  border-radius:20px;
+  background:rgba(12,10,28,0.78);border:1px solid var(--glass-border);
+  color:var(--text-muted);z-index:125;
   transition:opacity 0.3s;
   text-align:center;
+  max-width:calc(100vw - 24px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 2px 16px rgba(0,0,0,0.25);
 }
 
 #particles{position:fixed;inset:0;z-index:5;pointer-events:none;width:100%;height:100%}
@@ -799,6 +806,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   .selected-card-wrapper{width:210px;height:462px}
   #gesture-hint{bottom:max(40px,calc(env(safe-area-inset-bottom,0px)+28px));padding:8px 16px}
   #gesture-hint .hint-text{font-size:12px}
+  #state-badge{bottom:max(92px,calc(env(safe-area-inset-bottom,0px)+80px));padding:4px 12px;font-size:9px}
 }
 @media(min-width:481px) and (max-width:768px){
   .card{width:82px;height:180px;margin-left:-41px;margin-top:-90px}

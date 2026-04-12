@@ -767,9 +767,7 @@ html, body {
   height: 500px;
   border: 2.5px solid rgba(255, 182, 193, 0.55);
   box-shadow:
-    0 0 0 6px rgba(255, 215, 0, 0.15),
     0 0 60px rgba(255, 182, 193, 0.35),
-    0 0 120px rgba(255, 182, 193, 0.15),
     inset 0 0 80px rgba(255, 215, 0, 0.1);
   animation: platformPulse 4s ease-in-out infinite alternate;
 }
@@ -778,10 +776,7 @@ html, body {
   width: 380px;
   height: 380px;
   border: 2px solid rgba(255, 215, 0, 0.5);
-  box-shadow:
-    0 0 40px rgba(255, 215, 0, 0.25),
-    0 0 80px rgba(255, 215, 0, 0.1),
-    inset 0 0 50px rgba(255, 182, 193, 0.12);
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.25);
   animation: platformPulse 4s ease-in-out 0.5s infinite alternate;
 }
 
@@ -789,10 +784,7 @@ html, body {
   width: 240px;
   height: 240px;
   border: 1.5px solid rgba(255, 182, 193, 0.6);
-  box-shadow:
-    0 0 35px rgba(255, 182, 193, 0.4),
-    0 0 70px rgba(255, 182, 193, 0.15),
-    inset 0 0 40px rgba(255, 215, 0, 0.12);
+  box-shadow: 0 0 35px rgba(255, 182, 193, 0.4);
   animation: platformPulse 4s ease-in-out 1s infinite alternate;
 }
 
@@ -1004,7 +996,6 @@ html, body {
   width: var(--card-w);
   height: var(--card-h);
   transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
 }
 
@@ -1340,51 +1331,216 @@ html, body {
 
 
 /* ========================================
-   占卜结果页 — 持久显示 + 精致设计
+   占卜结果页 — 分布对齐 games/sakura #sakura-result-view
    ======================================== */
+@keyframes trSrFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes trSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 #tarot-result-view {
   position: fixed;
   inset: 0;
   z-index: 250;
   background: linear-gradient(180deg, #06061a 0%, #0c0a22 40%, #080818 100%);
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   overflow: hidden;
-  /* 与 .showcase-card img 同步：金句/解读/按钮区宽度 = 三列牌 + 两道间距 */
-  --result-card-img-w: 152px;
-  --result-card-img-h: 258px;
-  --result-row-gap: 14px;
+  animation: trSrFadeIn 0.55s ease forwards;
+  --result-card-img-w: 92px;
+  --result-card-img-h: 156px;
+  --result-row-gap: 8px;
   --result-text-row-max: calc(3 * var(--result-card-img-w) + 2 * var(--result-row-gap));
 }
 
-#tarot-result-view .result-header {
-  margin-bottom: 18px;
+@media (min-width: 601px) {
+  #tarot-result-view {
+    --result-card-img-w: 140px;
+    --result-card-img-h: 238px;
+    --result-row-gap: 12px;
+  }
 }
 
-.result-scroll-container {
+#tarot-result-view .tarot-result-inner {
   width: 100%;
-  max-width: 760px;
-  padding: 32px 28px 80px;
-  overflow-y: auto;
+  max-width: 360px;
+  height: auto;
   max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   align-items: center;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: max(10px, env(safe-area-inset-top, 0px)) 14px max(14px, env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  position: relative;
+  margin: auto;
 }
 
-.result-scroll-container::-webkit-scrollbar {
-  width: 3px;
+#tarot-result-view .tr-header {
+  text-align: center;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  animation: trSlideUp 0.55s ease 0.08s both;
+}
+#tarot-result-view .tr-title {
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--text-primary, #f0ebe3);
+  letter-spacing: 4px;
+  font-family: inherit;
 }
 
-.result-scroll-container::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
-  border-radius: 4px;
+#tarot-result-view .tr-cards-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+  animation: trSlideUp 0.55s ease 0.15s both;
+}
+#tarot-result-view .result-showcase {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  text-align: center;
+}
+#tarot-result-view .result-showcase .showcase-question {
+  font-size: 13px;
+  color: var(--accent-lavender);
+  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+  font-style: italic;
+  font-weight: 300;
+  padding: 0 4px;
 }
 
-/* 结果页标题 */
+#tarot-result-view .tr-quote {
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  font-size: clamp(14px, 4vw, 16px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: rgba(255, 223, 120, 0.95);
+  text-shadow: 0 0 26px rgba(255, 215, 0, 0.35), 0 2px 0 rgba(0, 0, 0, 0.35);
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  padding: 0 6px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: trSlideUp 0.55s ease 0.28s both;
+}
+
+#tarot-result-view .tr-destiny-card {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  padding: 0 6px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  animation: trSlideUp 0.55s ease 0.36s both;
+}
+#tarot-result-view .tr-destiny-body {
+  font-size: 14px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.62);
+  font-weight: 400;
+  text-align: left;
+}
+
+#tarot-result-view .tr-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  animation: trSlideUp 0.55s ease 0.44s both;
+}
+#tarot-result-view .tr-btn {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: 40px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+#tarot-result-view .tr-btn-save {
+  background: rgba(20, 15, 5, 0.6);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.12), inset 0 0 8px rgba(255, 215, 0, 0.08);
+}
+#tarot-result-view .tr-btn-save:active {
+  transform: scale(0.97);
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.8);
+}
+#tarot-result-view .tr-btn-retry {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+#tarot-result-view .tr-btn-retry:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#tarot-result-view .tr-upcoming {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+  animation: trSlideUp 0.55s ease 0.5s both;
+}
+#tarot-result-view .tr-upcoming-text {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.28);
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#tarot-result-view .tr-brand.result-brand {
+  margin: 8px 0 4px;
+  opacity: 0.38;
+  animation: trSlideUp 0.55s ease 0.55s both;
+}
+
+@media (max-width: 380px) {
+  #tarot-result-view .tr-destiny-body {
+    font-size: 12px;
+  }
+}
+
+/* 结果页标题（其它流程占位，塔罗结果已用 .tr-header） */
 .result-header {
   text-align: center;
   margin-bottom: 40px;
@@ -1827,90 +1983,11 @@ html, body {
     width: 100px;
     height: 170px;
   }
-  /* 塔罗结果（手机）：结构仍是独立结果页；牌/金句/解读仅参考离屏分享图的度量，便于和导出图视觉对齐 */
-  #tarot-result-view {
-    --result-card-img-w: 92px;
-    --result-card-img-h: 156px;
-    --result-row-gap: 8px;
-  }
-  #tarot-result-view .result-scroll-container {
-    max-height: 100vh;
-    max-height: 100dvh;
-    padding: max(10px, env(safe-area-inset-top, 0px)) 14px max(12px, env(safe-area-inset-bottom, 0px));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  #tarot-result-view .result-header {
-    margin-bottom: 14px;
-    animation: none;
-  }
-  #tarot-result-view .result-title-tarot {
-    /* 介于原结果页与分享图主标题之间，不占过高 */
-    font-size: 17px;
-    letter-spacing: 4px;
-    margin-bottom: 4px;
-  }
-  #tarot-result-view .result-subtitle-tarot {
-    font-size: 8px;
-    letter-spacing: 2px;
-  }
-  #tarot-result-view .result-showcase {
-    margin-bottom: 10px;
-    padding: 10px 0 12px;
-    border-radius: 12px;
-  }
-  #tarot-result-view .showcase-card .showcase-label {
-    font-size: 8px;
-    margin-bottom: 5px;
-    letter-spacing: 2px;
-  }
-  #tarot-result-view .showcase-card .showcase-name {
-    font-size: 11px;
-    margin-top: 6px;
-    letter-spacing: 1px;
-  }
-  #tarot-result-view .result-doc-quote {
-    /* 对齐分享图 .sc-quote：15px / 1.35 / 上下留白接近 */
-    font-size: 15px;
-    line-height: 1.35;
-    letter-spacing: 0.02em;
-    margin: 12px auto 14px;
-  }
-  #tarot-result-view .result-doc-insight {
-    /* 对齐分享图 .sc-destiny-body：13.5px / 1.85 */
-    font-size: 13.5px;
-    line-height: 1.85;
-    color: rgba(255, 255, 255, 0.55);
-    margin-bottom: 12px;
-    padding-bottom: 6px;
-  }
-  #tarot-result-view .result-actions-tarot {
-    margin-bottom: 8px;
-    gap: 10px;
-  }
-  #tarot-result-view .btn-tarot-save,
-  #tarot-result-view .btn-tarot-replay {
+  #tarot-result-view .tr-btn {
     min-height: 42px;
-    padding: 10px 6px;
+    padding: 10px 0;
     font-size: 12px;
     letter-spacing: 1px;
-  }
-  #tarot-result-view .result-upcoming {
-    margin-bottom: 8px;
-    margin-top: 2px;
-  }
-  #tarot-result-view .result-upcoming-text {
-    font-size: 8px;
-    line-height: 1.4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #tarot-result-view .result-brand {
-    margin: 12px 0 4px;
-    font-size: 10px;
-    opacity: 0.35;
-    animation: none;
   }
   #question-panel {
     padding: 24px 20px;
@@ -2013,116 +2090,6 @@ html, body {
   font-size: 0.68em;
   margin-left: 0.6em;
   letter-spacing: 0.05em;
-}
-
-/* ── 结果页：文档金句 + 解读（对齐预览 / 小樱字号）── */
-.result-title-tarot {
-  font-size: 18px;
-  font-weight: 300;
-  letter-spacing: 6px;
-  margin-bottom: 6px;
-}
-.result-subtitle-tarot {
-  font-size: 9px;
-  letter-spacing: 3px;
-  opacity: 0.85;
-}
-.result-doc-quote {
-  width: 100%;
-  max-width: var(--result-text-row-max, 484px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-  text-align: center;
-  font-size: clamp(16px, 4.6vw, 18px);
-  font-weight: 900;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  color: rgba(255, 223, 120, 0.98) !important;
-  text-shadow: 0 0 22px rgba(255, 215, 0, 0.4), 0 2px 0 rgba(0, 0, 0, 0.35);
-  margin: 10px auto 12px;
-  padding: 0;
-  min-height: 1.35em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  animation: resultFadeIn 0.6s ease forwards;
-}
-.result-doc-insight {
-  width: 100%;
-  max-width: var(--result-text-row-max, 484px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-  text-align: left;
-  font-size: clamp(14.5px, 4vw, 16px);
-  line-height: 1.82;
-  color: rgba(255, 255, 255, 0.62);
-  font-weight: 400;
-  padding: 0 0 8px;
-  margin-bottom: 18px;
-  animation: resultFadeIn 0.7s ease forwards;
-}
-.result-actions-tarot {
-  width: 100%;
-  max-width: var(--result-text-row-max, 484px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  margin-bottom: 8px;
-  animation: resultFadeIn 0.85s ease forwards;
-}
-.btn-tarot-save,
-.btn-tarot-replay {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 44px;
-  padding: 12px 8px;
-  border-radius: 40px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  cursor: pointer;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-  transition: all 0.3s;
-  box-sizing: border-box;
-}
-.btn-tarot-save:active,
-.btn-tarot-replay:active {
-  transform: scale(0.98);
-  opacity: 0.92;
-}
-.btn-tarot-save {
-  background: rgba(20, 15, 5, 0.6);
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.5);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.12), inset 0 0 8px rgba(255, 215, 0, 0.08);
-}
-.btn-tarot-replay {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-.result-upcoming {
-  width: 100%;
-  max-width: var(--result-text-row-max, 484px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-  text-align: center;
-  margin-bottom: 10px;
-  padding: 0;
-  animation: resultFadeIn 1s ease forwards;
-}
-.result-upcoming-text {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.28);
-  line-height: 1.45;
-  letter-spacing: 0.02em;
 }
 
 /* ── 离屏分享卡 360×640（games/sakura/result.html #share-card 同款度量）── */
@@ -2354,4 +2321,26 @@ html.perf-tarot-vivo #starfield-canvas {
 html.perf-tarot-vivo #gesture-hint {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* Android perf-flip-lite：去掉常驻元素的 backdrop-filter + 底盘动画 */
+html.perf-flip-lite #gesture-hint,
+html.perf-flip-lite #state-badge {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.perf-flip-lite .rune-dot {
+  animation: none !important;
+}
+
+html.perf-flip-lite .sakura-ring-outer,
+html.perf-flip-lite .sakura-ring-mid,
+html.perf-flip-lite .sakura-ring-inner {
+  animation: none !important;
+}
+
+html.perf-flip-lite .carousel-card.focused-card::after,
+html.perf-flip-lite .carousel-card.focused-card::before {
+  animation: none !important;
 }

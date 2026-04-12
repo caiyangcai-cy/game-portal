@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260418c">
+  <link rel="stylesheet" href="style.css?v=20260419a">
 </head>
 <body>
   <!-- ✦ 开场欢迎页 — 魔法球/灵珠风格 ✦ -->
@@ -173,25 +173,31 @@
 
     <!-- 占卜结果展示（金句+解读来自文档能量组合；保存分享逻辑同 games/sakura/result.html） -->
     <div id="tarot-result-view" class="hidden">
-      <div class="result-scroll-container">
-        <div class="result-header">
-          <div class="result-title result-title-tarot">✦ 命运揭示 ✦</div>
-          <div class="result-subtitle result-subtitle-tarot">TAROT READING</div>
+      <!-- 分布对齐 games/sakura/index.html #sakura-result-view（单卡→三列牌区） -->
+      <div class="tarot-result-inner" role="dialog" aria-modal="true" aria-label="命运揭示结果">
+        <div class="tr-header">
+          <div class="tr-title">✦ 命运揭示 ✦</div>
         </div>
 
-        <div class="result-showcase" id="result-showcase"></div>
-
-        <div class="result-doc-quote" id="result-doc-quote"></div>
-        <div class="result-doc-insight" id="result-doc-insight"></div>
-
-        <div class="result-actions-tarot">
-          <button type="button" class="btn-tarot-replay" id="btn-restart-reading">重新占卜</button>
-          <button type="button" class="btn-tarot-save" id="btn-tarot-save-share">保存分享</button>
+        <div class="tr-cards-wrap">
+          <div class="result-showcase" id="result-showcase"></div>
         </div>
-        <div class="result-upcoming">
-          <div class="result-upcoming-text">✦ 敬请期待 ✦ 新版本将支持输入你的困惑，生成属于你的专属解读</div>
+
+        <div class="tr-quote" id="result-doc-quote"></div>
+        <div class="tr-destiny-card">
+          <div class="tr-destiny-body" id="result-doc-insight"></div>
         </div>
-        <div class="result-brand"><span class="wm-cyou">CYou</span><span class="wm-games">Games</span><span class="wm-site">cyougames.site</span></div>
+
+        <div class="tr-actions">
+          <button type="button" class="tr-btn tr-btn-retry" id="btn-restart-reading">重新占卜</button>
+          <button type="button" class="tr-btn tr-btn-save" id="btn-tarot-save-share">保存分享</button>
+        </div>
+        <div class="tr-upcoming">
+          <div class="tr-upcoming-text">✦ 敬请期待 ✦ 新版本将支持输入你的困惑，生成属于你的专属解读</div>
+        </div>
+        <div class="tr-brand result-brand">
+          <span class="wm-cyou">CYou</span><span class="wm-games">Games</span><span class="wm-site">cyougames.site</span>
+        </div>
       </div>
     </div>
 
@@ -250,12 +256,12 @@
   <script src="tarot-card-energy-map.js?v=20260411d"></script>
   <script src="tarot-readings-doc.js?v=20260411d"></script>
   <script src="gestures.js?v=20260411c"></script>
-  <script src="effects.js?v=20260411c"></script>
+  <script src="effects.js?v=20260419a"></script>
   <script src="../sakura/share-capture.js?v=20260411d"></script>
   <script src="../sakura/vendor/html2canvas.min.js?v=20260416"></script>
   <script src="../sakura/vendor/html-to-image.min.js?v=20260416"></script>
   <script src="../sakura/share-export.js?v=20260418a"></script>
-  <script src="app.js?v=20260418c"></script>
+  <script src="app.js?v=20260419a"></script>
   <script type="module" src="bootstrap.js?v=20260417"></script>
 </body>
 </html>

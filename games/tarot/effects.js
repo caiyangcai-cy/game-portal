@@ -15,6 +15,11 @@ class Starfield {
     this._nebulaCanvas = null; // 离屏缓存
     this._resizeTimer = null;
     this._frameSkip = 0;       // 降频计数器
+    this._running = true;
+    this._rafId = null;
+    /** 安卓非 vivo：与小樱类似隔帧绘制，减轻结果页前后卡顿 */
+    this._drawStride = 1;
+    this._animTick = 0;
     this._resize();
     window.addEventListener('resize', () => {
       clearTimeout(this._resizeTimer);
@@ -25,13 +30,29 @@ class Starfield {
     this._animate();
   }
 
+  pause() {
+    this._running = false;
+    if (this._rafId != null) {
+      try {
+        cancelAnimationFrame(this._rafId);
+      } catch (_) {}
+      this._rafId = null;
+    }
+  }
+
+  resume() {
+    if (this._running) return;
+    this._running = true;
+    this._animate();
+  }
+
   _resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const mobile = w < 768;
     const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
     const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (vivo ? 1 : (android ? 1.2 : 1.5)) : 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (vivo ? 1 : (android ? 1 : 1.5)) : 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -51,8 +72,8 @@ class Starfield {
     const mobile = w < 768;
     const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
     const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
-    const density = mobile ? (vivo ? 20000 : (android ? 13000 : 9000)) : 4000;
-    const cap = mobile ? (vivo ? 55 : (android ? 95 : 180)) : 500;
+    const density = mobile ? (vivo ? 20000 : (android ? 22000 : 9000)) : 4000;
+    const cap = mobile ? (vivo ? 55 : (android ? 68 : 180)) : 500;
     const count = Math.min(Math.floor((w * h) / density), cap);
     this.stars = [];
 
@@ -67,6 +88,7 @@ class Starfield {
         colorIdx: Math.floor(Math.random() * 5),
       });
     }
+    this._drawStride = mobile && android && !vivo ? 2 : 1;
   }
 
   // 离屏渲染星云（只在 resize 时重建一次）
@@ -126,9 +148,19 @@ class Starfield {
   }
 
   _animate() {
+    if (!this._running) return;
+
     const ctx = this.ctx;
     const w = this._w;
     const h = this._h;
+
+    if (this._drawStride > 1) {
+      this._animTick++;
+      if (this._animTick % this._drawStride !== 0) {
+        this._rafId = requestAnimationFrame(() => this._animate());
+        return;
+      }
+    }
 
     ctx.clearRect(0, 0, w, h);
 
@@ -190,7 +222,7 @@ class Starfield {
       ctx.fill();
     }
 
-    requestAnimationFrame(() => this._animate());
+    this._rafId = requestAnimationFrame(() => this._animate());
   }
 }
 
@@ -224,7 +256,7 @@ class ParticleSystem {
     const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
     const vivo = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-tarot-vivo');
     const dpr = Math.min(window.devicePixelRatio || 1, mobile ? (vivo ? 1.05 : (android ? 1.2 : 1.5)) : 2);
-    this._MAX_PARTICLES = mobile ? (vivo ? 48 : (android ? 72 : 110)) : 300;
+    this._MAX_PARTICLES = mobile ? (vivo ? 40 : (android ? 56 : 110)) : 300;
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
@@ -543,7 +575,7 @@ class SpellEffect {
 
       case 'fire':
         // 火：上升的火焰粒子
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 15; i++) {
           const x = cx + (Math.random() - 0.5) * 200 * progress;
           const y = cy + 100 - Math.random() * 300 * progress;
           const size = 3 + Math.random() * 8;
@@ -559,7 +591,7 @@ class SpellEffect {
         // 光：放射状光线
         ctx.save();
         ctx.translate(cx, cy);
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 6; i++) {
           const angle = (Math.PI / 6) * i + time * 0.001;
           const len = 100 + progress * 200;
           const gradient = ctx.createLinearGradient(0, 0, Math.cos(angle) * len, Math.sin(angle) * len);
@@ -581,14 +613,14 @@ class SpellEffect {
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(-time * 0.002);
-        for (let i = 0; i < 60; i++) {
-          const angle = (i / 60) * Math.PI * 4;
+        for (let i = 0; i < 30; i++) {
+          const angle = (i / 30) * Math.PI * 4;
           const r = i * 3 * progress;
           const x = Math.cos(angle) * r;
           const y = Math.sin(angle) * r;
-          const alpha = (1 - i / 60) * 0.7;
+          const alpha = (1 - i / 30) * 0.7;
           ctx.beginPath();
-          ctx.arc(x, y, 4 + (1 - i / 60) * 6, 0, Math.PI * 2);
+          ctx.arc(x, y, 4 + (1 - i / 30) * 6, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(124,77,255,${alpha})`;
           ctx.fill();
         }
@@ -599,5 +631,10 @@ class SpellEffect {
 
   stop() {
     this.running = false;
+    if (this.ctx && this._w > 0 && this._h > 0) {
+      try {
+        this.ctx.clearRect(0, 0, this._w, this._h);
+      } catch (_) {}
+    }
   }
 }

@@ -405,7 +405,7 @@ class App {
       numHands: 1,
       // Vivo/内置浏览器：推理更疏 + 轮询更慢，优先保证环转动跟手
       inferStride: vivoStyle ? 5 : (android ? 4 : 2),
-      pollIntervalMs: vivoStyle ? 36 : (android ? 26 : 16),
+      pollIntervalMs: vivoStyle ? 36 : 16,
     });
     this.gestureEngine.onGesture = (gesture, landmarks) => {
       this._handleGesture(gesture, landmarks);
@@ -535,7 +535,7 @@ class App {
     this.els.carouselStage.classList.remove('hidden');
     this.carousel.create(); // 重新创建为叠放状态
     
-    this.particles.emitSummon('#d4af37', 50);
+    this.particles.emitSummon('#d4af37', 15);
 
     this._updateHint('🖐️', '张开手掌展开牌阵');
     this._updateBadge('牌堆已就绪');
@@ -547,7 +547,7 @@ class App {
   _spreadCards() {
     this._cardsSpread = true;
     this.carousel.spreadOut();
-    this.particles.emitSummon('#d4af37', 30);
+    this.particles.emitSummon('#d4af37', 12);
 
     const round = this.collectedCards.length + 1;
     this._updateHint('☝️', `左右滑动浏览 · ☝️ 食指选定 (第${round}/3张)`);
@@ -568,7 +568,7 @@ class App {
     this.carousel.setFocused(true);
 
     // 小粒子反馈
-    this.particles.emitSummon(card.color || '#d4af37', 20);
+    this.particles.emitSummon(card.color || '#d4af37', 12);
 
     const round = this.collectedCards.length + 1;
     this._updateHint('', `已锁定 · 🤏捏合确认翻牌 (第${round}/3张)`);
@@ -645,7 +645,7 @@ class App {
 
     var flipLite = typeof document !== 'undefined' && document.documentElement.classList.contains('perf-flip-lite');
     var vivoStyle = cygameTarotIsVivoStyleBrowser();
-    this.particles.emitSummon(card.color, vivoStyle ? 12 : (flipLite ? 18 : 40));
+    this.particles.emitSummon(card.color, vivoStyle ? 6 : (flipLite ? 8 : 12));
 
     // 延迟翻转 — 手机端缩短等待、减粒子与法术层；Vivo 系内置浏览器再收紧
     var preFlipMs = vivoStyle ? 180 : (flipLite ? 220 : 500);
@@ -663,8 +663,8 @@ class App {
         flipRing.classList.add('active');
       }
 
-      this.particles.emitSpellBurst(card.color, vivoStyle ? 8 : (flipLite ? 16 : 60));
-      this.spellEffect.play(card, vivoStyle ? 1400 : (flipLite ? 2200 : 4000));
+      this.particles.emitSpellBurst(card.color, vivoStyle ? 6 : (flipLite ? 8 : 20));
+      this.spellEffect.play(card, vivoStyle ? 1400 : (flipLite ? 2000 : 3000));
 
       setTimeout(() => {
         this.els.selectedCardName.classList.add('show');
@@ -738,10 +738,23 @@ class App {
     this._backToCarousel();
   }
 
+  /** 结果页为静态 UI：停星空、清粒子、停法术层，减轻安卓卡顿 */
+  _pauseAmbientForResult() {
+    if (this.spellEffect) this.spellEffect.stop();
+    if (this.particles) this.particles.clear();
+    if (this.starfield) this.starfield.pause();
+  }
+
+  _resumeAmbientFromResult() {
+    if (this.starfield) this.starfield.resume();
+  }
+
   /**
    * 显示占卜结果（金句+解读：文档能量表；保存分享 DOM 同步更新）
    */
   _showResult() {
+    this._pauseAmbientForResult();
+
     this.state = STATE.RESULT;
     this.els.platform3d.classList.add('hidden');
     this.els.carouselStage.classList.add('hidden');
@@ -793,7 +806,7 @@ class App {
 
     this.els.resultView.classList.remove('hidden');
 
-    this.particles.emitSpellBurst('#d4af37', 150);
+    this.particles.emitSpellBurst('#d4af37', 20);
   }
 
   /**
@@ -1024,6 +1037,8 @@ class App {
 
     this._updateHint('✊', '握拳开始仪式');
     this._updateBadge('塔罗占卜');
+
+    this._resumeAmbientFromResult();
   }
 
   // ===== UI =====

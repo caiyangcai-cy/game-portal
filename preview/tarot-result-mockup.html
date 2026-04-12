@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>塔罗牌结果页+分享页 Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Noto+Sans+SC:wght@300;400;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans SC','PingFang SC',sans-serif; background:#111; color:#fff; padding:40px 20px 80px; }
+  h1 { text-align:center; font-size:22px; font-weight:800; margin-bottom:6px; }
+  h1 .acc { background:linear-gradient(135deg,#b8a9c9,#d4af37); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .page-sub { text-align:center; font-size:12px; color:#666; margin-bottom:40px; }
+  .section-label { text-align:center; font-size:14px; font-weight:700; color:#b8a9c9; letter-spacing:0.1em; margin:56px 0 24px; }
+  .phones { display:flex; gap:28px; justify-content:center; flex-wrap:wrap; }
+
+  /* Phone frame */
+  .phone { width:300px; height:640px; border-radius:36px; border:3px solid #333; background:#06061a; position:relative; overflow:hidden; box-shadow:0 12px 60px rgba(0,0,0,0.6); }
+  .notch { position:absolute; top:6px; left:50%; transform:translateX(-50%); width:76px; height:22px; background:#000; border-radius:11px; z-index:50; }
+  .phone-inner { position:absolute; inset:0; overflow-y:auto; }
+
+  /* ── 结果页 ── */
+  .tarot-result {
+    min-height:100%;
+    background:linear-gradient(180deg,#06061a 0%,#0c0a22 40%,#080818 100%);
+    display:flex; flex-direction:column; align-items:center;
+    padding:48px 20px 28px;
+  }
+  .tr-header { text-align:center; margin-bottom:28px; }
+  .tr-title { font-size:20px; font-weight:300; color:#f0ebe3; letter-spacing:6px; margin-bottom:6px; }
+  .tr-sub { font-size:10px; color:rgba(255,255,255,0.25); letter-spacing:3px; }
+
+  /* 三张牌 */
+  .tr-cards { display:flex; gap:10px; justify-content:center; margin-bottom:24px; }
+  .tr-card { display:flex; flex-direction:column; align-items:center; }
+  .tr-card .label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:3px; margin-bottom:6px; }
+  .tr-card .card-img {
+    width:80px; height:136px; border-radius:8px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    background:#1a1530;
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px;
+  }
+  .tr-card .name { font-size:10px; color:#f0ebe3; letter-spacing:2px; margin-top:6px; }
+
+  /* 金句 */
+  .tr-quote {
+    text-align:center; margin-bottom:16px; padding:0 8px;
+    font-size:14px; font-weight:700; color:rgba(255,223,120,0.95);
+    letter-spacing:0.5px; line-height:1.5;
+    text-shadow:0 0 16px rgba(255,215,0,0.3);
+  }
+
+  /* 解读文字 */
+  .tr-reading {
+    width:100%; padding:16px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px;
+    margin-bottom:16px;
+  }
+  .tr-reading .rd-icon { text-align:center; font-size:14px; color:#b8a9c9; margin-bottom:6px; opacity:0.7; }
+  .tr-reading .rd-title { text-align:center; font-size:12px; color:#f0ebe3; letter-spacing:2px; margin-bottom:10px; }
+  .tr-reading .rd-text { font-size:11px; color:rgba(255,255,255,0.5); line-height:1.9; text-align:center; font-weight:300; }
+
+  /* 智慧语 */
+  .tr-wisdom {
+    width:100%; text-align:center; padding:14px 12px;
+    border-top:1px solid rgba(255,255,255,0.05);
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    margin-bottom:16px;
+  }
+  .tr-wisdom-text { font-size:10px; color:rgba(255,255,255,0.3); font-style:italic; line-height:1.7; }
+
+  /* 按钮 */
+  .tr-actions { display:flex; gap:10px; width:100%; margin-bottom:14px; }
+  .tr-btn {
+    flex:1; padding:10px 0; border-radius:12px; border:none;
+    font-size:11px; font-weight:600; letter-spacing:1px;
+    display:flex; align-items:center; justify-content:center; gap:4px;
+    cursor:pointer;
+  }
+  .btn-share { background:linear-gradient(135deg,#9575cd,#7c4dff); color:#fff; box-shadow:0 4px 16px rgba(149,117,205,0.3); }
+  .btn-retry { background:transparent; border:1px solid rgba(255,255,255,0.15)!important; color:rgba(255,255,255,0.7); }
+
+  /* 新版预告（结果页，按钮下方） */
+  .tr-upcoming {
+    width:100%; max-width:280px; text-align:center; margin-bottom:14px;
+  }
+  .tr-upcoming-text { font-size:9px; color:rgba(184,169,201,0.4); letter-spacing:0.3px; line-height:1.7; }
+
+  .tr-brand { font-family:'Outfit',sans-serif; font-size:10px; font-weight:700; opacity:0.35; display:flex; align-items:baseline; gap:0.06em; }
+  .tr-brand .cy { background:linear-gradient(135deg,#e0bfb8,#b76e79); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tr-brand .gm { color:rgba(168,168,173,0.8); font-weight:800; font-size:0.72em; margin-left:0.12em; }
+
+  /* ── 分享卡 ── */
+  .share-col { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .share-label { font-size:12px; font-weight:600; color:#b8a9c9; padding:3px 12px; border-radius:999px; background:rgba(149,117,205,0.12); border:1px solid rgba(149,117,205,0.25); }
+
+  .share-card {
+    width:320px; border-radius:20px; overflow:hidden;
+    background:linear-gradient(180deg,#08061a 0%,#0f0b28 50%,#0a0818 100%);
+    box-shadow:0 12px 60px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.06);
+    padding:32px 24px 24px;
+    display:flex; flex-direction:column; align-items:center;
+    position:relative;
+  }
+  .share-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:120px;
+    background:radial-gradient(ellipse at 50% 0%,rgba(184,169,201,0.06) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .sc-header { text-align:center; margin-bottom:24px; position:relative; }
+  .sc-title { font-size:18px; font-weight:300; color:#f0ebe3; letter-spacing:4px; }
+  .sc-sub { font-size:9px; color:rgba(255,255,255,0.25); letter-spacing:3px; margin-top:4px; }
+
+  .sc-cards { display:flex; gap:12px; justify-content:center; margin-bottom:20px; }
+  .sc-card-item { display:flex; flex-direction:column; align-items:center; }
+  .sc-card-item .sc-label { font-size:8px; color:rgba(255,255,255,0.3); letter-spacing:2px; margin-bottom:4px; }
+  .sc-card-item .sc-img {
+    width:80px; height:136px; border-radius:8px;
+    border:1px solid rgba(255,255,255,0.1);
+    box-shadow:0 6px 20px rgba(0,0,0,0.5);
+    background:#1a1530; display:flex; align-items:center; justify-content:center; font-size:28px;
+  }
+  .sc-card-item .sc-name { font-size:9px; color:#f0ebe3; letter-spacing:1px; margin-top:5px; }
+
+  .sc-quote {
+    text-align:center; margin-bottom:14px;
+    font-size:13px; font-weight:700; color:rgba(255,223,120,0.95); letter-spacing:0.5px; line-height:1.5;
+    text-shadow:0 0 14px rgba(255,215,0,0.3);
+  }
+  .sc-reading {
+    font-size:11px; color:rgba(255,255,255,0.5); line-height:1.85; text-align:center; font-weight:300;
+    margin-bottom:20px; padding:0 6px;
+  }
+  .sc-divider { width:40px; height:1px; background:linear-gradient(90deg,transparent,rgba(184,169,201,0.3),transparent); margin-bottom:8px; }
+  .sc-cta { font-size:9px; color:rgba(255,255,255,0.3); letter-spacing:0.5px; margin-bottom:4px; }
+  .sc-url { font-size:9px; color:rgba(255,255,255,0.28); letter-spacing:0.4px; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; }
+
+  /* notes */
+  .notes { max-width:660px; margin:40px auto 0; display:flex; flex-direction:column; gap:10px; }
+  .note { background:rgba(255,255,255,0.04); border-radius:12px; padding:14px 18px; border:1px solid rgba(255,255,255,0.06); }
+  .note-t { font-size:12px; font-weight:700; color:#b8a9c9; margin-bottom:3px; }
+  .note-b { font-size:11px; color:#888; line-height:1.65; }
+  .note-b em { color:#d4af37; font-style:normal; font-weight:600; }
+</style>
+</head>
+<body>
+
+<h1><span class="acc">塔罗牌占卜</span> · 结果页+分享页</h1>
+<p class="page-sub">参考小樱魔法卡风格 · 三张牌展示+金句+解读+分享</p>
+
+<!-- ======== 游戏内结果页 ======== -->
+<div class="section-label">— 游戏内结果页（抽完3张后展示） —</div>
+
+<div class="phones">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="phone-inner">
+      <div class="tarot-result">
+        <div class="tr-header">
+          <div class="tr-title">✦ 命运揭示 ✦</div>
+          <div class="tr-sub">TAROT READING</div>
+        </div>
+
+        <!-- 三张牌 -->
+        <div class="tr-cards">
+          <div class="tr-card">
+            <div class="label">过 去</div>
+            <div class="card-img">🌙</div>
+            <div class="name">女祭司</div>
+          </div>
+          <div class="tr-card">
+            <div class="label">现 在</div>
+            <div class="card-img">⭐</div>
+            <div class="name">星星</div>
+          </div>
+          <div class="tr-card">
+            <div class="label">未 来</div>
+            <div class="card-img">☀️</div>
+            <div class="name">太阳</div>
+          </div>
+        </div>
+
+        <!-- 金句 -->
+        <div class="tr-quote">「你走过的暗夜，终将化作照亮前路的星光。」</div>
+
+        <!-- 综合解读 -->
+        <div class="tr-reading">
+          <div class="rd-icon">✦</div>
+          <div class="rd-title">命运解读</div>
+          <div class="rd-text">从「女祭司」到「星星」，你正在经历一次从内心深处向外绽放的蜕变。过去的沉淀和等待并非虚度——每一次安静的思考都在为今天的清明铺路。而「太阳」告诉你，光明已经在路上了。</div>
+        </div>
+
+        <!-- 按钮 -->
+        <div class="tr-actions">
+          <button class="tr-btn btn-retry">重新占卜</button>
+          <button class="tr-btn btn-share">保存分享</button>
+        </div>
+
+        <!-- 新版预告（按钮下方，三行） -->
+        <div class="tr-upcoming">
+          <div class="tr-upcoming-text">新版本将支持输入你的问题<br>获得专属个性化解读<br>敬请期待 ✦</div>
+        </div>
+
+        <div class="tr-brand">
+          <span class="cy">CYou</span><span class="gm">Games</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 分享卡片 ======== -->
+<div class="section-label">— 点「保存分享」后生成的分享卡片 —</div>
+
+<div class="phones">
+  <div class="share-col">
+    <span class="share-label">分享卡片</span>
+    <div class="share-card">
+      <div class="sc-header">
+        <div class="sc-title">✦ 命运揭示 ✦</div>
+        <div class="sc-sub">心灵塔罗牌 · TAROT READING</div>
+      </div>
+
+      <div class="sc-cards">
+        <div class="sc-card-item">
+          <div class="sc-label">过 去</div>
+          <div class="sc-img">🌙</div>
+          <div class="sc-name">女祭司</div>
+        </div>
+        <div class="sc-card-item">
+          <div class="sc-label">现 在</div>
+          <div class="sc-img">⭐</div>
+          <div class="sc-name">星星</div>
+        </div>
+        <div class="sc-card-item">
+          <div class="sc-label">未 来</div>
+          <div class="sc-img">☀️</div>
+          <div class="sc-name">太阳</div>
+        </div>
+      </div>
+
+      <div class="sc-quote">「你走过的暗夜，终将化作照亮前路的星光。」</div>
+
+      <div class="sc-reading">从「女祭司」到「星星」，你正在经历一次从内心深处向外绽放的蜕变。过去的沉淀和等待并非虚度，而「太阳」告诉你，光明已经在路上了。</div>
+
+      <div class="sc-divider"></div>
+      <div class="sc-cta">隔空手势 · 翻牌占卜 →</div>
+      <div class="sc-url">https://cyougames.site</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 说明 ======== -->
+<div class="notes">
+  <div class="note">
+    <div class="note-t">📋 与小樱的区别</div>
+    <div class="note-b">小樱是<em>单张牌</em>揭示，塔罗是<em>三张牌</em>（过去/现在/未来）的组合解读。结果页需要同时展示三张牌+组合金句+综合解读。</div>
+  </div>
+  <div class="note">
+    <div class="note-t">✦ 金句位置</div>
+    <div class="note-b">参考小樱的格式，金句放在三张牌下方、解读上方，用<em>金色高亮</em>，是整个结果页最醒目的一句话。金句基于三张牌的元素组合生成（你之前要求的兜底文案）。</div>
+  </div>
+  <div class="note">
+    <div class="note-t">📖 综合解读</div>
+    <div class="note-b">现有 readings.js 里的 <em>insight</em>（综合解读）目前被 hidden 了，直接取消隐藏即可。解读内容已经有了，不用重写。</div>
+  </div>
+  <div class="note">
+    <div class="note-t">🔮 新版预告</div>
+    <div class="note-b">弱化展示，虚线边框 + 极淡文字，告诉用户：<em>「新版本将支持输入你的问题，获得专属个性化解读 · 敬请期待」</em>。既不喧宾夺主，又给用户回访的期待感。</div>
+  </div>
+  <div class="note">
+    <div class="note-t">📤 分享逻辑</div>
+    <div class="note-b">跟小樱完全一样：用 <em>share-export.js</em> 截图生成分享卡。三张牌图片也改成<em>base64 内联</em>，避免 Safari 首次截图空白问题。</div>
+  </div>
+  <div class="note">
+    <div class="note-t">🔄 按钮</div>
+    <div class="note-b">手机端：「重新占卜」+「长按保存」<br>桌面端：「重新占卜」+「保存分享」（直接下载 PNG）</div>
+  </div>
+</div>
+
+</body>
+</html>

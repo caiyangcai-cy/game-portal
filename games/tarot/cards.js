@@ -135,7 +135,7 @@ class CardCarousel {
     this.cards = [];
     this._animFrame = null;
     this._velocity = 0;
-    this._friction = 0.88;
+    this._friction = 0.92;
     this._isAnimating = false;
     this._isStacked = true;
     this._resizeTid = null;
@@ -345,7 +345,7 @@ class CardCarousel {
     this._applyRotation();
     this._updateFrontCard();
 
-    if (Math.abs(this._velocity) > 0.1) {
+    if (Math.abs(this._velocity) > 0.15) {
       this._animFrame = requestAnimationFrame(() => this._physicsLoop());
     } else {
       this._velocity = 0;
@@ -391,10 +391,14 @@ class CardCarousel {
   _updateFrontCard() {
     const idx = this.getCurrentIndex();
     const frontRingIndex = ((idx % this.ringSize) + this.ringSize) % this.ringSize;
-
-    this.cards.forEach((card, i) => {
-      card.classList.toggle('front-card', i === frontRingIndex);
-    });
+    if (frontRingIndex === this._lastFrontRingIdx) return; // 短路：没变化不操作DOM
+    if (this._lastFrontRingIdx != null && this.cards[this._lastFrontRingIdx]) {
+      this.cards[this._lastFrontRingIdx].classList.remove('front-card');
+    }
+    this._lastFrontRingIdx = frontRingIndex;
+    if (this.cards[frontRingIndex]) {
+      this.cards[frontRingIndex].classList.add('front-card');
+    }
   }
 
   _updateData() {
