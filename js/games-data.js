@@ -3,7 +3,7 @@ window.PORTFOLIO_GAMES = [
     id: "linggen",
     title: "一掌鉴灵根",
     tags: [],
-    coverImage: "assets/covers/linggen-cover.jpg",
+    coverImage: "assets/covers/linggen-cover.webp",
     coverStyle: "#0a0f1a",
     coverPosition: "center center",
     entry: "games/linggen/index.html",
