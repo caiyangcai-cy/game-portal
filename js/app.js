@@ -55,12 +55,20 @@
     }
 
     var playHref = "play.html?game=" + encodeURIComponent(game.id);
+    
+    var statusBadgeHtml = '';
+    if (game.cardBadge) {
+      var badgeModifier = game.cardBadge.type ? (' game-card__status-badge--' + game.cardBadge.type) : '';
+      statusBadgeHtml = '<span class="game-card__status-badge' + badgeModifier + '">' + esc(game.cardBadge.text) + '</span>';
+    }
+
     card.className = "game-card";
     card.innerHTML =
       '<div class="game-card__cover" aria-hidden="true">' +
       '<div class="game-card__media" style="' +
       mediaStyle(game) +
       '"></div>' +
+      statusBadgeHtml +
       '<span class="game-card__badge">H5</span>' +
       "</div>" +
       '<div class="game-card__info">' +

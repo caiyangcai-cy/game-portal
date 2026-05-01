@@ -354,10 +354,25 @@
   var badge = game.introBadge;
   if (badgeEl) badgeEl.textContent = badge || "H5 互动";
 
-  if (frame && game.entry) {
-    frame.src = game.entry;
+  if (game.qrOnly) {
+    if (frame) frame.style.display = "none";
+    if (previewHint) previewHint.hidden = true;
+    
+    var wrap = document.getElementById("play-frame-wrap");
+    if (wrap) {
+      wrap.style.display = "flex";
+      wrap.style.flexDirection = "column";
+      wrap.style.alignItems = "center";
+      wrap.style.justifyContent = "center";
+      wrap.innerHTML = '<img src="' + game.qrImage + '" style="max-width:240px; border-radius:16px; box-shadow:0 12px 32px rgba(0,0,0,0.5); margin-bottom:20px; border:4px solid #fff;" /><p style="color:#fff; font-size:18px; font-weight:bold; letter-spacing:1.5px; margin:0;">请使用手机扫码或长按识别二维码体验</p>';
+    }
+  } else {
+    if (frame && game.entry) {
+      frame.style.display = "";
+      frame.src = game.entry;
+    }
+    if (previewHint) previewHint.hidden = true;
   }
-  if (previewHint) previewHint.hidden = true;
 
   // 移动端默认展开简介抽屉，让新用户第一眼看到游戏介绍
   // 桌面端侧栏始终可见，不需要展开
@@ -365,7 +380,8 @@
   setSheetOpen(isMobile);
 
   // 微信内置浏览器：提前提醒用户使用系统浏览器（摄像头/手势体验更稳定）
-  if (isWeChat()) {
+  // 微信内置浏览器：如果不是 qrOnly 游戏，才提醒用户去外部浏览器
+  if (isWeChat() && !game.qrOnly) {
     showWeChatTip();
   }
 
@@ -406,6 +422,6 @@
   }
 
   if (actionsEl && game.entry) {
-    actionsEl.hidden = false;
+    actionsEl.hidden = !!game.qrOnly;
   }
 })();

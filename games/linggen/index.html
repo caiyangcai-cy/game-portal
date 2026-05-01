@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>一掌鉴灵根</title>
+    <script type="module" crossorigin src="/assets/index-ClePgPF1.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CoAOsHKR.css">
+  
+    <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
+    <script>
+      LA.init({id:"3PngsxBYQTggVdVW",ck:"3PngsxBYQTggVdVW"}); // 灵根专属统计
+      LA.init({id:"3Pc2HwRLtXmUPjNC",ck:"3Pc2HwRLtXmUPjNC"}); // 主站汇总统计
+    </script>
+  </head>
+  <body>
+    <!-- 访问密码锁 -->
+    
+
+    <div id="app">
+      <!-- 阶段一：启动页 -->
+      
+      <div class="screen" id="screen-start">
+        <button id="btn-info-start" class="btn-icon" style="position:absolute; top:20px; right:20px; width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.5); color:rgba(255,255,255,1); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:100; padding:0;">
+          <span style="font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-style: italic; font-weight: bold; line-height: 1;">i</span>
+        </button>
+        <div class="p1-top-graphic">
+          <div class="jade-array-container">
+            <div class="jade-array-aura"></div>
+            <div class="jade-array-inner"></div>
+            <div class="jade-array-orbit">
+              <div class="jade-array-accent top"></div>
+              <div class="jade-array-accent bottom"></div>
+              <div class="jade-array-accent left"></div>
+              <div class="jade-array-accent right"></div>
+            </div>
+            
+            <div class="jade-node j-water"></div>
+            <div class="jade-node j-wood"></div>
+            <div class="jade-node j-fire"></div>
+            <div class="jade-node j-earth"></div>
+            <div class="jade-node j-metal"></div>
+            
+            <div class="jade-center">
+              <img src="/assets/palm.png" alt="掌纹" style="width: 48%; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.85;" />
+              <div class="jade-center-glow"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p1-bottom-content">
+          <h1 class="p1-title">一掌鉴灵根</h1>
+          <div class="p1-subtitle">伸出手掌 · 解锁你的灵根 · 看看你的修仙天赋</div>
+          <button class="btn-ink-solid" id="btn-start">开 始 鉴 定</button>
+          <div style="font-size: 11px; color: rgba(255, 255, 255, 0.45); margin-top: 10px; text-align: center; font-family: -apple-system, sans-serif;">*为了识别你的手势，需要使用摄像头权限，但不会上传任何画面。</div>
+          <div class="note-https hidden" id="note-https">请使用 https 访问或 localhost 运行以启用摄像头</div>
+        </div>
+      </div>
+
+      <!-- 阶段二、三、四：AR互动区 -->
+      
+      <!-- AR界面 -->
+      <div class="screen hidden" id="screen-ar">
+        <button id="btn-info-ar" class="btn-icon" style="position:absolute; top:20px; right:20px; width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.5); color:rgba(255,255,255,1); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:100; padding:0;">
+          <span style="font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-style: italic; font-weight: bold; line-height: 1;">i</span>
+        </button>
+        <div class="stage">
+          <canvas id="output-canvas"></canvas>
+          <video id="input-video" playsinline muted class="hidden"></video>
+        </div>
+        
+        <!-- 【新设计】空灵感字效结果展示 -->
+        <!-- 新增：魔法吸收特效层 -->
+        <div id="gather-effect-layer" class="hidden"></div>
+        <div id="full-screen-flash" class="full-screen-flash"></div>
+        <div id="burst-flash" class="burst-flash"></div>
+        <div id="lens-flare" class="lens-flare"></div>
+        
+        <div class="result-ethereal" id="result-ethereal">
+          <div class="ethereal-title">
+            <span id="ethereal-name"></span>
+            <div class="stamp">天道<br>认证</div>
+          </div>
+          <div class="ethereal-stars" id="ethereal-stars"></div>
+          <div class="ethereal-tier" id="ethereal-tier"></div>
+          <div class="ethereal-desc" id="ethereal-desc"></div>
+        </div>
+
+        <!-- 底部提示面板 -->
+        <div class="bottom-panel" id="bottomPanel">
+          <div class="step-title" id="hud-title">第一步：聚气</div>
+          <div class="step-action" id="hud-desc">✊ 试试握拳，感受灵力凝聚</div>
+          <button type="button" class="hud__manual hidden" id="btn-lock-manual">锁灵判定失败可点此跳过</button>
+        </div>
+
+        <!-- 结果页底部 (拍照区) -->
+        <div class="result-overlay" id="resultOverlay">
+          <button type="button" class="btn-secondary" id="btn-reset">重新鉴定</button>
+          <button type="button" class="btn-primary" id="btn-photo">拍照存证</button>
+        </div>
+
+        <div class="freezeFlash" id="freeze-flash"></div>
+      </div>
+
+      <!-- 阶段五：海报页 -->
+      <div class="poster hidden" id="screen-poster">
+        <div class="poster__top">
+          <button class="btn-ghost" id="btn-back">返回</button>
+          <a class="btn-ghost" id="btn-download" download="一掌鉴灵根.png" style="text-decoration:none;font-weight:bold;color:#353330;">保存截图</a>
+        </div>
+        <div class="poster__body">
+          <div>
+            <div class="poster__card">
+              <img id="poster-img" class="poster__img" alt="一掌鉴灵根" />
+            </div>
+            <div class="poster__hint" id="tip">长按图片保存到相册</div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Info Modal -->
+      <div id="info-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:999; display:flex; align-items:center; justify-content:center;">
+        <div id="info-modal-backdrop" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);"></div>
+        <div style="position:relative; width:85%; max-width:340px; background:#F0EDE5; border-radius:16px; padding:30px 20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); border:2px solid #C0BDB4;">
+          <button id="btn-info-close" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:24px; color:#7A766F; cursor:pointer;">&times;</button>
+          <h2 style="margin:0 0 20px 0; text-align:center; color:#31302C; font-family:'Songti SC', 'STSong', serif; font-size:24px; letter-spacing:2px;">测试指南</h2>
+          <div style="color:#5C5851; font-size:15px; line-height:1.6; text-align:justify;">
+            <p style="margin:0 0 12px 0;">本测试灵感来源于修仙文，通过 AR 视觉算法，扫描你的骨骼脉络与五行灵气分布，鉴定你的灵根资质与修仙天赋。</p>
+            <p style="margin:0 0 12px 0; font-weight:bold; color:#31302C;">【操作指引】</p>
+            <p style="margin:0 0 8px 0;">① ✋ 张开手掌，唤醒五灵珠</p>
+            <p style="margin:0 0 8px 0;">② ✊ 试试握拳，感受灵力凝聚</p>
+            <p style="margin:0 0 8px 0;">③ ✋ 猛然推掌，引爆灵珠</p>
+            <p style="margin:0 0 0 0;">④ 🤞 双指剑指，锁定灵根</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

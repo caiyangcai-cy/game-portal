@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CYou Games · 横版扫码物料</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;800&family=Outfit:wght@700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --gradient-rosegold: linear-gradient(135deg, #e0bfb8 0%, #b76e79 100%);
+        --bg: #09090b;
+        --text: #fbfbfd;
+        --text-muted: #a8a8ad;
+        --surface: #1a1a1e;
+        --border: rgba(255, 255, 255, 0.06);
+        --radius-card: 18px;
+        --font: "Noto Sans SC", system-ui, -apple-system, sans-serif;
+        --font-logo: "Outfit", "Noto Sans SC", system-ui, sans-serif;
+        --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35), 0 12px 40px rgba(0, 0, 0, 0.22);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font);
+        background: #050506;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      /* 固定 16:9 横版画布，便于截图/打印成图 */
+      .canvas {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        max-width: calc(100vw - 48px);
+        max-height: calc((100vw - 48px) * 9 / 16);
+        aspect-ratio: 16 / 9;
+        background: var(--bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+        border: 1px solid var(--border);
+      }
+
+      .canvas__glow {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+            ellipse 70% 50% at 18% 18%,
+            rgba(224, 191, 184, 0.12),
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse 55% 45% at 92% 8%,
+            rgba(183, 110, 121, 0.1),
+            transparent 48%
+          ),
+          radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0, 0, 0, 0.45), transparent 55%);
+      }
+
+      .canvas__inner {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        width: 100%;
+        /* 两列：左品牌 + 右二维码；二维码必须贴最右 */
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: clamp(64px, 7vw, 160px);
+        /* 右侧留白更小，确保二维码“靠最右边” */
+        padding: 88px 72px 88px 110px;
+        box-sizing: border-box;
+      }
+
+      .brand {
+        min-width: 0;
+        max-width: 100%;
+        position: relative;
+        z-index: 2;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: baseline;
+        flex-wrap: nowrap;
+        gap: 0.06em;
+        font-family: var(--font-logo);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        font-size: clamp(2.6rem, 4.6vw, 4.8rem);
+        line-height: 1.05;
+        white-space: nowrap;
+      }
+
+      .logo-cyou {
+        background: var(--gradient-rosegold);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .logo-games {
+        color: var(--text-muted);
+        font-weight: 800;
+        font-size: 0.58em;
+        margin-left: 0.1em;
+        letter-spacing: 0.08em;
+      }
+
+      .brand__line {
+        width: 72px;
+        height: 4px;
+        border-radius: 4px;
+        margin: 32px 0 28px;
+        background: var(--gradient-rosegold);
+        opacity: 0.95;
+      }
+
+      .brand__tag {
+        margin: 0;
+        font-size: clamp(1.15rem, 2vw, 1.65rem);
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.02em;
+        line-height: 1.5;
+        max-width: 20ch;
+      }
+
+      /* 域名：无协议、胶囊条，与站头色系统一 */
+      .brand__site {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 18px;
+        padding: 10px 18px 10px 14px;
+        max-width: 100%;
+        font-family: var(--font-logo);
+        font-size: clamp(0.95rem, 1.25vw, 1.2rem);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: rgba(251, 251, 253, 0.86);
+        background: rgba(26, 26, 30, 0.68);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        box-shadow:
+          0 2px 14px rgba(0, 0, 0, 0.28),
+          0 0 0 1px rgba(183, 110, 121, 0.10),
+          0 0 26px rgba(183, 110, 121, 0.12);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .brand__site::before {
+        content: "";
+        display: block;
+        width: 5px;
+        height: 5px;
+        margin-right: 12px;
+        border-radius: 50%;
+        background: var(--gradient-rosegold);
+        flex-shrink: 0;
+      }
+
+      /* 玫瑰金细描边（不影响布局） */
+      .brand__site::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 1px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(224, 191, 184, 0.55), rgba(183, 110, 121, 0.55));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0.75;
+      }
+
+      .scan {
+        display: block;
+        flex-shrink: 0;
+        justify-self: end;
+        margin-right: 0;
+        position: relative;
+        z-index: 1;
+      }
+
+      .scan__card {
+        padding: 16px;
+        background: #fff;
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-card);
+        line-height: 0;
+      }
+
+      .scan__card img {
+        display: block;
+        width: min(300px, 28vw);
+        height: auto;
+        max-width: 100%;
+      }
+
+      /* 小屏：整画布等比缩小 */
+      @media (max-width: 1980px) {
+        .canvas {
+          width: 100%;
+          height: auto;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .canvas__inner {
+          grid-template-columns: 1fr;
+          row-gap: 40px;
+          padding: 48px 32px 56px;
+        }
+        .scan {
+          justify-self: center;
+        }
+        .logo {
+          font-size: clamp(2.2rem, 8vw, 2.8rem);
+          white-space: normal;
+        }
+      }
+
+      @media print {
+        body {
+          background: #000;
+          padding: 0;
+        }
+        .canvas {
+          max-width: none;
+          max-height: none;
+          border-radius: 0;
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas" role="img" aria-label="CYou Games 网站二维码与链接">
+      <div class="canvas__glow" aria-hidden="true"></div>
+      <div class="canvas__inner">
+        <div class="brand">
+          <div class="logo">
+            <span class="logo-cyou">CYou</span><span class="logo-games">Games</span>
+          </div>
+          <p class="brand__site" translate="no">cyougames.site</p>
+          <div class="brand__line" aria-hidden="true"></div>
+          <p class="brand__tag">点击畅玩，样样好玩</p>
+        </div>
+        <div class="scan">
+          <div class="scan__card">
+            <img
+              src="qr-cyougames-site.png"
+              width="300"
+              height="300"
+              alt="访问 cyougames.site 的二维码"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
