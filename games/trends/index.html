@@ -436,7 +436,7 @@
         }
         @media (max-width: 768px) {
             .topic-grid, .video-grid, .creator-grid { grid-template-columns: 1fr; gap: 24px; }
-            h1 { font-size: 32px; letter-spacing: 2px; }
+            h1 { font-size: clamp(20px, 6vw, 32px); letter-spacing: 0; white-space: nowrap; }
             .container { 
                 padding-top: max(30px, env(safe-area-inset-top));
                 padding-bottom: max(30px, env(safe-area-inset-bottom));
