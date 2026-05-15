@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>创作者风向标 | 视频号动漫专区</title>
     <style>
         :root {
@@ -435,9 +435,44 @@
             .creator-grid { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 768px) {
-            .topic-grid, .video-grid, .creator-grid { grid-template-columns: 1fr; }
-            h1 { font-size: 48px; }
-            .container { padding: 40px 20px; }
+            .topic-grid, .video-grid, .creator-grid { grid-template-columns: 1fr; gap: 24px; }
+            h1 { font-size: 32px; letter-spacing: 2px; }
+            .container { 
+                padding-top: max(30px, env(safe-area-inset-top));
+                padding-bottom: max(30px, env(safe-area-inset-bottom));
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+            header { margin-bottom: 40px; }
+            .section-title { font-size: 26px; margin-bottom: 24px; }
+            .section-title::before { height: 26px; }
+            
+            .ranking-item { padding: 16px 20px; border-radius: 16px; }
+            .rank-num { font-size: 40px; width: 70px; }
+            .rank-title { font-size: 18px; }
+            .rank-tag { padding: 6px 14px; font-size: 14px; }
+
+            .topic-card { padding: 24px; border-radius: 16px; }
+            .topic-card h3 { font-size: 22px; margin-bottom: 12px; }
+            .topic-card p { font-size: 15px; }
+
+            .video-cover { height: 220px; }
+            .video-info { padding: 20px; }
+            .video-title { font-size: 18px; margin-bottom: 16px; }
+            .author-name { font-size: 15px; }
+            .like-data { font-size: 14px; padding: 4px 12px; }
+
+            .creator-card { padding: 30px 20px; border-radius: 16px; }
+            .avatar { width: 100px; height: 100px; border-width: 4px; margin-bottom: 20px; }
+            .creator-name { font-size: 20px; }
+
+            .tips-table-container { 
+                overflow-x: auto; 
+                -webkit-overflow-scrolling: touch; 
+                border-radius: 16px;
+            }
+            .tips-table { min-width: 600px; }
+            .tips-table th, .tips-table td { padding: 12px 16px; font-size: 14px; }
         }
     </style>
 </head>
